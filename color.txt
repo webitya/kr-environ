@@ -1,0 +1,258 @@
+# KR ENVIRON SOLUTIONS
+## Official Website Color Theme & Design System
+
+**Version:** 1.0  
+**Purpose:** Website design, UI/UX, social media marketing, brochures, presentations, and brand consistency.
+
+---
+
+## 1. BRAND COLOR PALETTE
+
+### Primary Color — Forest Green
+**HEX:** #216B35
+
+**Purpose:** Main brand color, primary buttons, important icons, key links, and section headings.
+
+**Brand meaning:** Nature, environmental responsibility, growth, trust, and sustainability.
+
+### Secondary Color — Environmental Blue
+**HEX:** #087EA4
+
+**Purpose:** Secondary buttons, technical sections, links, GIS and remote sensing graphics, and environmental monitoring content.
+
+**Brand meaning:** Water, science, technology, research, and reliability.
+
+### Accent Color — Solar Gold
+**HEX:** #F2BE36
+
+**Purpose:** Small highlights, special icons, important figures, badges, and decorative elements.
+
+**Brand meaning:** Solar energy, innovation, optimism, and sustainability.
+
+**Text rule:** Use dark text on gold backgrounds rather than white text for better readability.
+
+**Note:** These are recommended digital brand colors inspired by the supplied KR Environ Solutions logo. They have not been verified as exact color values from the original logo file.
+
+---
+
+## 2. COMPLETE WEBSITE COLOR REFERENCE
+
+- **Primary brand:** Forest Green — #216B35
+- **Primary hover:** Deep Green — #174D28
+- **Secondary brand:** Environmental Blue — #087EA4
+- **Secondary hover:** Deep Blue — #06617F
+- **Accent:** Solar Gold — #F2BE36
+- **H1 heading:** Deep Forest — #173B26
+- **H2 heading:** Forest Green — #216B35
+- **H3 heading:** Dark Charcoal Green — #26382D
+- **Paragraph text:** Slate Gray — #4B5563
+- **Secondary text:** Muted Gray — #68756D
+- **Main background:** White — #FFFFFF
+- **Alternate background:** Soft Green-White — #F5F8F3
+- **Technical section background:** Pale Blue — #EFF7FA
+- **Footer background:** Deep Forest — #142D20
+- **Borders and dividers:** Light Gray-Green — #DCE5DD
+
+---
+
+## 3. TYPOGRAPHY COLOR RULES
+
+### H1 — Main Page Heading
+- Color: #173B26
+- Suggested desktop font size: 48–56 px
+- Font weight: 700
+- Usage: Homepage hero title and main page heading.
+- Example: Environmental Solutions for a Sustainable Future
+
+### H2 — Section Headings
+- Color: #216B35
+- Suggested desktop font size: 32–40 px
+- Font weight: 600–700
+- Usage: About Us, Our Services, Our Expertise, Why Choose Us, and Our Projects.
+
+### H3 — Subheadings
+- Color: #26382D
+- Suggested font size: 22–26 px
+- Font weight: 600
+- Usage: Individual services, service cards, technical features, and subsection titles.
+
+### Paragraph Text
+- Color: #4B5563
+- Suggested font size: 16–18 px
+- Font weight: 400
+- Line height: 1.6–1.8
+- Usage: Descriptions, company introduction, service explanations, and website body content.
+
+### Secondary Text
+- Color: #68756D
+- Suggested font size: 14–16 px
+- Usage: Captions, supporting information, labels, and secondary descriptions.
+
+### Links
+- Default color: #087EA4
+- Hover color: #06617F
+- Underline: Recommended for links within paragraph text.
+
+**Typography rule:** Keep headings dark and prominent, paragraph text neutral, and accent colors limited to selected details.
+
+---
+
+## 4. BUTTON COLOR SYSTEM
+
+### Primary Button
+- Background: #216B35
+- Text: #FFFFFF
+- Hover background: #174D28
+- Border: None
+- Usage: Request a Consultation, Contact Us, Get in Touch, and Enquire Now.
+
+### Secondary Button
+- Background: #FFFFFF
+- Text: #087EA4
+- Border: 1 px solid #087EA4
+- Hover background: #EFF7FA
+- Usage: Explore Services, View Projects, and Learn More.
+
+### Alternative Filled Button
+- Background: #087EA4
+- Text: #FFFFFF
+- Hover background: #06617F
+- Usage: Download Brochure and Explore Technical Solutions.
+
+### Button Dimensions
+- Height: 48–52 px
+- Horizontal padding: 20–28 px
+- Border radius: 8–12 px
+- Font size: 15–16 px
+- Font weight: 600
+- Transition duration: 200 milliseconds
+
+**Button rule:** Use forest green for the main conversion action. Use blue for secondary actions. Reserve gold for small highlights rather than regular buttons.
+
+---
+
+## 5. WEBSITE BACKGROUND RULES
+
+### White — #FFFFFF
+Use for the main website background, header, navigation, hero content areas, service cards, forms, and enquiry sections.
+
+### Soft Green-White — #F5F8F3
+Use for About Us, Why Choose KR Environ, team and expertise sections, sustainability content, and alternating content sections.
+
+### Pale Blue — #EFF7FA
+Use for GIS and remote sensing, environmental monitoring, technical capabilities, research, and scientific assessment sections.
+
+### Deep Forest — #142D20
+Use for the footer, selected dark banners, and occasional high-impact sections.
+
+For dark backgrounds, use white headings (#FFFFFF) and soft light text (#E4EEE6).
+
+---
+
+## 6. RECOMMENDED COLOR PROPORTIONS
+
+Use the following visual balance as a starting point:
+
+- **70% — Neutral backgrounds:** White and very light backgrounds.
+- **20% — Forest green:** Branding, headings, primary buttons, and key icons.
+- **8% — Environmental blue:** Technical graphics, links, and secondary buttons.
+- **2% — Solar gold:** Small highlights and decorative elements.
+
+These proportions are practical design guidelines, not strict requirements.
+
+---
+
+## 7. BRAND DESIGN RULES
+
+1. Use forest green as the main brand color across the entire website.
+2. Use environmental blue as the supporting technical color.
+3. Use solar gold sparingly.
+4. Maintain white space and a clean, uncluttered interface.
+5. Alternate white, soft green-white, and pale blue backgrounds to separate sections.
+6. Maintain the same color palette across every page and component.
+7. Use consistent typography, spacing, buttons, icons, and card styles.
+8. Avoid excessive gradients, strong shadows, neon colors, and too many competing accent colors.
+9. Use authentic environmental, forest, wildlife, fieldwork, and GIS imagery wherever appropriate.
+10. Keep the website professional, scientific, credible, and suitable for institutional and business audiences.
+
+---
+
+## 8. ACCESSIBILITY RULES
+
+- Use white text on forest-green and environmental-blue buttons.
+- Avoid white text on solar gold.
+- Keep paragraph text dark enough to read comfortably against light backgrounds.
+- Check text and interactive-element contrast before publishing.
+- Use visible keyboard-focus states and clear hover states.
+- Do not communicate important information through color alone.
+
+---
+
+## 9. FINAL BRAND DECISION
+
+**Brand identity:** Environmental expertise combined with scientific and technological capability.
+
+**Primary color:** Forest Green — #216B35
+
+**Secondary color:** Environmental Blue — #087EA4
+
+**Accent color:** Solar Gold — #F2BE36
+
+**H1 heading:** #173B26
+
+**H2 heading:** #216B35
+
+**H3 heading:** #26382D
+
+**Paragraph text:** #4B5563
+
+**Primary CTA:** Green background with white text.
+
+**Secondary CTA:** White background with blue border and text.
+
+**Main background:** #FFFFFF
+
+**Alternate background:** #F5F8F3
+
+**Footer:** #142D20
+
+**Typography:** Inter for headings and body text.
+
+**Design principle:** Premium, clean, trustworthy, environmentally responsible, and scientifically professional.
+
+This document is the proposed **KR Environ Solutions Website Color Theme, Version 1.0**. Use it as the common reference for website development, UI/UX design, social media creatives, brochures, presentations, and other brand materials.
+
+All colors should remain consistent across brand communications unless a formal brand identity update is approved.
+
+---
+
+## 10. CSS CODE READY IMPLEMENTATION (:root)
+
+```css
+:root {
+  /* Brand Core Colors */
+  --color-primary: #216B35;
+  --color-primary-hover: #174D28;
+  --color-secondary: #087EA4;
+  --color-secondary-hover: #06617F;
+  --color-accent: #F2BE36;
+
+  /* Typography Colors */
+  --color-heading-h1: #173B26;
+  --color-heading-h2: #216B35;
+  --color-heading-h3: #26382D;
+  --color-text-body: #4B5563;
+  --color-text-muted: #68756D;
+  --color-text-inverse: #FFFFFF;
+  --color-text-inverse-muted: #E4EEE6;
+
+  /* Background Colors */
+  --bg-main: #FFFFFF;
+  --bg-alt-green: #F5F8F3;
+  --bg-alt-blue: #EFF7FA;
+  --bg-footer: #142D20;
+
+  /* Borders & Dividers */
+  --border-light: #DCE5DD;
+}
+```

@@ -1,26 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Climate+Crisis:YEAR@1979&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Manrope:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Brand Core Colors */
+  --color-primary: #216B35;
+  --color-primary-hover: #174D28;
+  --color-secondary: #087EA4;
+  --color-secondary-hover: #06617F;
+  --color-accent: #F2BE36;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Typography Colors */
+  --color-heading-h1: #173B26;
+  --color-heading-h2: #216B35;
+  --color-heading-h3: #26382D;
+  --color-text-body: #4B5563;
+  --color-text-muted: #68756D;
+  --color-text-inverse: #FFFFFF;
+  --color-text-inverse-muted: #E4EEE6;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Backgrounds */
+  --bg-main: #FFFFFF;
+  --bg-alt-green: #F5F8F3;
+  --bg-alt-blue: #EFF7FA;
+  --bg-footer: #142D20;
+
+  /* Borders & Dividers */
+  --border-light: #DCE5DD;
+
+  /* Fonts */
+  --font-climate: 'Climate Crisis', cursive, sans-serif;
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-manrope: 'Manrope', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+  --font-lato: 'Lato', sans-serif;
+  --font-opensans: 'Open Sans', sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-lato), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--color-text-body);
+  background-color: var(--bg-main);
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* Typography Helpers */
+.font-climate {
+  font-family: var(--font-climate);
+}
+.font-montserrat {
+  font-family: var(--font-montserrat);
+}
+.font-manrope {
+  font-family: var(--font-manrope);
+}
+.font-poppins {
+  font-family: var(--font-poppins);
+}
+.font-lato {
+  font-family: var(--font-lato);
+}
+.font-opensans {
+  font-family: var(--font-opensans);
+}
+
+h1, .h1 {
+  font-family: var(--font-montserrat);
+  color: var(--color-heading-h1);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+h2, .h2 {
+  font-family: var(--font-montserrat);
+  color: var(--color-heading-h2);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+h3, .h3 {
+  font-family: var(--font-manrope);
+  color: var(--color-heading-h3);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* Custom UI Tokens */
+.bg-primary-green { background-color: #216B35; }
+.bg-primary-green-hover:hover { background-color: #174D28; }
+.bg-environmental-blue { background-color: #087EA4; }
+.bg-environmental-blue-hover:hover { background-color: #06617F; }
+.bg-solar-gold { background-color: #F2BE36; }
+.bg-soft-green { background-color: #F5F8F3; }
+.bg-pale-blue { background-color: #EFF7FA; }
+.bg-deep-forest { background-color: #142D20; }
+
+.text-primary-green { color: #216B35; }
+.text-deep-forest { color: #173B26; }
+.text-environmental-blue { color: #087EA4; }
+.text-solar-gold { color: #F2BE36; }
+.text-slate-gray { color: #4B5563; }
+.text-muted-gray { color: #68756D; }
+
+.border-light-green { border-color: #DCE5DD; }
+
+/* Custom button styles */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #216B35;
+  color: #FFFFFF;
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.625rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(33, 107, 53, 0.2);
+  text-decoration: none;
+}
+.btn-primary:hover {
+  background-color: #174D28;
+  box-shadow: 0 6px 16px rgba(23, 77, 40, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #FFFFFF;
+  color: #087EA4;
+  border: 1.5px solid #087EA4;
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.625rem;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+.btn-secondary:hover {
+  background-color: #EFF7FA;
+  border-color: #06617F;
+  color: #06617F;
+  transform: translateY(-1px);
+}
+
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #F2BE36;
+  color: #173B26;
+  font-family: var(--font-poppins);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.625rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 14px rgba(242, 190, 54, 0.25);
+  text-decoration: none;
+}
+.btn-accent:hover {
+  background-color: #deb12b;
+  transform: translateY(-1px);
+}
+
+/* Glassmorphism & Card Shadows */
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(220, 229, 221, 0.8);
+  box-shadow: 0 10px 30px -10px rgba(23, 59, 38, 0.08);
+}
+
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -12px rgba(23, 59, 38, 0.14);
 }

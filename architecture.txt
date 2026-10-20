@@ -1,0 +1,641 @@
+# KR ENVIRON SOLUTIONS
+## Website Architecture, SEO Routes & Modular Component Structure
+
+**Version:** 1.3  
+**Purpose:** Website development, reusable UI components, dynamic admin-managed content, SEO-friendly URLs, and maintainable project architecture.
+
+---
+
+# 1. MAIN WEBSITE NAVIGATION
+
+1. Home — `/`
+2. About Us — `/about-us/`
+3. Services — `/services/`
+4. Projects — `/projects/`
+5. Gallery — `/gallery/`
+6. Videos — `/videos/`
+7. Blog — `/blog/`
+8. Contact Us — `/contact-us/`
+
+**Primary CTA:** Request a Consultation — `/contact-us/`
+
+Use a responsive navigation bar with a dropdown for Services. Gallery and Videos must display admin-managed content without individual slug-based detail URLs.
+
+---
+
+# 2. MODULAR DEVELOPMENT PRINCIPLE
+
+Build the website using a modular component architecture. Every major section should have its own reusable JSX component instead of writing the entire page inside a single file.
+
+**Example:**
+
+- `HomeHero.jsx`
+- `HomeAbout.jsx`
+- `HomeServices.jsx`
+- `HomeProjects.jsx`
+- `HomeGallery.jsx`
+- `HomeVideos.jsx`
+- `HomeBlog.jsx`
+- `HomeContact.jsx`
+
+Each page should assemble its components in the required order.
+
+### Development rules
+
+1. Keep page files responsible for arranging sections, not containing all UI markup.
+2. Keep each major page section in a separate JSX component.
+3. Create reusable components for buttons, headings, cards, forms, navigation, and footers.
+4. Fetch dynamic content from the database through reusable data-access functions or server-side data-fetching modules.
+5. Keep SEO metadata associated with each page and dynamic content type.
+6. Use consistent naming conventions, imports, and folder organization.
+7. Avoid unnecessary duplication of components across pages.
+8. Components should be easy to maintain, test, and update independently.
+
+---
+
+# 3. RECOMMENDED PROJECT FOLDER STRUCTURE
+
+Use the following modular structure for a Next.js project using the App Router.
+
+```text
+kr-environ/
+│
+├── public/
+│   ├── images/
+│   ├── logos/
+│   ├── gallery/
+│   └── icons/
+│
+├── src/
+│   ├── app/
+│   │   ├── layout.jsx
+│   │   ├── page.jsx
+│   │   ├── not-found.jsx
+│   │   │
+│   │   ├── about-us/
+│   │   │   └── page.jsx
+│   │   │
+│   │   ├── our-expertise/
+│   │   │   └── page.jsx
+│   │   │
+│   │   ├── services/
+│   │   │   ├── page.jsx
+│   │   │   └── [slug]/
+│   │   │       └── page.jsx
+│   │   │
+│   │   ├── projects/
+│   │   │   ├── page.jsx
+│   │   │   └── [slug]/
+│   │   │       └── page.jsx
+│   │   │
+│   │   ├── gallery/
+│   │   │   └── page.jsx
+│   │   │
+│   │   ├── videos/
+│   │   │   └── page.jsx
+│   │   │
+│   │   ├── blog/
+│   │   │   ├── page.jsx
+│   │   │   ├── [slug]/
+│   │   │   │   └── page.jsx
+│   │   │   └── category/
+│   │   │       └── [slug]/
+│   │   │           └── page.jsx
+│   │   │
+│   │   ├── contact-us/
+│   │   │   └── page.jsx
+│   │   │
+│   │   ├── privacy-policy/
+│   │   │   └── page.jsx
+│   │   │
+│   │   ├── terms-and-conditions/
+│   │   │   └── page.jsx
+│   │   │
+│   │   └── sitemap.js
+│   │
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── SiteHeader.jsx
+│   │   │   ├── MainNavigation.jsx
+│   │   │   ├── MobileNavigation.jsx
+│   │   │   ├── SiteFooter.jsx
+│   │   │   └── Breadcrumbs.jsx
+│   │   │
+│   │   ├── common/
+│   │   │   ├── SectionHeading.jsx
+│   │   │   ├── PrimaryButton.jsx
+│   │   │   ├── SecondaryButton.jsx
+│   │   │   ├── Container.jsx
+│   │   │   ├── ServiceCard.jsx
+│   │   │   ├── ProjectCard.jsx
+│   │   │   ├── BlogCard.jsx
+│   │   │   ├── GalleryGrid.jsx
+│   │   │   ├── VideoCard.jsx
+│   │   │   ├── ContactForm.jsx
+│   │   │   ├── FAQSection.jsx
+│   │   │   └── Pagination.jsx
+│   │   │
+│   │   ├── home/
+│   │   │   ├── HomeHero.jsx
+│   │   │   ├── HomeAbout.jsx
+│   │   │   ├── HomeServices.jsx
+│   │   │   ├── HomeWhyChooseUs.jsx
+│   │   │   ├── HomeExpertise.jsx
+│   │   │   ├── HomeProjects.jsx
+│   │   │   ├── HomeGallery.jsx
+│   │   │   ├── HomeVideos.jsx
+│   │   │   ├── HomeBlog.jsx
+│   │   │   ├── HomeCTA.jsx
+│   │   │   └── HomeContact.jsx
+│   │   │
+│   │   ├── about/
+│   │   │   ├── AboutHero.jsx
+│   │   │   ├── AboutIntroduction.jsx
+│   │   │   ├── AboutLeadership.jsx
+│   │   │   ├── AboutExpertise.jsx
+│   │   │   └── AboutApproach.jsx
+│   │   │
+│   │   ├── services/
+│   │   │   ├── ServicesHero.jsx
+│   │   │   ├── ServicesGrid.jsx
+│   │   │   ├── ServiceDetailHero.jsx
+│   │   │   ├── ServiceDetailContent.jsx
+│   │   │   ├── ServiceBenefits.jsx
+│   │   │   ├── ServiceProcess.jsx
+│   │   │   ├── RelatedServices.jsx
+│   │   │   └── ServiceEnquiryCTA.jsx
+│   │   │
+│   │   ├── projects/
+│   │   │   ├── ProjectsHero.jsx
+│   │   │   ├── ProjectsGrid.jsx
+│   │   │   └── ProjectDetailContent.jsx
+│   │   │
+│   │   ├── gallery/
+│   │   │   ├── GalleryHero.jsx
+│   │   │   ├── GalleryFilters.jsx
+│   │   │   ├── GalleryGridSection.jsx
+│   │   │   └── GalleryLightbox.jsx
+│   │   │
+│   │   ├── videos/
+│   │   │   ├── VideosHero.jsx
+│   │   │   ├── VideoFilters.jsx
+│   │   │   ├── VideosGrid.jsx
+│   │   │   └── VideoPlayerModal.jsx
+│   │   │
+│   │   ├── blog/
+│   │   │   ├── BlogHero.jsx
+│   │   │   ├── BlogGrid.jsx
+│   │   │   ├── BlogFilters.jsx
+│   │   │   ├── BlogArticleHeader.jsx
+│   │   │   ├── BlogArticleContent.jsx
+│   │   │   ├── RelatedArticles.jsx
+│   │   │   └── BlogSidebar.jsx
+│   │   │
+│   │   └── contact/
+│   │       ├── ContactHero.jsx
+│   │       ├── ContactInformation.jsx
+│   │       ├── ContactEnquiryForm.jsx
+│   │       └── OfficeLocation.jsx
+│   │
+│   ├── lib/
+│   │   ├── db.js
+│   │   ├── services.js
+│   │   ├── projects.js
+│   │   ├── blogs.js
+│   │   ├── gallery.js
+│   │   ├── videos.js
+│   │   ├── seo.js
+│   │   └── validations.js
+│   │
+│   ├── config/
+│   │   ├── site.js
+│   │   └── navigation.js
+│   │
+│   └── styles/
+│       └── globals.css
+│
+└── package.json
+```
+
+This is a recommended starting structure, not a requirement to create every file immediately. Add components as the corresponding sections are implemented. Keep existing project conventions where they differ.
+
+---
+
+# 4. HOMEPAGE MODULAR STRUCTURE
+
+**Page URL:** `/`
+
+**Page file:** `src/app/page.jsx`
+
+Build the homepage by composing independent sections in this order:
+
+1. `HomeHero.jsx` — Main headline, introduction, hero image, and primary CTA.
+2. `HomeAbout.jsx` — Short company introduction and About Us link.
+3. `HomeServices.jsx` — Featured services loaded from published database records.
+4. `HomeWhyChooseUs.jsx` — Verified differentiators and reasons to work with the company.
+5. `HomeExpertise.jsx` — Environmental consultancy and technical expertise.
+6. `HomeProjects.jsx` — Selected published projects.
+7. `HomeGallery.jsx` — Selected gallery images, linked to `/gallery/`.
+8. `HomeVideos.jsx` — Featured videos with in-page playback.
+9. `HomeBlog.jsx` — Latest published articles.
+10. `HomeCTA.jsx` — Request a Consultation call to action.
+11. `HomeContact.jsx` — Short contact information and enquiry entry point.
+
+The homepage should import and arrange these components rather than implement each full section directly inside `page.jsx`.
+
+**Dynamic content rule:** Services, projects, gallery items, videos, and blogs displayed on the homepage must come from the relevant data source. Hide sections that have no published content where appropriate.
+
+---
+
+# 5. ABOUT US — MODULAR STRUCTURE
+
+**Page URL:** `/about-us/`
+
+**Page file:** `src/app/about-us/page.jsx`
+
+Components:
+
+- `AboutHero.jsx`
+- `AboutIntroduction.jsx`
+- `AboutLeadership.jsx`
+- `AboutExpertise.jsx`
+- `AboutApproach.jsx`
+- `AboutCTA.jsx`
+
+Use separate reusable components for the company introduction, proprietor profile, areas of expertise, professional approach, and consultation CTA.
+
+Do not publish unverified qualifications, experience, awards, or institutional endorsements.
+
+---
+
+# 6. SERVICES — DYNAMIC SLUG SYSTEM
+
+**Services listing URL:** `/services/`
+
+**Listing page file:** `src/app/services/page.jsx`
+
+**Individual service URL pattern:** `/services/[slug]/`
+
+**Dynamic detail page file:** `src/app/services/[slug]/page.jsx`
+
+Components:
+
+- `ServicesHero.jsx`
+- `ServicesGrid.jsx`
+- `ServiceCard.jsx`
+- `ServiceDetailHero.jsx`
+- `ServiceDetailContent.jsx`
+- `ServiceBenefits.jsx`
+- `ServiceProcess.jsx`
+- `RelatedServices.jsx`
+- `ServiceEnquiryCTA.jsx`
+
+### Admin panel behaviour
+
+When an administrator adds a service, the website should automatically generate a public URL from its unique slug.
+
+Example:
+
+- Title: Environmental Impact Assessment
+- Slug: `environmental-impact-assessment`
+- URL: `/services/environmental-impact-assessment/`
+
+The same dynamic detail template must render all published services using the matching database record.
+
+**Required service fields:**
+- Title
+- Slug
+- Short description
+- Full content
+- Featured image
+- Category
+- SEO title
+- Meta description
+- Publication status
+
+Include any additional technical or enquiry fields the actual service requires.
+
+---
+
+# 7. BLOG — DYNAMIC ARTICLE SYSTEM
+
+**Blog listing URL:** `/blog/`
+
+**Listing page file:** `src/app/blog/page.jsx`
+
+**Article URL pattern:** `/blog/[slug]/`
+
+**Article page file:** `src/app/blog/[slug]/page.jsx`
+
+**Category URL pattern:** `/blog/category/[slug]/`
+
+**Category page file:** `src/app/blog/category/[slug]/page.jsx`
+
+Components:
+
+- `BlogHero.jsx`
+- `BlogGrid.jsx`
+- `BlogFilters.jsx`
+- `BlogCard.jsx`
+- `BlogArticleHeader.jsx`
+- `BlogArticleContent.jsx`
+- `RelatedArticles.jsx`
+- `BlogSidebar.jsx`
+
+### Admin panel behaviour
+
+Every published article receives a unique slug and uses the same reusable article template.
+
+Example:
+
+- Title: Environmental Clearance Process in India
+- Slug: `environmental-clearance-process-in-india`
+- URL: `/blog/environmental-clearance-process-in-india/`
+
+**Required blog fields:**
+- Title
+- Slug
+- Category
+- Author
+- Featured image
+- Excerpt
+- Article content
+- Publication date
+- SEO title
+- Meta description
+- Publication status
+
+Generate metadata dynamically from each article record. Categories should also be managed through the admin panel.
+
+---
+
+# 8. PROJECTS — DYNAMIC SLUG SYSTEM
+
+**Listing URL:** `/projects/`
+
+**Listing page file:** `src/app/projects/page.jsx`
+
+**Detail URL pattern:** `/projects/[slug]/`
+
+**Detail page file:** `src/app/projects/[slug]/page.jsx`
+
+Components:
+
+- `ProjectsHero.jsx`
+- `ProjectsGrid.jsx`
+- `ProjectCard.jsx`
+- `ProjectDetailContent.jsx`
+- `RelatedProjects.jsx`
+- `ProjectCTA.jsx`
+
+Each project should have a unique slug and use the same reusable detail-page template.
+
+**Admin panel fields:**
+- Project title
+- Slug
+- Category
+- Location
+- Project date
+- Overview
+- Scope of work
+- Project images
+- Client name, when authorized for publication
+- SEO title
+- Meta description
+- Publication status
+
+Only verified project details and authorized client information should be published.
+
+---
+
+# 9. GALLERY — ONE FIXED PAGE, NO ITEM SLUGS
+
+**Public URL:** `/gallery/`
+
+**Page file:** `src/app/gallery/page.jsx`
+
+Components:
+
+- `GalleryHero.jsx`
+- `GalleryFilters.jsx`
+- `GalleryGridSection.jsx`
+- `GalleryGrid.jsx`
+- `GalleryLightbox.jsx`
+
+### Required behaviour
+
+- All published images are loaded from the database or configured media storage.
+- Gallery categories act as filters on the same page.
+- Clicking an image opens a lightbox or image viewer.
+- The image viewer does not navigate to a separate slug-based page.
+- Admin users can upload, edit, reorder, publish, or hide images.
+
+**Admin panel fields:**
+- Image title
+- Image file or media URL
+- Caption
+- Category
+- Alt text
+- Display order
+- Published / Hidden status
+
+**Routes:** Only `/gallery/` is required for the public gallery.
+
+---
+
+# 10. VIDEOS — ONE FIXED PAGE, NO VIDEO SLUGS
+
+**Public URL:** `/videos/`
+
+**Page file:** `src/app/videos/page.jsx`
+
+Components:
+
+- `VideosHero.jsx`
+- `VideoFilters.jsx`
+- `VideosGrid.jsx`
+- `VideoCard.jsx`
+- `VideoPlayerModal.jsx`
+
+### Required behaviour
+
+- All published videos appear on the same Videos page.
+- Categories filter the videos without navigating to category-specific URLs.
+- Clicking a video opens a modal, embedded player, or designated playback section.
+- Admin users can add, edit, reorder, publish, or hide videos.
+- No individual slug-based video routes are required.
+
+**Admin panel fields:**
+- Video title
+- Video URL or embed URL
+- Thumbnail
+- Description
+- Category
+- Display order
+- Publication date
+- Published / Hidden status
+
+**Routes:** Only `/videos/` is required for the public videos section.
+
+---
+
+# 11. CONTACT US — MODULAR STRUCTURE
+
+**Page URL:** `/contact-us/`
+
+**Page file:** `src/app/contact-us/page.jsx`
+
+Components:
+
+- `ContactHero.jsx`
+- `ContactInformation.jsx`
+- `ContactEnquiryForm.jsx`
+- `OfficeLocation.jsx`
+- `ContactCTA.jsx`
+
+The enquiry form should validate user input and submit enquiries through a secure backend. Store and protect enquiry information appropriately.
+
+Display confirmed company contact information and address details. Do not expose private administrative data.
+
+---
+
+# 12. REUSABLE GLOBAL COMPONENTS
+
+These components may be shared across multiple pages:
+
+- `SiteHeader.jsx` — Global header.
+- `MainNavigation.jsx` — Desktop navigation.
+- `MobileNavigation.jsx` — Mobile menu.
+- `SiteFooter.jsx` — Global footer.
+- `Breadcrumbs.jsx` — Hierarchical page navigation.
+- `Container.jsx` — Consistent content width and horizontal spacing.
+- `SectionHeading.jsx` — Reusable section-title pattern.
+- `PrimaryButton.jsx` — Main green CTA.
+- `SecondaryButton.jsx` — Secondary outline CTA.
+- `ServiceCard.jsx` — Service previews.
+- `ProjectCard.jsx` — Project previews.
+- `BlogCard.jsx` — Article previews.
+- `GalleryGrid.jsx` — Reusable image layout.
+- `VideoCard.jsx` — Video thumbnail and playback action.
+- `ContactForm.jsx` — Shared enquiry form where needed.
+- `FAQSection.jsx` — Frequently asked questions.
+
+A global component should be shared only when its appearance and behaviour genuinely need to be consistent. Avoid creating unnecessary components for tiny, one-off elements.
+
+---
+
+# 13. GLOBAL DESIGN SYSTEM
+
+Use the approved KR Environ Solutions color theme consistently across all modular components.
+
+**Primary:** Forest Green — `#216B35`
+
+**Secondary:** Environmental Blue — `#087EA4`
+
+**Accent:** Solar Gold — `#F2BE36`
+
+**H1:** `#173B26`
+
+**H2:** `#216B35`
+
+**H3:** `#26382D`
+
+**Paragraph:** `#4B5563`
+
+**Main background:** `#FFFFFF`
+
+**Alternate background:** `#F5F8F3`
+
+**Footer:** `#142D20`
+
+Use consistent typography, spacing, button dimensions, border radius, responsive behaviour, and accessible color contrast throughout the website.
+
+Create shared design tokens in the global styling system rather than repeating values throughout individual components.
+
+---
+
+# 14. SEO AND ROUTE STRUCTURE
+
+### Fixed pages
+
+- `/`
+- `/about-us/`
+- `/our-expertise/`
+- `/contact-us/`
+- `/privacy-policy/`
+- `/terms-and-conditions/`
+- `/disclaimer/`
+
+### Dynamic content pages
+
+**Services**
+- `/services/`
+- `/services/[slug]/`
+
+**Projects**
+- `/projects/`
+- `/projects/[slug]/`
+
+**Blog**
+- `/blog/`
+- `/blog/[slug]/`
+- `/blog/category/[slug]/`
+
+### Fixed media pages
+
+- `/gallery/`
+- `/videos/`
+
+### SEO rules
+
+1. Generate metadata for each published service, project, and blog article.
+2. Provide unique titles, meta descriptions, and canonical URLs.
+3. Use readable, lowercase, hyphen-separated slugs.
+4. Ensure slugs are unique within their corresponding content type.
+5. Redirect old URLs if published slugs change.
+6. Generate the XML sitemap from published, indexable pages.
+7. Keep unpublished records out of public listings and search engine sitemaps.
+8. Link relevant blog articles to services and relevant projects where appropriate.
+9. Add breadcrumbs to nested service, project, and blog pages.
+10. Avoid unnecessary indexable URLs for gallery and video filters.
+
+---
+
+# 15. ADMIN PANEL AND DATA MANAGEMENT
+
+The admin panel must support:
+
+**Services:** Create, edit, publish, unpublish, and delete service records.
+
+**Blogs:** Create and manage articles, categories, slugs, images, and SEO metadata.
+
+**Projects:** Manage project details, locations, images, categories, and public visibility.
+
+**Gallery:** Upload images, add captions and alt text, assign categories, reorder, and hide content.
+
+**Videos:** Add video URLs, thumbnails, descriptions, categories, and display order.
+
+### Important development requirements
+
+- Use database IDs as internal record identifiers.
+- Use slugs only for service, project, and blog article detail routes.
+- Validate all admin inputs on the server.
+- Protect the admin panel with authentication and role-based authorization.
+- Validate upload types and sizes.
+- Prevent duplicate slugs.
+- Use secure storage for uploaded media.
+- Keep draft content private.
+- Revalidate or refresh relevant pages after content changes.
+- Generate public metadata only from the appropriate published content record.
+
+---
+
+# 16. FINAL DEVELOPMENT RULE
+
+The KR Environ Solutions website must follow a modular component architecture.
+
+The homepage should consist of separate files such as `HomeHero.jsx`, `HomeAbout.jsx`, `HomeServices.jsx`, `HomeProjects.jsx`, `HomeGallery.jsx`, `HomeVideos.jsx`, and `HomeBlog.jsx`.
+
+Individual pages should be assembled from reusable components. Dynamic services, blog articles, and projects should use database-driven slug routes. Gallery and Videos should each have one fixed public page, with their items managed through the admin panel and displayed using filters, lightboxes, or embedded video players.
+
+**Final objective:** A professional, SEO-friendly, responsive, database-driven website that is easy to maintain, scalable as content grows, and consistent with the KR Environ Solutions brand identity.

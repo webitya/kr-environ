@@ -1,0 +1,137 @@
+================================================================================
+KR ENVIRON SOLUTION - BRAND TYPOGRAPHY THEORY & DESIGN SYSTEM
+================================================================================
+
+1. FONT IMPORT CODE
+--------------------------------------------------------------------------------
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Climate+Crisis:YEAR@1979&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Manrope:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+</style>
+
+
+2. BRAND IDENTITY & TYPOGRAPHY THEORY
+--------------------------------------------------------------------------------
+KR Environ Solution operates at the intersection of environmental stewardship, 
+cutting-edge engineering, ecological sustainability, and industrial compliance.
+
+The selected font ecosystem provides a multi-tiered communication palette:
+- Urgency & Environmental Consciousness (Climate Crisis)
+- Corporate Authority & Visionary Leadership (Montserrat)
+- Modern Engineering & Precision Analytics (Manrope)
+- Engaging Interactivity & Approachability (Poppins)
+- Editorial Trust & Warmth (Lato)
+- Technical Clarity & Compliance Data (Open Sans)
+
+
+3. FONT ROLES & DESIGN HIERARCHY
+--------------------------------------------------------------------------------
+
+[A] "Climate Crisis"
+    * Classification: Experimental Environmental Display / Variable Font
+    * CSS Family: font-family: 'Climate Crisis', sans-serif;
+    * Brand Meaning: Designed to visually embody Arctic ice-loss data; symbolizes 
+      ecological gravity, urgency, and transformative environmental impact.
+    * Target Usage:
+      - High-impact Hero accent words (e.g., "NET ZERO", "CLIMATE", "CRISIS TO SOLUTION")
+      - Key Environmental Milestone banners & urgency callouts
+      - Large display percentage/emission reduction badges
+    * Rule: Use sparingly in uppercase for short, punchy statements. Avoid for full sentences.
+
+[B] "Montserrat"
+    * Classification: Geometric Sans-Serif
+    * CSS Family: font-family: 'Montserrat', sans-serif;
+    * Recommended Weights: 600 (SemiBold), 700 (Bold), 800 (ExtraBold)
+    * Brand Meaning: Architectural, structural, and dependable. Projects corporate 
+      reputation, industry stature, and forward-thinking sustainability leadership.
+    * Target Usage:
+      - Main Page Titles (H1)
+      - Major Section Headings (H2)
+      - Main Navigation Bar brand logotype & primary nav items
+      - Value Proposition headlines
+
+[C] "Manrope"
+    * Classification: Modern Semi-Geometric Sans-Serif
+    * CSS Family: font-family: 'Manrope', sans-serif;
+    * Recommended Weights: 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold)
+    * Brand Meaning: Crisp, technological, and data-driven. Connects environmental 
+      mission with engineering precision and modern digital execution.
+    * Target Usage:
+      - Subheadings (H3, H4)
+      - KPI Metrics, Statistics, and Data Dashboards (e.g., "99.8% Emission Reduction")
+      - Service Card titles & Solution Feature highlights
+      - Process timeline milestones
+
+[D] "Poppins"
+    * Classification: Rounded Geometric Sans-Serif
+    * CSS Family: font-family: 'Poppins', sans-serif;
+    * Recommended Weights: 500 (Medium), 600 (SemiBold), 700 (Bold)
+    * Brand Meaning: Human-centric, welcoming, action-oriented. Drives engagement 
+      and makes technical eco-solutions approachable to clients and partners.
+    * Target Usage:
+      - Call to Action (CTA) buttons (e.g., "Request an Environmental Audit", "Get in Touch")
+      - Interactive badges, tags, filter chips (e.g., "Air Quality", "EIA", "Waste Water")
+      - Form labels and input fields
+      - Testimonial author titles & micro-copy
+
+[E] "Lato"
+    * Classification: Humanist Sans-Serif
+    * CSS Family: font-family: 'Lato', sans-serif;
+    * Recommended Weights: 300 (Light), 400 (Regular), 400i (Italic), 700 (Bold)
+    * Brand Meaning: Transparent, warm, organic, and grounded. Enhances readability 
+      and establishes long-form storytelling credibility.
+    * Target Usage:
+      - Primary Body Paragraphs across all marketing and service pages
+      - Detailed project case studies and sustainability whitepapers
+      - "About KR Environ" company story and mission statements
+      - Client testimonial quotes
+
+[F] "Open Sans"
+    * Classification: Neutral Neutral-Humanist Sans-Serif
+    * CSS Family: font-family: 'Open Sans', sans-serif;
+    * Recommended Weights: 400 (Regular), 600 (SemiBold)
+    * Brand Meaning: Neutral, universal legibility, regulatory transparency.
+    * Target Usage:
+      - Technical specification tables & emission parameter matrices
+      - Compliance certifications, ISO standards, and legal disclosures
+      - Footer site map, policy notes, and contact meta details
+      - Tooltips and secondary fine print
+
+
+4. CSS VARIABLES & SYSTEM MAPPING CONFIGURATION
+--------------------------------------------------------------------------------
+:root {
+  /* Font Families */
+  --font-climate: 'Climate Crisis', sans-serif;
+  --font-montserrat: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-manrope: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-lato: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-opensans: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Semantic Typography Hierarchy */
+  --font-display-impact: var(--font-climate);
+  --font-heading-primary: var(--font-montserrat);
+  --font-heading-secondary: var(--font-manrope);
+  --font-interactive-cta: var(--font-poppins);
+  --font-body-editorial: var(--font-lato);
+  --font-body-technical: var(--font-opensans);
+}
+
+
+5. TYPOGRAPHY SCALING SYSTEM
+--------------------------------------------------------------------------------
+Element               Font Family         Weight     Size (Desktop / Mobile)      Line Height
+-----------------------------------------------------------------------------------------
+Hero Impact Word      Climate Crisis      Variable   3.5rem - 5.5rem / 2.5rem     1.05
+Hero Headline (H1)    Montserrat          800/700    2.75rem - 3.75rem / 2.0rem   1.15
+Section Title (H2)    Montserrat          700        2.0rem - 2.5rem / 1.75rem    1.25
+Feature Heading (H3)  Manrope             600        1.35rem - 1.65rem / 1.25rem  1.35
+Card / Subtitle (H4)  Manrope             600        1.1rem - 1.25rem / 1.05rem   1.4
+Metric Numbers        Manrope             700/800    2.5rem - 3.5rem / 2.0rem     1.1
+Button / CTA          Poppins             600        0.95rem - 1.05rem            1.2
+Badges / Tags         Poppins             500        0.75rem - 0.85rem            1.2
+Lead Paragraph        Lato                400        1.15rem - 1.25rem / 1.05rem  1.6
+Body Copy             Lato                400        1.0rem (16px)                1.65
+Technical / Specs     Open Sans           400/600    0.875rem (14px)              1.55
+Footer / Fine Print   Open Sans           400        0.8rem (12.8px)              1.5
+================================================================================

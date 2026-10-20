@@ -1,0 +1,59 @@
+# KR Environ Solutions – Company & Services
+
+**KR Environ Solutions** is a Jharkhand‐based environmental technology firm (headed by proprietor Sarika Gupta) that focuses on innovative wildlife conservation and human–animal conflict mitigation. In practice, the company works closely with government agencies (e.g. Jharkhand’s Forest & Wildlife Department headquartered at Van Bhawan, Doranda, Ranchi) to introduce advanced tech solutions. A key part of their offering comes from **Kyari Innovations Pvt. Ltd.** – a pioneering “wildlife tech” startup. Kyari (a major partner) bills itself as *“India’s first wildlife technology startup,”* dedicated to developing products that **deter or safely capture wild animals** while protecting humans and wildlife alike. In Kyari’s own words, its products are “designed to deter and safely capture wild animals while being non-harmful and easy to use,” with over *1400 ANIDERS* systems deployed nationwide. In effect, KR Environ leverages Kyari’s innovations – such as infrared repellent devices and safety gear – to serve forestry, agricultural, and conservation clients across India.
+
+---
+
+## Products & Technical Solutions
+
+KR Environ/Sarika Gupta’s portfolio centers on Kyari’s **wildlife‐safety products** and related services. Key offerings include:
+
+- **ANIDERS (Animal Intrusion Detection & Repellent System):** A solar‐powered, sensor-based “smart scarecrow” that detects large mammals (elephants, boars, deer, etc.) at field boundaries and triggers lights and sirens to scare them away. Kyari reports *91% effectiveness* in repelling crop‐raiding animals and up to a *60% increase in crop yields* for farmers using ANIDERS. The device runs 24/7 on batteries with optional GSM alerts, and is explicitly non‐lethal (using only sound/light alarms). Multiple models exist (plain solar, GSM-enabled, terrain variants) to suit hills or plains. (*Use case:* protecting farmland and forest edges from elephant/bear incursions.)
+
+- **Re-Pulse Mat (Electric Shock Deterrent):** A floor mat that delivers a harmless electric shock to any animal stepping on it. Installed at checkpoints or human-wildlife boundaries, it acts as a passive barrier. According to Kyari, the mat can be solar-powered or battery-backed and delivers a safe but startling shock to deter all ferocious species (tiger, elephant, bear, etc.). It is easy to install, non-injurious, and useful for preventing entry into villages or sensitive areas.
+
+- **KyNet Net Gun:** A handheld **net launcher** for wildlife capture. This electronically-triggered net gun can safely immobilize medium-sized wild animals (leopards, boars, monkeys, etc.) for rescue or relocation. Kyari claims it’s one of the safest capture tools, with “100+ net guns deployed” so far. The gun’s design minimizes recoil and includes ambidextrous handles and battery-life indicators.
+
+- **Smart Stick Guardian (Forester):** An advanced **safety baton** for forest guards and rangers. This rugged telescoping stick (2–4 feet long) incorporates features like a built-in LED floodlight (multi-mode lighting), panic alarm, and rechargeable batteries for shock, light, and USB power bank functions. In field tests, rangers have credited the Smart Stick with increasing their safety during patrols (e.g. testimonial: “Smart Stick Forester increases our safety during patrolling”). Kyari markets a consumer version (Smart Stick Guardian) for adventurers too.
+
+- **Stun Baton & Stun Stick:** Simpler electroshock batons (2–4 ft) for close-range defense. These plain or foldable sticks deliver a high-voltage pulse to deter large animals in emergencies. (For example, the 2′ Stun Baton is a handheld electroshock device; the 4′ Stun Stick is a full-length rod.)
+
+- **Additional Services:** Beyond hardware, KR Environ offers **site surveys, installation and training**. Kyari notes that *on-site installation and support* is available for its systems. Indeed, company materials highlight that KR Environ arranges “net gun training sessions” for forest staff and deploys teams to set up ANIDERS and Smart Sticks in reserves and farmlands. They likely provide environmental consultancy (e.g. waste-land development, HWC management plans) given Sarika Gupta’s meetings with Jharkhand waste-land and SEIAA officials.
+
+---
+
+## Technology Highlights
+
+- **Solar Power & All-Weather:** Most systems are solar‐powered with backup batteries, suitable for remote forests. Kyari’s pages emphasize *“All Weather Resilient”* and *“Solar Powered Models”* for ANIDERS.
+- **Sensor & Alarm Systems:** ANIDERS uses PIR infrared sensors plus 30+ unique light/sound alarms to prevent habituation. The net gun is *electronically triggered* for rapid response.
+- **Non-Lethal Design:** All products are designed to avoid harm – they repel or capture animals without injury. For example, the Re-Pulse Mat and ANIDERS both explicitly provide safe deterrence (no electric fencing or harm).
+- **Connectivity:** Higher-end units include GSM modules for remote alerts, and Kyari mentions real-time camera integrations in advanced ANIDERS setups. (This allows forest staff to monitor via smartphone alerts.)
+
+---
+
+## Achievements & Impact
+
+KR Environ Solutions/Kyari Innovations have gained notable recognition in the wildlife-tech field:
+
+- **National Awards:** Kyari won the *National Budding Innovator Award for ANIDERS (2018)* from India’s NTCA (National Tiger Conservation Authority). The Smart Stick Forester was launched at an NTCA conference (Chandrapur, 2021).
+- **Media Exposure:** The company’s innovations were featured on *Shark Tank India* (Season 2, 2023), which brought national attention to their wildlife-safety solutions.
+- **Scale of Deployment:** Kyari reports *100+ net guns* and *1400+ ANIDERS units* deployed across India. Its clientele spans *12+ tiger reserves* and *21+ state forest departments*. In total, *4,000+ units* of various products have been installed nationwide. This broad adoption underscores KR Environ’s market reach and trust in the forestry sector.
+- **Notable Projects:** Recent field work includes **70 ANIDERS systems** installed (April 2023) along the Bihar–Nepal border (Araria district), as well as *200 solar Smart Sticks* deployed in Ladakh (Valmiki Tiger Reserve, Bihar) and training sessions for forest personnel in Odisha.
+- **Customer Feedback:** Testimonials from forest officials praise the products. For example, CT Ouseph (Assistant Warden, Thattekad Sanctuary) notes: *“The products have really proven useful in mitigating HWC in our range… [the] company regularly takes follow-ups to ensure proper functioning”*. Vinay Kumar (Beat Guard, Sanjay Tiger Reserve) similarly reports that the Smart Stick *“increases our safety… [and] the company provides regular assistance”*.
+
+---
+
+## Partnerships & Collaborations
+
+KR Environ’s strength lies in bridging technology and policy. The proprietor, Sarika Gupta, has actively liaised with Jharkhand government agencies – from the PCCF (Wildlife) and Chief Wildlife Warden to the DFO of Ranchi (Member Secretary of SEIAA) and Deputy Director of the Waste Land Development Board – to propose and deploy these innovations. These courtesy meetings at Van Bhawan (Ranchi) aim to integrate Kyari’s solutions into state conservation efforts. In effect, KR Environ acts as a **regional partner/distributor** for Kyari Innovations, implementing their products in Jharkhand and beyond. (The original Kyari company is based in the Ganges-Himalayas region and emphasizes *“bringing the best in tech”* to make outdoor activities safer.)
+
+---
+
+## Contact & Presence
+
+- **Location:** The Jharkhand Forest Department is headquartered at *Van Bhawan, Doranda, Ranchi – 834002*. KR Environ Solutions operates in this region, although its official office address is not publicly listed.
+- **Website & Social:** Kyari Innovations (Kyari for Wildlife) maintains a website (kyari.in) and social media for outreach. For example, their brochure lists Twitter/Instagram as `@KyariWildlife`. KR Environ Solutions likely uses these channels indirectly through Kyari branding.
+
+In summary, **KR Environ Solutions** leverages cutting-edge wildlife-tech products (from Kyari Innovations) to address human–animal conflict and safety in India. Its offerings – ranging from smart scarecrows (ANIDERS) to electronic capture tools – are backed by national awards, deployment data, and government support. All claims above are documented by Kyari’s official materials and Jharkhand government sources, forming a comprehensive profile for marketing, SEO, and web content.
+
+**Sources:** Official Kyari Innovations brochures and website; Jharkhand Forest Dept (Van Bhawan address); related press and testimonials.
