@@ -44,6 +44,31 @@ body {
   overflow-x: hidden;
 }
 
+/* Ensure all interactive buttons, links, and form triggers display pointer cursor */
+button,
+[type='button'],
+[type='reset'],
+[type='submit'],
+[role='button'],
+a,
+select,
+summary,
+input[type='checkbox'],
+input[type='radio'],
+label[for] {
+  cursor: pointer;
+}
+
+button:disabled,
+[type='button']:disabled,
+[type='reset']:disabled,
+[type='submit']:disabled,
+[role='button'][aria-disabled='true'],
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
 /* Typography Helpers */
 .font-climate {
   font-family: var(--font-climate);
