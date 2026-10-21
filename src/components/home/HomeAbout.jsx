@@ -87,7 +87,7 @@ export default function HomeAbout() {
             </div>
 
             <div className="pt-2">
-              <Link href="/about-us" className="btn-primary">
+              <Link href="/about-us" className="btn-primary w-full sm:w-auto text-center justify-center">
                 <span>Learn More About Our Mission</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>

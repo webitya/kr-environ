@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -43,6 +44,16 @@ export default function SiteHeader() {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // Auto-expand mobile services if currently browsing services
   useEffect(() => {
@@ -59,20 +70,24 @@ export default function SiteHeader() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Lock body scroll when mobile drawer is open
+  // Lock body & html scroll when mobile drawer is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 w-full transition-all duration-300">
+    <>
+      <header className="sticky top-0 z-40 w-full transition-all duration-300">
       {/* Top Banner with Partnership & Helpline */}
       <div className="hidden md:block bg-[#173B26] text-[#E4EEE6] text-xs py-2 px-4 border-b border-[#216B35]/40">
         <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -219,11 +234,16 @@ export default function SiteHeader() {
             </button>
           </div>
         </div>
+      </nav>
+    </header>
 
+    {/* Teleport Mobile Navigation Drawer to document.body to prevent backdrop-blur & sticky containing-block traps on scroll */}
+    {mounted && typeof document !== 'undefined' && createPortal(
+      <div className="lg:hidden">
         {/* Backdrop for Right-to-Left Drawer */}
         <div
           onClick={() => setMobileMenuOpen(false)}
-          className={`fixed inset-0 bg-black/60 backdrop-blur-xs z-50 lg:hidden transition-opacity duration-300 ${
+          className={`fixed inset-0 bg-black/60 z-[9998] transition-opacity duration-300 ${
             mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
           aria-hidden="true"
@@ -231,13 +251,13 @@ export default function SiteHeader() {
 
         {/* Right-to-Left Mobile Navigation Drawer */}
         <aside
-          className={`fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-white z-50 shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:hidden border-l border-[#DCE5DD] ${
-            mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          className={`fixed inset-y-0 right-0 w-[85vw] max-w-xs sm:max-w-sm h-screen h-[100dvh] bg-white z-[9999] shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ease-in-out border-l border-[#DCE5DD] ${
+            mobileMenuOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
           }`}
           aria-label="Mobile Navigation"
         >
           {/* Drawer Header with Logo and Brand Name */}
-          <div className="p-4 border-b border-[#DCE5DD] flex items-center justify-between bg-[#F5F8F3]/80 shrink-0">
+          <div className="p-4 border-b border-[#DCE5DD] flex items-center justify-between bg-[#F5F8F3] shrink-0">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
@@ -248,14 +268,9 @@ export default function SiteHeader() {
                 alt="KR Environ Solutions Logo"
                 className="w-10 h-10 rounded-xl object-contain bg-white border border-[#DCE5DD] p-0.5 shadow-xs shrink-0"
               />
-              <div className="text-left">
-                <span className="font-semibold text-base tracking-tight text-[#173B26] block leading-tight">
-                  KR Environ Solutions
-                </span>
-                <span className="text-[10px] text-[#216B35] font-semibold tracking-wide uppercase block">
-                  Wildlife & Env Engineering
-                </span>
-              </div>
+              <span className="font-semibold text-base tracking-tight text-[#173B26]">
+                KR Environ Solutions
+              </span>
             </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -267,98 +282,64 @@ export default function SiteHeader() {
           </div>
 
           {/* Drawer Scrollable Nav Links */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-1">
+          <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
               if (item.dropdown) {
                 return (
-                  <div key={item.name} className="space-y-1">
+                  <div key={item.name} className="space-y-0.5">
                     <button
                       type="button"
                       onClick={() => setMobileServicesOpen((prev) => !prev)}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                         isActive
                           ? 'text-[#216B35] bg-[#F5F8F3]'
                           : 'text-[#173B26] hover:bg-[#F5F8F3]'
                       }`}
                       aria-expanded={mobileServicesOpen}
                     >
-                      <span className="flex items-center gap-2">
-                        <span>{item.name}</span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#216B35]/10 text-[#216B35]">
-                          {item.dropdown.length}
-                        </span>
-                      </span>
-                      <span
-                        className={`p-1 rounded-md transition-transform duration-300 ${
+                      <span>{item.name}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform duration-200 ${
                           mobileServicesOpen ? 'rotate-180 text-[#216B35]' : 'text-[#68756D]'
                         }`}
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </span>
+                      />
                     </button>
 
-                    {/* Smooth Collapsible Services Container */}
+                    {/* Collapsible Services List - Clean, normal font, no dots, no card effect */}
                     <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      className={`overflow-hidden transition-all duration-200 ease-in-out ${
                         mobileServicesOpen
-                          ? 'max-h-[600px] opacity-100 my-1.5'
+                          ? 'max-h-[600px] opacity-100'
                           : 'max-h-0 opacity-0 pointer-events-none'
                       }`}
                     >
-                      <div className="ml-1 pl-3 pr-2 py-2 space-y-1 bg-[#F5F8F3]/80 rounded-xl border border-[#DCE5DD]">
-                        <div className="flex items-center justify-between px-2 pb-1.5 border-b border-[#DCE5DD]/60">
-                          <span className="text-[11px] font-bold text-[#216B35] uppercase tracking-wider">
-                            Solutions & Gear
-                          </span>
-                          <Link
-                            href="/services"
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-[11px] font-semibold text-[#216B35] hover:text-[#174D28] hover:underline flex items-center gap-1"
-                          >
-                            <span>All Solutions</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </Link>
-                        </div>
-
-                        <div className="space-y-0.5 pt-1">
-                          {item.dropdown.map((sub) => {
-                            const isSubActive = pathname === sub.href;
-                            return (
-                              <Link
-                                key={sub.href}
-                                href={sub.href}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className={`flex items-start gap-2.5 p-2 rounded-lg transition-colors group/sub ${
-                                  isSubActive
-                                    ? 'bg-white shadow-xs text-[#216B35] font-semibold border border-[#216B35]/20'
-                                    : 'text-[#4B5563] hover:bg-white hover:text-[#173B26]'
-                                }`}
-                              >
-                                <span
-                                  className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 transition-transform ${
-                                    isSubActive
-                                      ? 'bg-[#216B35] scale-125 ring-2 ring-[#216B35]/20'
-                                      : 'bg-[#216B35]/40 group-hover/sub:bg-[#216B35]'
-                                  }`}
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div
-                                    className={`text-xs font-semibold leading-tight ${
-                                      isSubActive ? 'text-[#216B35]' : 'text-[#173B26] group-hover/sub:text-[#216B35]'
-                                    }`}
-                                  >
-                                    {sub.title}
-                                  </div>
-                                  <div className="text-[10px] text-[#68756D] line-clamp-1 mt-0.5">
-                                    {sub.desc}
-                                  </div>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
+                      <div className="pl-4 py-1 space-y-0.5">
+                        {item.dropdown.map((sub) => {
+                          const isSubActive = pathname === sub.href;
+                          return (
+                            <Link
+                              key={sub.href}
+                              href={sub.href}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={`block px-3 py-2 rounded-lg text-sm font-normal transition-colors ${
+                                isSubActive
+                                  ? 'text-[#216B35] font-medium bg-[#F5F8F3]'
+                                  : 'text-[#4B5563] hover:text-[#216B35] hover:bg-[#F5F8F3]'
+                              }`}
+                            >
+                              {sub.title}
+                            </Link>
+                          );
+                        })}
+                        <Link
+                          href="/services"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block px-3 py-2 rounded-lg text-sm font-medium text-[#216B35] hover:bg-[#F5F8F3] transition-colors"
+                        >
+                          View All Solutions &rarr;
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -383,7 +364,7 @@ export default function SiteHeader() {
           </div>
 
           {/* Drawer Footer Actions */}
-          <div className="p-4 border-t border-[#DCE5DD] bg-[#F5F8F3]/60 space-y-3 shrink-0">
+          <div className="p-4 border-t border-[#DCE5DD] bg-[#F5F8F3]/90 space-y-3 shrink-0">
             <Link
               href="/contact-us"
               onClick={() => setMobileMenuOpen(false)}
@@ -398,7 +379,9 @@ export default function SiteHeader() {
             </div>
           </div>
         </aside>
-      </nav>
-    </header>
-  );
+      </div>,
+      document.body
+    )}
+  </>
+);
 }
