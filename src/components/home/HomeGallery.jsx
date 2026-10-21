@@ -10,16 +10,14 @@ export default function HomeGallery({ gallery = [] }) {
   const displayItems = gallery.slice(0, 6);
 
   return (
-    <section className="py-20 bg-[#F5F8F3] border-b border-[#DCE5DD]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 lg:py-14 bg-[#F5F8F3] border-b border-[#DCE5DD]">
+      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
         <SectionHeading
-          badge="Visual Archive"
-          badgeColor="gold"
           title="Field Operations & Conservation In Action"
           subtitle="Explore equipment installations, ranger night patrols, and high-level forestry consultations."
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayItems.map((item) => (
             <div
               key={item.id}
@@ -33,11 +31,10 @@ export default function HomeGallery({ gallery = [] }) {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#142D20]/90 via-[#142D20]/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
 
-              <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-poppins font-bold text-[#173B26]">
-                {item.category}
-              </div>
-
               <div className="absolute bottom-4 left-4 right-4 text-white">
+                <div className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">
+                  {item.category}
+                </div>
                 <h4 className="text-base font-bold font-montserrat leading-snug">
                   {item.title}
                 </h4>
@@ -49,7 +46,7 @@ export default function HomeGallery({ gallery = [] }) {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
+        <div className="mt-8 text-center">
           <Link href="/gallery" className="btn-secondary">
             <Camera className="w-4 h-4" />
             <span>Explore Full Photographic Gallery</span>
@@ -79,7 +76,7 @@ export default function HomeGallery({ gallery = [] }) {
               className="w-full max-h-[70vh] object-contain bg-black"
             />
             <div className="p-6 bg-[#142D20] text-white">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#F2BE36] font-poppins">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-poppins">
                 {selectedImage.category}
               </span>
               <h3 className="text-xl font-bold font-montserrat mt-1">

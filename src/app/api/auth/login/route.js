@@ -5,8 +5,8 @@ export async function POST(req) {
   try {
     const { username, password } = await req.json();
 
-    const expectedUser = process.env.ADMIN_USERNAME;
-    const expectedPass = process.env.ADMIN_PASSWORD;
+    const expectedUser = (process.env.ADMIN_USERNAME || '').trim();
+    const expectedPass = (process.env.ADMIN_PASSWORD || '').trim();
 
     if (!expectedUser || !expectedPass) {
       return NextResponse.json(
@@ -15,22 +15,32 @@ export async function POST(req) {
       );
     }
 
-    if (username === expectedUser && password === expectedPass) {
+    const inputUser = (username || '').trim();
+    const inputPass = (password || '').trim();
+
+    if (inputUser.toLowerCase() === expectedUser.toLowerCase() && inputPass === expectedPass) {
+      const sessionToken = (process.env.ADMIN_SESSION_SECRET || 'verified_secure_session').trim();
       const cookieStore = await cookies();
-      const sessionToken = process.env.ADMIN_SESSION_SECRET || 'verified_secure_session';
-      cookieStore.set('kr_admin_token', sessionToken, {
+      
+      const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 24 * 7 // 7 days
-      });
+      };
 
-      return NextResponse.json({
+      cookieStore.set('kr_admin_token', sessionToken, cookieOptions);
+
+      const response = NextResponse.json({
         success: true,
         message: 'Authentication successful',
         user: { username: expectedUser, role: 'admin' }
       });
+
+      response.cookies.set('kr_admin_token', sessionToken, cookieOptions);
+
+      return response;
     }
 
     return NextResponse.json(

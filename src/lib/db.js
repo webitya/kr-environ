@@ -5,6 +5,7 @@ import Project from '@/models/Project';
 import Gallery from '@/models/Gallery';
 import Video from '@/models/Video';
 import Enquiry from '@/models/Enquiry';
+import Category from '@/models/Category';
 
 // Helper to convert Mongoose doc to clean plain JSON objects (stripping BSON ObjectId and __v)
 function serializeDoc(doc) {
@@ -65,6 +66,11 @@ export async function upsertService(serviceData) {
       { $set: cleanData },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     ).lean();
+
+    // Auto-persist category to Category collection in MongoDB
+    if (cleanData.category && cleanData.category.trim()) {
+      addCategory(cleanData.category.trim(), 'service').catch(() => {});
+    }
 
     return serializeDoc(updated);
   } catch (err) {
@@ -134,9 +140,120 @@ export async function upsertBlog(blogData) {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     ).lean();
 
+    // Auto-persist category to Category collection in MongoDB
+    if (cleanData.category && cleanData.category.trim()) {
+      addCategory(cleanData.category.trim()).catch(() => {});
+    }
+
     return serializeDoc(updated);
   } catch (err) {
     console.error('MongoDB upsertBlog error:', err.message);
+    throw err;
+  }
+}
+
+// ==================== CATEGORIES ====================
+export async function getCategories(type = null) {
+  const defaultBlogCats = [
+    'Wildlife Technology',
+    'Field Conservation',
+    'Rescue Operations',
+    'Agricultural Security',
+    'Sensors & Deterrence'
+  ];
+  const defaultVideoCats = [
+    'Product Demonstration',
+    'Field Operations',
+    'Training & Rescue',
+    'Ranger Safety'
+  ];
+  const defaultServiceCats = [
+    'Wildlife Deterrence & Smart Sensors',
+    'Perimeter Defense & Checkpoints',
+    'Capture & Rescue Technology',
+    'Personnel Protection Gear',
+    'Turnkey Field Consultancy'
+  ];
+  const defaultGalleryCats = [
+    'Field Presence',
+    'Government Partnership',
+    'Field Operations',
+    'Credentials'
+  ];
+
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) {
+      if (type === 'video') return defaultVideoCats;
+      if (type === 'service') return defaultServiceCats;
+      if (type === 'gallery') return defaultGalleryCats;
+      return defaultBlogCats;
+    }
+
+    const query = type ? { type: { $in: [type, 'general'] } } : {};
+    const [savedCats, blogCats, videoCats, serviceCats, galleryCats] = await Promise.all([
+      Category.find(query).lean().catch(() => []),
+      type && type !== 'blog' ? Promise.resolve([]) : Blog.distinct('category').catch(() => []),
+      type && type !== 'video' ? Promise.resolve([]) : Video.distinct('category').catch(() => []),
+      type && type !== 'service' ? Promise.resolve([]) : Service.distinct('category').catch(() => []),
+      type && type !== 'gallery' ? Promise.resolve([]) : Gallery.distinct('category').catch(() => [])
+    ]);
+
+    let baseDefaults = defaultBlogCats;
+    if (type === 'video') baseDefaults = defaultVideoCats;
+    else if (type === 'service') baseDefaults = defaultServiceCats;
+    else if (type === 'gallery') baseDefaults = defaultGalleryCats;
+    else baseDefaults = [...defaultBlogCats, ...defaultVideoCats, ...defaultServiceCats, ...defaultGalleryCats];
+
+    const set = new Set(baseDefaults);
+    (blogCats || []).forEach((c) => {
+      if (c && typeof c === 'string' && c.trim()) set.add(c.trim());
+    });
+    (videoCats || []).forEach((c) => {
+      if (c && typeof c === 'string' && c.trim()) set.add(c.trim());
+    });
+    (serviceCats || []).forEach((c) => {
+      if (c && typeof c === 'string' && c.trim()) set.add(c.trim());
+    });
+    (galleryCats || []).forEach((c) => {
+      if (c && typeof c === 'string' && c.trim()) set.add(c.trim());
+    });
+    (savedCats || []).forEach((c) => {
+      if (c && c.name && c.name.trim()) set.add(c.name.trim());
+    });
+
+    return Array.from(set).sort();
+  } catch (err) {
+    console.error('Error fetching categories from MongoDB:', err.message);
+    if (type === 'video') return defaultVideoCats;
+    if (type === 'service') return defaultServiceCats;
+    if (type === 'gallery') return defaultGalleryCats;
+    return defaultBlogCats;
+  }
+}
+
+export async function addCategory(name, type = 'blog') {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    const trimmedName = (name || '').trim();
+    if (!trimmedName) throw new Error('Category name cannot be empty');
+
+    const slug = trimmedName
+      .toLowerCase()
+      .replace(/[\s\W-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    const cat = await Category.findOneAndUpdate(
+      { slug },
+      { name: trimmedName, slug, type },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    ).lean();
+
+    return serializeDoc(cat);
+  } catch (err) {
+    console.error('MongoDB addCategory error:', err.message);
     throw err;
   }
 }
@@ -258,6 +375,11 @@ export async function upsertGallery(galleryData) {
       doc = await Gallery.create(cleanData);
     }
 
+    // Auto-persist category to Category collection in MongoDB
+    if (cleanData.category && cleanData.category.trim()) {
+      addCategory(cleanData.category.trim(), 'gallery').catch(() => {});
+    }
+
     return serializeDoc(doc);
   } catch (err) {
     console.error('MongoDB upsertGallery error:', err.message);
@@ -307,6 +429,11 @@ export async function upsertVideo(videoData) {
       ).lean();
     } else {
       doc = await Video.create(cleanData);
+    }
+
+    // Auto-persist category to Category collection in MongoDB
+    if (cleanData.category && cleanData.category.trim()) {
+      addCategory(cleanData.category.trim(), 'video').catch(() => {});
     }
 
     return serializeDoc(doc);

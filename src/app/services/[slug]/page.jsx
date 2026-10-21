@@ -7,7 +7,6 @@ import {
   ArrowLeft, 
   CheckCircle2, 
   ShieldCheck, 
-  Zap, 
   PhoneCall, 
   Share2, 
   Calendar,
@@ -51,34 +50,33 @@ export default async function ServiceDetailPage({ params }) {
 
       <main className="flex-1">
         {/* Breadcrumb & Hero */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-12 sm:py-16 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-8 sm:py-12 border-b border-[#DCE5DD]">
           <Container>
-            <div className="mb-6">
+            <div className="mb-4">
               <Link
                 href="/services"
-                className="inline-flex items-center gap-2 text-xs font-semibold font-poppins text-[#087EA4] hover:text-[#06617F] transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold font-poppins text-[#216B35] hover:text-[#174D28] transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to All Technical Solutions</span>
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-8 space-y-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-poppins font-semibold bg-[#216B35]/10 text-[#216B35] border border-[#216B35]/20">
-                  <ShieldCheck className="w-3.5 h-3.5" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-8 space-y-3">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35]">
                   {service.category || 'Wildlife Technology'}
-                </span>
+                </p>
 
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-montserrat font-extrabold text-[#173B26] leading-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-extrabold text-[#173B26] leading-tight">
                   {service.title}
                 </h1>
 
-                <p className="text-base sm:text-lg text-[#4B5563] font-lato leading-relaxed">
+                <p className="text-sm sm:text-base text-[#4B5563] font-lato leading-relaxed">
                   {service.shortDescription}
                 </p>
 
-                <div className="flex flex-wrap gap-4 pt-2">
+                <div className="flex flex-wrap gap-3 pt-1">
                   <Link href="/contact-us" className="btn-primary">
                     <PhoneCall className="w-4 h-4" />
                     <span>Request Technical Quote / Deployment</span>
@@ -91,7 +89,7 @@ export default async function ServiceDetailPage({ params }) {
                   <img
                     src={service.featuredImage || '/img4.jpeg'}
                     alt={service.title}
-                    className="w-full h-72 object-cover"
+                    className="w-full h-60 object-cover"
                   />
                 </div>
               </div>
@@ -100,17 +98,17 @@ export default async function ServiceDetailPage({ params }) {
         </section>
 
         {/* Content & Specs Section */}
-        <section className="py-16 bg-white">
+        <section className="py-10 sm:py-12 bg-white">
           <Container>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Main Detailed Content */}
-              <div className="lg:col-span-8 space-y-8">
-                <div className="prose max-w-none text-[#4B5563] font-lato text-base leading-relaxed space-y-4">
+              <div className="lg:col-span-8 space-y-6">
+                <div className="prose max-w-none text-[#4B5563] font-lato text-sm sm:text-base leading-relaxed space-y-3">
                   {service.content ? (
                     service.content.split('\n\n').map((paragraph, idx) => {
                       if (paragraph.startsWith('### ')) {
                         return (
-                          <h3 key={idx} className="text-2xl font-bold font-montserrat text-[#173B26] pt-4">
+                          <h3 key={idx} className="text-xl font-bold font-montserrat text-[#173B26] pt-2">
                             {paragraph.replace('### ', '')}
                           </h3>
                         );
@@ -118,7 +116,7 @@ export default async function ServiceDetailPage({ params }) {
                       if (paragraph.startsWith('- ')) {
                         const items = paragraph.split('\n').filter(Boolean);
                         return (
-                          <ul key={idx} className="list-disc pl-5 space-y-1.5 my-3">
+                          <ul key={idx} className="list-disc pl-5 space-y-1 my-2">
                             {items.map((it, i) => (
                               <li key={i}>{it.replace('- ', '')}</li>
                             ))}
@@ -133,12 +131,12 @@ export default async function ServiceDetailPage({ params }) {
                 </div>
 
                 {/* Key Technical Highlights Box */}
-                <div className="p-8 rounded-2xl bg-[#EFF7FA] border border-[#087EA4]/20 space-y-4">
-                  <h3 className="text-xl font-bold font-montserrat text-[#173B26] flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-[#087EA4]" />
+                <div className="p-5 sm:p-6 rounded-2xl bg-[#F5F8F3] border border-[#216B35]/20 space-y-3">
+                  <h3 className="text-lg font-bold font-montserrat text-[#173B26] flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-[#216B35]" />
                     Field Compliance & Non-Lethal Certification
                   </h3>
-                  <p className="text-sm text-[#4B5563] font-lato">
+                  <p className="text-xs sm:text-sm text-[#4B5563] font-lato">
                     All wildlife hardware deployed by KR Environ Solutions complies with ethical wildlife stewardship standards. The systems deter animals using bio-acoustic sound, visual strobes, or certified non-injurious micro-impulses that condition wildlife away from human settlements without physical trauma.
                   </p>
                 </div>
@@ -164,7 +162,7 @@ export default async function ServiceDetailPage({ params }) {
 
                 {/* Direct Action Card */}
                 <div className="bg-[#142D20] text-white p-6 rounded-2xl shadow-lg space-y-4">
-                  <span className="text-xs font-bold font-poppins text-[#F2BE36] uppercase tracking-wider block">
+                  <span className="text-xs font-bold font-poppins text-emerald-400 uppercase tracking-wider block">
                     Government Procurements
                   </span>
                   <h4 className="text-lg font-bold font-montserrat text-white leading-snug">
@@ -193,7 +191,7 @@ export default async function ServiceDetailPage({ params }) {
                       className="bg-white p-6 rounded-2xl border border-[#DCE5DD] hover:border-[#216B35] transition-all card-hover flex flex-col justify-between"
                     >
                       <div>
-                        <span className="text-xs font-bold text-[#087EA4] uppercase tracking-wider font-poppins block mb-2">
+                        <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins block mb-2">
                           {rel.category}
                         </span>
                         <h4 className="text-lg font-bold font-montserrat text-[#173B26] hover:text-[#216B35]">

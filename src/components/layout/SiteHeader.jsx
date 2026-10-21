@@ -9,9 +9,10 @@ import {
   Menu, 
   X, 
   PhoneCall, 
-  Leaf, 
-  LockKeyhole,
-  ExternalLink 
+  ExternalLink,
+  Phone,
+  Mail,
+  ArrowRight
 } from 'lucide-react';
 
 const navItems = [
@@ -39,8 +40,16 @@ const navItems = [
 export default function SiteHeader() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Auto-expand mobile services if currently browsing services
+  useEffect(() => {
+    if (pathname && pathname.startsWith('/services')) {
+      setMobileServicesOpen(true);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,35 +59,44 @@ export default function SiteHeader() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <header className="sticky top-0 z-50 w-full transition-all duration-300">
       {/* Top Banner with Partnership & Helpline */}
-      <div className="bg-[#173B26] text-[#E4EEE6] text-xs py-2 px-4 border-b border-[#216B35]/40 font-opensans">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div className="hidden md:block bg-[#173B26] text-[#E4EEE6] text-xs py-2 px-4 border-b border-[#216B35]/40">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 bg-[#216B35] text-white px-2 py-0.5 rounded text-[11px] font-semibold">
-              <Leaf className="w-3 h-3 text-[#F2BE36]" />
-              Official Wildlife Tech Partner
-            </span>
-            <span className="text-white/80">
-              Partnered with <strong>Kyari Innovations</strong> | Serving 21+ State Forest Depts
+            <span className="text-white/90">
+              Partnered with <strong className="text-white">Kyari Innovations</strong> | Serving 21+ State Forest Depts
             </span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
-            <span className="hidden md:inline text-white/80">
-              📞 +91 8317054180 / 0651-4051577
-            </span>
-            <span className="hidden lg:inline text-white/80">
-              ✉️ kr.environ.2026@gmail.com
-            </span>
-            <Link 
-              href="/admin-login" 
-              className="flex items-center gap-1 text-[#F2BE36] hover:underline transition-colors"
+            <a 
+              href="tel:+918317054180" 
+              className="inline-flex items-center gap-1.5 text-white/90 hover:text-white transition-colors"
             >
-              <LockKeyhole className="w-3 h-3" />
-              <span>Admin Portal</span>
-            </Link>
+              <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>+91 8317054180 / 0651-4051577</span>
+            </a>
+            <a 
+              href="mailto:kr.environ.2026@gmail.com" 
+              className="hidden sm:inline-flex items-center gap-1.5 text-white/90 hover:text-white transition-colors"
+            >
+              <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>kr.environ.2026@gmail.com</span>
+            </a>
           </div>
         </div>
       </div>
@@ -86,30 +104,25 @@ export default function SiteHeader() {
       {/* Main Navigation Bar */}
       <nav className={`w-full transition-all duration-200 ${
         scrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-md py-3 border-b border-[#DCE5DD]' 
-          : 'bg-white py-4 border-b border-[#DCE5DD]'
+          ? 'bg-white/95 backdrop-blur-md shadow-md py-2 border-b border-[#DCE5DD]' 
+          : 'bg-white py-2.5 sm:py-3 border-b border-[#DCE5DD]'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 flex items-center justify-between">
           {/* Logo & Brand Identity */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-2.5 group">
             <img
               src="/logo.jpeg"
               alt="KR Environ Solutions Logo"
-              className="w-12 h-12 rounded-xl object-contain bg-white border border-[#DCE5DD] p-0.5 shadow-sm group-hover:scale-105 transition-transform"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain bg-white border border-[#DCE5DD] p-0.5 shadow-sm group-hover:scale-105 transition-transform shrink-0"
             />
-            <div className="flex flex-col">
-              <span className="font-montserrat font-extrabold text-xl sm:text-2xl tracking-tight text-[#173B26] group-hover:text-[#216B35] transition-colors leading-none">
-                KR ENVIRON
-              </span>
-              <span className="font-manrope text-[10px] uppercase tracking-widest text-[#087EA4] font-bold mt-1">
-                SOLUTIONS &bull; FOREST & WILDLIFE TECH
-              </span>
-            </div>
+            <span className="font-semibold text-lg sm:text-xl tracking-tight text-[#173B26] group-hover:text-[#216B35] transition-colors">
+              KR Environ Solutions
+            </span>
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center space-x-1 xl:space-x-2">
-            {navItems.map((item) => {
+          <div className="hidden lg:flex items-center space-x-0.5 xl:space-x-1.5">
+            {navItems.filter((item) => item.href !== '/contact-us').map((item) => {
               const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
               if (item.dropdown) {
@@ -122,21 +135,21 @@ export default function SiteHeader() {
                   >
                     <Link
                       href={item.href}
-                      className={`inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-poppins font-medium transition-colors ${
+                      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition-colors ${
                         isActive
                           ? 'text-[#216B35] font-semibold bg-[#F5F8F3]'
                           : 'text-[#4B5563] hover:text-[#216B35] hover:bg-[#F5F8F3]'
                       }`}
                     >
                       {item.name}
-                      <ChevronDown className="w-4 h-4 text-[#087EA4] group-hover:rotate-180 transition-transform duration-200" />
+                      <ChevronDown className="w-3.5 h-3.5 text-[#216B35] group-hover:rotate-180 transition-transform duration-200" />
                     </Link>
 
                     {/* Services Dropdown Menu */}
                     {servicesDropdownOpen && (
                       <div className="absolute top-full left-0 w-80 bg-white rounded-xl shadow-xl border border-[#DCE5DD] p-2 mt-1 animate-in fade-in slide-in-from-top-2 duration-150 z-50">
                         <div className="px-3 py-1.5 border-b border-[#DCE5DD]/60 mb-1">
-                          <span className="text-[11px] font-bold text-[#087EA4] uppercase tracking-wider font-poppins">
+                          <span className="text-[11px] font-bold text-[#216B35] uppercase tracking-wider">
                             Conservation Tech & Services
                           </span>
                         </div>
@@ -144,12 +157,12 @@ export default function SiteHeader() {
                           <Link
                             key={subItem.href}
                             href={subItem.href}
-                            className="block p-2.5 rounded-lg hover:bg-[#F5F8F3] transition-colors group/sub"
+                            className="block p-2 rounded-lg hover:bg-[#F5F8F3] transition-colors group/sub"
                           >
-                            <div className="text-sm font-semibold text-[#173B26] group-hover/sub:text-[#216B35] font-manrope">
+                            <div className="text-xs sm:text-sm font-semibold text-[#173B26] group-hover/sub:text-[#216B35]">
                               {subItem.title}
                             </div>
-                            <div className="text-xs text-[#68756D] line-clamp-1 font-lato">
+                            <div className="text-[11px] text-[#68756D] line-clamp-1">
                               {subItem.desc}
                             </div>
                           </Link>
@@ -157,7 +170,7 @@ export default function SiteHeader() {
                         <div className="pt-2 mt-1 border-t border-[#DCE5DD]/60">
                           <Link 
                             href="/services" 
-                            className="block text-center text-xs font-semibold text-[#087EA4] hover:text-[#06617F] py-1"
+                            className="block text-center text-xs font-semibold text-[#216B35] hover:text-[#174D28] py-1"
                           >
                             View All Solutions &rarr;
                           </Link>
@@ -172,7 +185,7 @@ export default function SiteHeader() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`px-3 py-2 rounded-lg text-sm font-poppins font-medium transition-colors ${
+                  className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition-colors ${
                     isActive
                       ? 'text-[#216B35] font-semibold bg-[#F5F8F3]'
                       : 'text-[#4B5563] hover:text-[#216B35] hover:bg-[#F5F8F3]'
@@ -191,7 +204,7 @@ export default function SiteHeader() {
               className="btn-primary"
             >
               <PhoneCall className="w-4 h-4" />
-              <span>Request Consultation</span>
+              <span>Contact Us</span>
             </Link>
           </div>
 
@@ -207,49 +220,184 @@ export default function SiteHeader() {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-[#DCE5DD] px-4 pt-2 pb-6 space-y-2 animate-in slide-in-from-top duration-200">
-            {navItems.map((item) => (
-              <div key={item.name}>
+        {/* Backdrop for Right-to-Left Drawer */}
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className={`fixed inset-0 bg-black/60 backdrop-blur-xs z-50 lg:hidden transition-opacity duration-300 ${
+            mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+          aria-hidden="true"
+        />
+
+        {/* Right-to-Left Mobile Navigation Drawer */}
+        <aside
+          className={`fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-white z-50 shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:hidden border-l border-[#DCE5DD] ${
+            mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          aria-label="Mobile Navigation"
+        >
+          {/* Drawer Header with Logo and Brand Name */}
+          <div className="p-4 border-b border-[#DCE5DD] flex items-center justify-between bg-[#F5F8F3]/80 shrink-0">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2.5 group"
+            >
+              <img
+                src="/logo.jpeg"
+                alt="KR Environ Solutions Logo"
+                className="w-10 h-10 rounded-xl object-contain bg-white border border-[#DCE5DD] p-0.5 shadow-xs shrink-0"
+              />
+              <div className="text-left">
+                <span className="font-semibold text-base tracking-tight text-[#173B26] block leading-tight">
+                  KR Environ Solutions
+                </span>
+                <span className="text-[10px] text-[#216B35] font-semibold tracking-wide uppercase block">
+                  Wildlife & Env Engineering
+                </span>
+              </div>
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-1.5 rounded-lg text-[#173B26] hover:bg-[#DCE5DD]/60 transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Drawer Scrollable Nav Links */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+
+              if (item.dropdown) {
+                return (
+                  <div key={item.name} className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => setMobileServicesOpen((prev) => !prev)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        isActive
+                          ? 'text-[#216B35] bg-[#F5F8F3]'
+                          : 'text-[#173B26] hover:bg-[#F5F8F3]'
+                      }`}
+                      aria-expanded={mobileServicesOpen}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span>{item.name}</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#216B35]/10 text-[#216B35]">
+                          {item.dropdown.length}
+                        </span>
+                      </span>
+                      <span
+                        className={`p-1 rounded-md transition-transform duration-300 ${
+                          mobileServicesOpen ? 'rotate-180 text-[#216B35]' : 'text-[#68756D]'
+                        }`}
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </span>
+                    </button>
+
+                    {/* Smooth Collapsible Services Container */}
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        mobileServicesOpen
+                          ? 'max-h-[600px] opacity-100 my-1.5'
+                          : 'max-h-0 opacity-0 pointer-events-none'
+                      }`}
+                    >
+                      <div className="ml-1 pl-3 pr-2 py-2 space-y-1 bg-[#F5F8F3]/80 rounded-xl border border-[#DCE5DD]">
+                        <div className="flex items-center justify-between px-2 pb-1.5 border-b border-[#DCE5DD]/60">
+                          <span className="text-[11px] font-bold text-[#216B35] uppercase tracking-wider">
+                            Solutions & Gear
+                          </span>
+                          <Link
+                            href="/services"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-[11px] font-semibold text-[#216B35] hover:text-[#174D28] hover:underline flex items-center gap-1"
+                          >
+                            <span>All Solutions</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+
+                        <div className="space-y-0.5 pt-1">
+                          {item.dropdown.map((sub) => {
+                            const isSubActive = pathname === sub.href;
+                            return (
+                              <Link
+                                key={sub.href}
+                                href={sub.href}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={`flex items-start gap-2.5 p-2 rounded-lg transition-colors group/sub ${
+                                  isSubActive
+                                    ? 'bg-white shadow-xs text-[#216B35] font-semibold border border-[#216B35]/20'
+                                    : 'text-[#4B5563] hover:bg-white hover:text-[#173B26]'
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 transition-transform ${
+                                    isSubActive
+                                      ? 'bg-[#216B35] scale-125 ring-2 ring-[#216B35]/20'
+                                      : 'bg-[#216B35]/40 group-hover/sub:bg-[#216B35]'
+                                  }`}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div
+                                    className={`text-xs font-semibold leading-tight ${
+                                      isSubActive ? 'text-[#216B35]' : 'text-[#173B26] group-hover/sub:text-[#216B35]'
+                                    }`}
+                                  >
+                                    {sub.title}
+                                  </div>
+                                  <div className="text-[10px] text-[#68756D] line-clamp-1 mt-0.5">
+                                    {sub.desc}
+                                  </div>
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
                 <Link
+                  key={item.name}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-base font-poppins font-medium ${
-                    pathname === item.href
-                      ? 'text-[#216B35] font-semibold bg-[#F5F8F3]'
-                      : 'text-[#4B5563] hover:bg-[#F5F8F3]'
+                  className={`block px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    isActive
+                      ? 'text-[#216B35] bg-[#F5F8F3]'
+                      : 'text-[#173B26] hover:bg-[#F5F8F3]'
                   }`}
                 >
                   {item.name}
                 </Link>
-                {item.dropdown && (
-                  <div className="pl-6 space-y-1 mt-1 border-l-2 border-[#DCE5DD] ml-3">
-                    {item.dropdown.map((sub) => (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block py-1.5 text-xs text-[#68756D] hover:text-[#216B35]"
-                      >
-                        &bull; {sub.title}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-            <div className="pt-4 border-t border-[#DCE5DD]">
-              <Link
-                href="/contact-us"
-                onClick={() => setMobileMenuOpen(false)}
-                className="btn-primary w-full text-center"
-              >
-                Request a Consultation
-              </Link>
+              );
+            })}
+          </div>
+
+          {/* Drawer Footer Actions */}
+          <div className="p-4 border-t border-[#DCE5DD] bg-[#F5F8F3]/60 space-y-3 shrink-0">
+            <Link
+              href="/contact-us"
+              onClick={() => setMobileMenuOpen(false)}
+              className="btn-primary w-full text-center py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm"
+            >
+              <PhoneCall className="w-4 h-4" />
+              <span>Contact Us</span>
+            </Link>
+            <div className="text-[11px] text-[#68756D] text-center space-y-0.5 pt-1">
+              <p className="font-semibold text-[#173B26]">KR Environ Solutions &bull; Ranchi</p>
+              <p>+91 8317054180 | kr.environ.2026@gmail.com</p>
             </div>
           </div>
-        )}
+        </aside>
       </nav>
     </header>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, User, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
@@ -13,6 +13,17 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // If already authenticated, redirect immediately to /admin
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => {
+        if (res.ok) {
+          window.location.href = '/admin';
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,8 +42,7 @@ export default function AdminLoginPage() {
         throw new Error(data.error || 'Authentication failed');
       }
 
-      router.push('/admin');
-      router.refresh();
+      window.location.href = '/admin';
     } catch (err) {
       setError(err.message || 'Invalid username or password');
     } finally {
@@ -140,7 +150,7 @@ export default function AdminLoginPage() {
             <div className="text-center pt-1">
               <Link
                 href="/"
-                className="inline-flex items-center justify-center gap-1.5 text-xs text-[#087EA4] hover:text-[#06617F] font-semibold py-1.5 px-3 rounded-lg hover:bg-[#F5F8F3] transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 text-xs text-[#216B35] hover:text-[#174D28] font-semibold py-1.5 px-3 rounded-lg hover:bg-[#F5F8F3] transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Homepage</span>

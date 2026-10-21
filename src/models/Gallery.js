@@ -7,7 +7,8 @@ const GallerySchema = new mongoose.Schema({
   caption: { type: String, default: '' },
   displayOrder: { type: Number, default: 0 }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 export default mongoose.models.Gallery || mongoose.model('Gallery', GallerySchema);

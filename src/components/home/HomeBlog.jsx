@@ -6,37 +6,35 @@ export default function HomeBlog({ blogs = [] }) {
   const displayBlogs = blogs.slice(0, 3);
 
   return (
-    <section className="py-20 bg-[#F5F8F3] border-b border-[#DCE5DD]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 lg:py-14 bg-[#F5F8F3] border-b border-[#DCE5DD]">
+      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
         <SectionHeading
-          badge="Knowledge & Insights"
-          badgeColor="green"
           title="Field Research & Conservation Technology Insights"
           subtitle="Explore in-depth analyses on human-wildlife mitigation, frontline ranger safety, and ecological policy."
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {displayBlogs.map((blog) => (
             <article
               key={blog.id || blog.slug}
               className="bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden shadow-xs hover:border-[#216B35]/40 transition-all card-hover flex flex-col justify-between"
             >
               <div>
-                <div className="relative h-52 w-full overflow-hidden bg-slate-100">
+                <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                   <img
                     src={blog.featuredImage || '/img4.jpeg'}
                     alt={blog.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-poppins font-bold text-[#216B35] uppercase tracking-wider">
-                    {blog.category}
-                  </div>
                 </div>
 
-                <div className="p-6">
-                  <div className="flex items-center gap-4 text-xs text-[#68756D] font-poppins mb-2">
+                <div className="p-5">
+                  <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35] mb-1.5">
+                    {blog.category}
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-[#68756D] font-poppins mb-1.5">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-[#087EA4]" />
+                      <Calendar className="w-3.5 h-3.5 text-[#216B35]" />
                       {blog.date}
                     </span>
                     <span className="flex items-center gap-1">
@@ -45,32 +43,32 @@ export default function HomeBlog({ blogs = [] }) {
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold font-montserrat text-[#173B26] hover:text-[#216B35] transition-colors leading-snug">
+                  <h3 className="text-base sm:text-lg font-bold font-montserrat text-[#173B26] hover:text-[#216B35] transition-colors leading-snug">
                     <Link href={`/blog/${blog.slug}`}>
                       {blog.title}
                     </Link>
                   </h3>
 
-                  <p className="mt-3 text-sm text-[#4B5563] font-lato line-clamp-3 leading-relaxed">
+                  <p className="mt-2 text-xs sm:text-sm text-[#4B5563] font-lato line-clamp-3 leading-relaxed">
                     {blog.excerpt}
                   </p>
                 </div>
               </div>
 
-              <div className="px-6 pb-6 pt-2">
+              <div className="px-5 pb-5 pt-1">
                 <Link
                   href={`/blog/${blog.slug}`}
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold font-poppins text-[#216B35] hover:text-[#174D28] transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold font-poppins text-[#216B35] hover:text-[#174D28] transition-colors"
                 >
                   <span>Read Full Article</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </article>
           ))}
         </div>
 
-        <div className="mt-12 text-center">
+        <div className="mt-8 text-center">
           <Link href="/blog" className="btn-secondary">
             <span>Explore All Blog Articles</span>
             <ArrowRight className="w-4 h-4" />

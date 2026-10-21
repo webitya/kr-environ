@@ -1,77 +1,56 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
-import fs from 'fs/promises';
-import path from 'path';
 
-// Configure Cloudinary if credentials are provided in .env.local
-const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+// Configure Cloudinary with environment variables and secure credentials
+function getCloudinary() {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'fjdmukyv';
+  const apiKey = process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '116643283675257';
+  const apiSecret = process.env.CLOUDINARY_API_SECRET || 'UX70B7MNFKNgfxLakSywBT9GKSs';
 
-const hasCloudinary = Boolean(cloudName && apiKey && apiSecret);
-
-if (hasCloudinary) {
   cloudinary.config({
     cloud_name: cloudName,
     api_key: apiKey,
     api_secret: apiSecret,
     secure: true
   });
+
+  return cloudinary;
 }
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
     const file = formData.get('file');
+    const targetFolder = formData.get('folder') || 'kr-environ';
 
     if (!file) {
-      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'No image file provided' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const mime = file.type || 'image/jpeg';
+    const base64Data = `data:${mime};base64,${buffer.toString('base64')}`;
 
-    // 1. If full Cloudinary credentials exist, upload to Cloudinary
-    if (hasCloudinary) {
-      const mime = file.type || 'image/jpeg';
-      const base64Data = `data:${mime};base64,${buffer.toString('base64')}`;
-      
-      const result = await cloudinary.uploader.upload(base64Data, {
-        folder: 'kr-environ',
-        resource_type: 'image'
-      });
+    const cld = getCloudinary();
+    const result = await cld.uploader.upload(base64Data, {
+      folder: targetFolder,
+      resource_type: 'image'
+    });
 
-      return NextResponse.json({
-        success: true,
-        url: result.secure_url,
-        publicId: result.public_id,
-        source: 'cloudinary'
-      });
-    }
-
-    // 2. Fallback: Save locally into public/uploads for instant local development
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    try {
-      await fs.mkdir(uploadsDir, { recursive: true });
-    } catch (e) {
-      // directory exists
-    }
-
-    const cleanFilename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const filePath = path.join(uploadsDir, cleanFilename);
-    await fs.writeFile(filePath, buffer);
-
-    const localUrl = `/uploads/${cleanFilename}`;
     return NextResponse.json({
       success: true,
-      url: localUrl,
-      source: 'local',
-      note: 'Saved locally. Add CLOUDINARY_API_KEY & CLOUDINARY_API_SECRET in .env.local for live Cloudinary storage.'
+      url: result.secure_url,
+      publicId: result.public_id,
+      format: result.format,
+      width: result.width,
+      height: result.height,
+      source: 'cloudinary'
     });
   } catch (err) {
-    console.error('Upload error:', err);
+    console.error('Cloudinary upload error:', err);
     return NextResponse.json(
-      { success: false, error: err.message || 'Image upload failed' },
+      { success: false, error: err.message || 'Cloudinary upload failed' },
       { status: 500 }
     );
   }

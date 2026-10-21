@@ -98,16 +98,16 @@ export default function GalleryPage() {
 
       <main className="flex-1">
         {/* Gallery Hero */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-16 sm:py-24 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-10 sm:py-14 border-b border-[#DCE5DD]">
           <Container>
             <div className="max-w-3xl">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-poppins uppercase tracking-wider bg-[#F2BE36]/20 text-[#173B26] border border-[#F2BE36]/30 mb-4 font-semibold">
+              <p className="text-xs uppercase tracking-wider font-semibold text-[#173B26] mb-2">
                 Photo Archive
-              </span>
-              <h1 className="text-4xl sm:text-5xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
+              </p>
+              <h1 className="text-3xl sm:text-4xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
                 Field Operations & Equipment Gallery
               </h1>
-              <p className="mt-4 text-lg text-[#4B5563] font-lato leading-relaxed">
+              <p className="mt-2.5 text-base text-[#4B5563] font-lato leading-relaxed">
                 Photographic documentation of our field deployments, live wildlife rescues, equipment installations, and forestry training programs.
               </p>
             </div>
@@ -115,10 +115,10 @@ export default function GalleryPage() {
         </section>
 
         {/* Gallery Content */}
-        <section className="py-16 bg-white">
+        <section className="py-10 sm:py-12 bg-white">
           <Container>
             {/* Filter Pills */}
-            <div className="flex flex-wrap items-center gap-2 mb-10 pb-4 border-b border-[#DCE5DD]">
+            <div className="flex flex-wrap items-center gap-2 mb-6 pb-3 border-b border-[#DCE5DD]">
               <span className="text-xs font-bold text-[#68756D] uppercase tracking-wider mr-2 font-poppins flex items-center gap-1">
                 <Filter className="w-3.5 h-3.5" /> Filter by:
               </span>
@@ -126,7 +126,7 @@ export default function GalleryPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-poppins font-medium transition-colors ${
+                  className={`px-3.5 py-1 rounded-lg text-xs font-poppins font-medium transition-colors ${
                     activeCategory === cat
                       ? 'bg-[#216B35] text-white font-semibold shadow-xs'
                       : 'bg-[#F5F8F3] text-[#4B5563] hover:bg-[#DCE5DD]'
@@ -138,7 +138,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
@@ -152,15 +152,14 @@ export default function GalleryPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#142D20]/90 via-[#142D20]/25 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
 
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-poppins font-bold text-[#173B26]">
-                    {item.category}
-                  </div>
-
                   <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-base font-bold font-montserrat leading-snug">
+                    <div className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">
+                      {item.category}
+                    </div>
+                    <h3 className="text-base font-bold leading-snug">
                       {item.title}
                     </h3>
-                    <p className="text-xs text-white/80 font-lato mt-1 line-clamp-1">
+                    <p className="text-xs text-white/80 mt-1 line-clamp-1">
                       {item.caption}
                     </p>
                   </div>
@@ -193,13 +192,13 @@ export default function GalleryPage() {
               className="w-full max-h-[70vh] object-contain bg-black"
             />
             <div className="p-6 bg-[#142D20] text-white">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#F2BE36] font-poppins">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                 {selectedImage.category}
               </span>
-              <h3 className="text-xl font-bold font-montserrat mt-1">
+              <h3 className="text-xl font-bold mt-1">
                 {selectedImage.title}
               </h3>
-              <p className="text-sm text-[#E4EEE6]/80 font-lato mt-2">
+              <p className="text-sm text-[#E4EEE6]/80 mt-2">
                 {selectedImage.caption}
               </p>
             </div>

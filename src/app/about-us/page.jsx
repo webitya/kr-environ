@@ -28,7 +28,7 @@ const leaders = [
     qualifications: "MSc (Environmental Science) (Lucknow University) • MSc (Geoinformatics)",
     experience: "15+ years experience as an Environmental Analyst",
     bio: "Visionary leader driving comprehensive Environmental Clearance (EC/FC), GIS drone mapping, and state-level Human-Wildlife Conflict mitigation across Jharkhand and India.",
-    badge: "Proprietor"
+    designation: "Proprietor"
   },
   {
     name: "Dr. Raj Kumar",
@@ -36,7 +36,7 @@ const leaders = [
     qualifications: "Doctorate (Forest Research Institute - FRI, Dehradun)",
     experience: "10+ years experience in Environmental Clearance",
     bio: "Specialist in statutory Forest Clearance proposals, regulatory liaison, site-specific management plans, and compensatory afforestation land assessments.",
-    badge: "Forest Clearance Expert"
+    designation: "Forest Clearance Expert"
   },
   {
     name: "Dr. Satya Prakash",
@@ -44,7 +44,7 @@ const leaders = [
     qualifications: "Doctorate / Renowned Wildlife & Biodiversity Authority",
     experience: "25+ years experience in Wildlife Management",
     bio: "Pioneering authority in biodiversity assessment (flora, fauna, avifauna, butterflies), ecological corridor heatmapping, and safe wildlife capture strategies.",
-    badge: "Wildlife Management"
+    designation: "Wildlife Management"
   }
 ];
 
@@ -55,16 +55,16 @@ export default function AboutUsPage() {
 
       <main className="flex-1">
         {/* About Hero */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-16 sm:py-24 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-10 sm:py-14 border-b border-[#DCE5DD]">
           <Container>
             <div className="max-w-3xl">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-poppins uppercase tracking-wider bg-[#216B35]/10 text-[#216B35] border border-[#216B35]/20 mb-4 font-semibold">
+              <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35] mb-2">
                 Sustainable &bull; Responsible &bull; Reliable
-              </span>
-              <h1 className="text-4xl sm:text-5xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
+              </p>
+              <h1 className="text-3xl sm:text-4xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
                 Your Trusted Environmental & Forest Consultancy Partner
               </h1>
-              <p className="mt-4 text-lg text-[#4B5563] font-lato leading-relaxed">
+              <p className="mt-3 text-base text-[#4B5563] font-lato leading-relaxed">
                 We combine field expertise, scientific approach, and modern technology to deliver environmental solutions that are efficient, reliable, and fully compliant with state and central regulatory frameworks.
               </p>
             </div>
@@ -72,18 +72,18 @@ export default function AboutUsPage() {
         </section>
 
         {/* Company Introduction & Official Photographs */}
-        <section className="py-20 bg-white border-b border-[#DCE5DD]">
+        <section className="py-12 lg:py-14 bg-white border-b border-[#DCE5DD]">
           <Container>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              <div className="lg:col-span-7 space-y-6">
-                <span className="text-xs font-bold text-[#087EA4] uppercase tracking-wider font-poppins">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-7 space-y-4">
+                <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins">
                   Official Mandate & Capabilities
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-bold font-montserrat text-[#173B26]">
+                <h2 className="text-2xl sm:text-3xl font-bold font-montserrat text-[#173B26]">
                   Bridging Environmental Clearance, GIS Technology & Wildlife Safety
                 </h2>
 
-                <div className="space-y-4 text-base text-[#4B5563] font-lato leading-relaxed">
+                <div className="space-y-3 text-sm sm:text-base text-[#4B5563] font-lato leading-relaxed">
                   <p>
                     <strong>KR Environ Solutions</strong> (headed by proprietor <strong>S. Gupta</strong>) operates out of Ranchi, Jharkhand, offering turnkey environmental services including Environmental Clearance (EC), Environmental Impact Assessment (EIA), Forest Clearance (FC), Consent to Establish (CTE) & Operate (CTO), Tree Enumeration & Translocation, and ESG Drone Surveys.
                   </p>
@@ -92,13 +92,13 @@ export default function AboutUsPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 font-poppins text-xs">
-                  <div className="p-4 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3">
-                    <FileCheck className="w-5 h-5 text-[#216B35] shrink-0" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-poppins text-xs">
+                  <div className="p-3 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-2.5">
+                    <FileCheck className="w-4 h-4 text-[#216B35] shrink-0" />
                     <span className="text-[#173B26] font-medium">EC / FC / CTE / CTO Statutory Compliance</span>
                   </div>
-                  <div className="p-4 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3">
-                    <Compass className="w-5 h-5 text-[#087EA4] shrink-0" />
+                  <div className="p-3 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-2.5">
+                    <Compass className="w-4 h-4 text-[#216B35] shrink-0" />
                     <span className="text-[#173B26] font-medium">Drone Survey, KML & GIS Mapping</span>
                   </div>
                 </div>
@@ -114,7 +114,7 @@ export default function AboutUsPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#142D20]/90 via-[#142D20]/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <span className="text-[11px] font-bold text-[#F2BE36] uppercase font-poppins">
+                    <span className="text-[11px] font-bold text-emerald-400 uppercase font-poppins">
                       Field Presence
                     </span>
                     <h3 className="text-base font-bold font-montserrat">
@@ -145,49 +145,49 @@ export default function AboutUsPage() {
         </section>
 
         {/* Expert Leadership Panel from Official Brochure */}
-        <section className="py-20 bg-[#F5F8F3] border-b border-[#DCE5DD]">
+        <section className="py-12 lg:py-14 bg-[#F5F8F3] border-b border-[#DCE5DD]">
           <Container>
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-center max-w-3xl mx-auto mb-8">
               <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins">
                 Our Advisory & Executive Board
               </span>
-              <h2 className="text-3xl sm:text-4xl font-bold font-montserrat text-[#173B26] mt-2">
+              <h2 className="text-2xl sm:text-3xl font-bold font-montserrat text-[#173B26] mt-1.5">
                 Expert Leadership Team
               </h2>
-              <p className="mt-3 text-base text-[#4B5563] font-lato">
+              <p className="mt-2 text-xs sm:text-sm text-[#4B5563] font-lato">
                 Decades of combined scientific scholarship, regulatory clearances, and field biodiversity management.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {leaders.map((leader, idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-2xl p-8 border border-[#DCE5DD] shadow-xs hover:border-[#216B35]/50 transition-all card-hover flex flex-col justify-between"
+                  className="bg-white rounded-2xl p-5 sm:p-6 border border-[#DCE5DD] shadow-xs hover:border-[#216B35]/50 transition-all card-hover flex flex-col justify-between"
                 >
                   <div>
-                    <span className="inline-block text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[#216B35]/10 text-[#216B35] font-poppins mb-4">
-                      {leader.badge}
-                    </span>
-                    <h3 className="text-2xl font-bold font-montserrat text-[#173B26]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#216B35] mb-1.5">
+                      {leader.designation}
+                    </p>
+                    <h3 className="text-xl font-bold font-montserrat text-[#173B26]">
                       {leader.name}
                     </h3>
-                    <div className="text-xs font-semibold text-[#087EA4] font-poppins mt-1">
+                    <div className="text-xs font-semibold text-[#216B35] font-poppins mt-0.5">
                       {leader.role}
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-[#DCE5DD]/60 space-y-2 text-xs font-opensans text-[#4B5563]">
+                    <div className="mt-3 pt-3 border-t border-[#DCE5DD]/60 space-y-1.5 text-xs font-opensans text-[#4B5563]">
                       <div className="flex items-start gap-2">
                         <GraduationCap className="w-4 h-4 text-[#216B35] shrink-0 mt-0.5" />
                         <span><strong>Education:</strong> {leader.qualifications}</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <Award className="w-4 h-4 text-[#F2BE36] shrink-0 mt-0.5" />
+                        <Award className="w-4 h-4 text-[#216B35] shrink-0 mt-0.5" />
                         <span><strong>Track Record:</strong> {leader.experience}</span>
                       </div>
                     </div>
 
-                    <p className="mt-4 text-sm text-[#4B5563] font-lato leading-relaxed">
+                    <p className="mt-3 text-xs sm:text-sm text-[#4B5563] font-lato leading-relaxed">
                       {leader.bio}
                     </p>
                   </div>
@@ -198,18 +198,18 @@ export default function AboutUsPage() {
         </section>
 
         {/* Brochure & Visiting Card Showcase */}
-        <section className="py-20 bg-white border-b border-[#DCE5DD]">
+        <section className="py-12 lg:py-14 bg-white border-b border-[#DCE5DD]">
           <Container>
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="text-xs font-bold text-[#087EA4] uppercase tracking-wider font-poppins">
+            <div className="text-center max-w-2xl mx-auto mb-6">
+              <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins">
                 Credentials & Documents
               </span>
-              <h2 className="text-3xl font-bold font-montserrat text-[#173B26] mt-1">
+              <h2 className="text-2xl font-bold font-montserrat text-[#173B26] mt-1">
                 Official Company Visiting Card & Overview
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               <div className="rounded-2xl overflow-hidden border border-[#DCE5DD] shadow-lg">
                 <img
                   src="/visitingcard.jpeg"
@@ -230,15 +230,15 @@ export default function AboutUsPage() {
         </section>
 
         {/* Full CTA */}
-        <section className="py-20 bg-[#142D20] text-white text-center">
+        <section className="py-12 lg:py-14 bg-[#142D20] text-white text-center">
           <Container>
-            <h2 className="text-3xl sm:text-4xl font-bold font-montserrat text-white max-w-2xl mx-auto leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold font-montserrat text-white max-w-2xl mx-auto leading-tight">
               Partner with Us for Reliable & Compliant Environmental Solutions
             </h2>
-            <p className="mt-4 text-base text-[#E4EEE6]/80 font-lato max-w-xl mx-auto">
+            <p className="mt-3 text-sm sm:text-base text-[#E4EEE6]/80 font-lato max-w-xl mx-auto">
               Schedule an in-person briefing or request ground surveys at our Ranchi offices.
             </p>
-            <div className="mt-8 flex justify-center gap-4">
+            <div className="mt-5 flex justify-center gap-4">
               <Link href="/contact-us" className="btn-accent">
                 <span>Contact Our Ranchi Office</span>
                 <ArrowRight className="w-4 h-4" />

@@ -11,7 +11,7 @@ export default function NotFound() {
 
       <main className="flex-1 flex items-center justify-center py-24 bg-[#F5F8F3]">
         <Container className="text-center max-w-lg">
-          <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-[#216B35] flex items-center justify-center mx-auto mb-6">
             <ShieldAlert className="w-8 h-8" />
           </div>
 

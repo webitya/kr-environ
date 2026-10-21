@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { MapPin, Phone, Mail, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import SectionHeading from '../common/SectionHeading';
 
-export default function HomeContact() {
+export default function HomeContact({ showHeading = true }) {
   const [formData, setFormData] = useState({
     name: '',
     organization: '',
@@ -43,33 +43,33 @@ export default function HomeContact() {
   };
 
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          badge="Direct Liaison"
-          badgeColor="green"
-          title="Connect with Our Conservation Technology Specialists"
-          subtitle="Reach out for on-site field surveys, equipment demonstrations, or departmental procurement enquiries."
-        />
+    <section className="py-8 sm:py-12 bg-white">
+      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
+        {showHeading && (
+          <SectionHeading
+            title="Connect with Our Conservation Technology Specialists"
+            subtitle="Reach out for on-site field surveys, equipment demonstrations, or departmental procurement enquiries."
+          />
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: Contact Cards & Liaison Details */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-[#F5F8F3] p-8 rounded-2xl border border-[#DCE5DD]">
-              <h3 className="text-xl font-bold font-montserrat text-[#173B26]">
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-[#F5F8F3] p-5 sm:p-6 rounded-2xl border border-[#DCE5DD]">
+              <h2 className="text-lg sm:text-xl font-bold text-[#173B26]">
                 Registered & Branch Offices
-              </h3>
-              <p className="mt-2 text-sm text-[#4B5563] font-lato leading-relaxed">
+              </h2>
+              <p className="mt-1.5 text-xs sm:text-sm text-[#4B5563] leading-relaxed">
                 Connect with our team for Environmental & Forest Clearances, GIS Drone Surveys, and Wildlife Deterrent installations.
               </p>
 
-              <div className="mt-6 space-y-4 text-xs sm:text-sm font-opensans">
+              <div className="mt-6 space-y-4 text-xs sm:text-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#216B35]/10 text-[#216B35] flex items-center justify-center shrink-0 mt-0.5">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <strong className="text-[#173B26] block font-poppins text-xs uppercase tracking-wide">Registered Office:</strong>
+                    <strong className="text-[#173B26] block text-xs uppercase tracking-wide">Registered Office:</strong>
                     <span className="text-[#4B5563]">
                       806, Hariom Nand Tower, Argora-Kathal More Road, Ranchi, Jharkhand
                     </span>
@@ -77,11 +77,11 @@ export default function HomeContact() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#087EA4]/10 text-[#087EA4] flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#216B35]/10 text-[#216B35] flex items-center justify-center shrink-0 mt-0.5">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <strong className="text-[#173B26] block font-poppins text-xs uppercase tracking-wide">Branch Office (B.O.):</strong>
+                    <strong className="text-[#173B26] block text-xs uppercase tracking-wide">Branch Office (B.O.):</strong>
                     <span className="text-[#4B5563]">
                       H. No.4, Mansarovar Colony, Bhola Nagar, In Front of Dayal Petrol Pump, Kathal More, Ranchi
                     </span>
@@ -89,11 +89,11 @@ export default function HomeContact() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#F2BE36]/20 text-[#173B26] flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#216B35]/10 text-[#216B35] flex items-center justify-center shrink-0 mt-0.5">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
-                    <strong className="text-[#173B26] block font-poppins text-xs uppercase tracking-wide">Contact Numbers:</strong>
+                    <strong className="text-[#173B26] block text-xs uppercase tracking-wide">Contact Numbers:</strong>
                     <span className="text-[#4B5563] block font-medium">+91 8317054180, +91 9155796749</span>
                     <span className="text-[#68756D] text-xs">Landline: 0651-4051577</span>
                   </div>
@@ -104,7 +104,7 @@ export default function HomeContact() {
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
-                    <strong className="text-[#173B26] block font-poppins text-xs uppercase tracking-wide">Official Email:</strong>
+                    <strong className="text-[#173B26] block text-xs uppercase tracking-wide">Official Email:</strong>
                     <span className="text-[#4B5563] font-medium">kr.environ.2026@gmail.com</span>
                   </div>
                 </div>
@@ -112,25 +112,25 @@ export default function HomeContact() {
             </div>
 
             {/* Credential Note from brochure */}
-            <div className="p-6 rounded-2xl border border-[#DCE5DD] bg-white shadow-xs">
-              <span className="text-xs font-bold text-[#087EA4] uppercase tracking-wider font-poppins">
+            <div className="p-4 sm:p-5 rounded-2xl border border-[#DCE5DD] bg-white shadow-xs">
+              <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider">
                 Expert Leadership
               </span>
-              <h4 className="text-base font-bold font-montserrat text-[#173B26] mt-1">
+              <h4 className="text-base font-bold text-[#173B26] mt-1">
                 S. Gupta, Proprietor & Environmentalist
               </h4>
-              <p className="text-xs text-[#68756D] font-lato mt-1 leading-relaxed">
+              <p className="text-xs text-[#68756D] mt-0.5 leading-relaxed">
                 MSc (Environmental Science, Lucknow Univ) &bull; MSc (Geoinformatics) &bull; 15+ years experience as an Environmental Analyst.
               </p>
             </div>
           </div>
 
           {/* Right Column: Interactive Consultation Form */}
-          <div className="lg:col-span-7 bg-white p-8 rounded-2xl border border-[#DCE5DD] shadow-sm">
-            <h3 className="text-2xl font-bold font-montserrat text-[#173B26] mb-2">
+          <div className="lg:col-span-7 bg-white p-5 sm:p-6 rounded-2xl border border-[#DCE5DD] shadow-sm">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#173B26] mb-1.5">
               Request an Equipment Demonstration or Site Audit
-            </h3>
-            <p className="text-sm text-[#4B5563] font-lato mb-6">
+            </h2>
+            <p className="text-xs sm:text-sm text-[#4B5563] mb-4">
               Fill in your details below and our technical liaison will respond within 24 hours.
             </p>
 

@@ -8,8 +8,8 @@ const SpecSchema = new mongoose.Schema({
 const ServiceSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, index: true, trim: true },
-  category: { type: String, default: 'Wildlife Deterrence & Smart Sensors' },
-  shortDescription: { type: String, required: true },
+  category: { type: String, default: 'Wildlife Deterrence & Smart Sensors', trim: true },
+  shortDescription: { type: String, default: '' },
   featuredImage: { type: String, default: '' },
   status: { type: String, enum: ['published', 'draft'], default: 'published' },
   seoTitle: { type: String, default: '' },
@@ -17,7 +17,8 @@ const ServiceSchema = new mongoose.Schema({
   specs: [SpecSchema],
   content: { type: String, default: '' }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 // Prevent model overwrite during Next.js hot reload

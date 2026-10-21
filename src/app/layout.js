@@ -1,4 +1,5 @@
 import "./globals.css";
+import FloatingContactButtons from "@/components/common/FloatingContactButtons";
 
 export const metadata = {
   title: "KR Environ Solutions | Advanced Wildlife Tech & Environmental Engineering",
@@ -20,9 +21,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-full scroll-smooth antialiased">
-      <body className="min-h-full flex flex-col bg-[#FFFFFF] text-[#4B5563]">
+    <html lang="en" className="h-full scroll-smooth antialiased" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-[#FFFFFF] text-[#4B5563]" suppressHydrationWarning>
         {children}
+        <FloatingContactButtons />
       </body>
     </html>
   );

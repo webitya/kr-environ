@@ -6,6 +6,7 @@ import Project from '@/models/Project';
 import Gallery from '@/models/Gallery';
 import Video from '@/models/Video';
 import Enquiry from '@/models/Enquiry';
+import Category from '@/models/Category';
 import { seedMongoDBIfNeeded } from '@/lib/db';
 
 export async function GET() {
@@ -20,13 +21,14 @@ export async function GET() {
 
     await seedMongoDBIfNeeded();
 
-    const [services, blogs, projects, gallery, videos, enquiries] = await Promise.all([
+    const [services, blogs, projects, gallery, videos, enquiries, categories] = await Promise.all([
       Service.countDocuments(),
       Blog.countDocuments(),
       Project.countDocuments(),
       Gallery.countDocuments(),
       Video.countDocuments(),
-      Enquiry.countDocuments()
+      Enquiry.countDocuments(),
+      Category.countDocuments()
     ]);
 
     return NextResponse.json({
@@ -38,7 +40,8 @@ export async function GET() {
         projects,
         gallery,
         videos,
-        enquiries
+        enquiries,
+        categories
       }
     });
   } catch (err) {

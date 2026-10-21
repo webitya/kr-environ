@@ -12,7 +12,8 @@ const ProjectSchema = new mongoose.Schema({
   results: { type: String, default: '' },
   status: { type: String, enum: ['published', 'draft'], default: 'published' }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 export default mongoose.models.Project || mongoose.model('Project', ProjectSchema);

@@ -15,12 +15,13 @@ export async function generateMetadata({ params }) {
   }
 
   return {
-    title: `${blog.title} | KR Environ Solutions Blog`,
-    description: blog.excerpt,
+    title: blog.metaTitle || `${blog.title} | KR Environ Solutions Blog`,
+    description: blog.metaDescription || blog.excerpt,
+    keywords: blog.focusKeywords ? blog.focusKeywords.split(',').map((k) => k.trim()) : undefined,
     openGraph: {
-      title: blog.title,
-      description: blog.excerpt,
-      images: [blog.featuredImage]
+      title: blog.metaTitle || blog.title,
+      description: blog.metaDescription || blog.excerpt,
+      images: [blog.featuredImage || '/img4.jpeg']
     }
   };
 }
@@ -38,38 +39,44 @@ export default async function BlogDetailPage({ params }) {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Schema.org Automatic JSON-LD Structured Data */}
+      {blog.schemaMarkup && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: blog.schemaMarkup }}
+        />
+      )}
+
       <SiteHeader />
 
       <main className="flex-1">
         {/* Article Header */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-12 sm:py-16 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-8 sm:py-12 border-b border-[#DCE5DD]">
           <Container>
-            <div className="max-w-4xl mx-auto space-y-4">
+            <div className="w-full space-y-3">
               <Link
                 href="/blog"
-                className="inline-flex items-center gap-2 text-xs font-semibold font-poppins text-[#087EA4] hover:text-[#06617F] transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold font-poppins text-[#216B35] hover:text-[#174D28] transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Knowledge Articles</span>
               </Link>
 
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-poppins font-semibold bg-[#216B35]/10 text-[#216B35] border border-[#216B35]/20">
-                  {blog.category || 'Wildlife Technology'}
-                </span>
-              </div>
+              <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35]">
+                {blog.category || 'Wildlife Technology'}
+              </p>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-montserrat font-extrabold text-[#173B26] leading-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-extrabold text-[#173B26] leading-tight">
                 {blog.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-6 text-xs sm:text-sm text-[#68756D] font-poppins pt-2 border-t border-[#DCE5DD]/60">
+              <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-[#68756D] font-poppins pt-2 border-t border-[#DCE5DD]/60">
                 <span className="flex items-center gap-1.5">
-                  <User className="w-4 h-4 text-[#216B35]" />
+                  <User className="w-3.5 h-3.5 text-[#216B35]" />
                   <span>By <strong>{blog.author}</strong></span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-[#087EA4]" />
+                  <Calendar className="w-3.5 h-3.5 text-[#216B35]" />
                   <span>Published on {blog.date}</span>
                 </span>
               </div>
@@ -78,11 +85,11 @@ export default async function BlogDetailPage({ params }) {
         </section>
 
         {/* Featured Image & Body */}
-        <section className="py-12 bg-white">
+        <section className="py-8 sm:py-10 bg-white">
           <Container>
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="w-full space-y-6">
               {blog.featuredImage && (
-                <div className="rounded-2xl overflow-hidden shadow-lg border border-[#DCE5DD] bg-slate-100 max-h-[460px]">
+                <div className="rounded-2xl overflow-hidden shadow-lg border border-[#DCE5DD] bg-slate-100 max-h-[360px]">
                   <img
                     src={blog.featuredImage}
                     alt={blog.title}
@@ -92,33 +99,37 @@ export default async function BlogDetailPage({ params }) {
               )}
 
               {/* Excerpt Lead */}
-              <div className="p-6 rounded-2xl bg-[#F5F8F3] border-l-4 border-[#216B35] text-lg text-[#173B26] font-lato italic font-medium leading-relaxed">
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#F5F8F3] border-l-4 border-[#216B35] text-sm sm:text-base text-[#173B26] font-lato italic font-medium leading-relaxed">
                 "{blog.excerpt}"
               </div>
 
               {/* Main Content Body */}
-              <div className="prose max-w-none text-[#4B5563] font-lato text-base sm:text-lg leading-relaxed space-y-4">
+              <div className="prose max-w-none text-[#4B5563] text-sm sm:text-base leading-relaxed space-y-3">
                 {blog.content ? (
-                  blog.content.split('\n\n').map((paragraph, idx) => {
-                    if (paragraph.startsWith('### ')) {
-                      return (
-                        <h3 key={idx} className="text-2xl font-bold font-montserrat text-[#173B26] pt-4">
-                          {paragraph.replace('### ', '')}
-                        </h3>
-                      );
-                    }
-                    if (paragraph.startsWith('- ')) {
-                      const items = paragraph.split('\n').filter(Boolean);
-                      return (
-                        <ul key={idx} className="list-disc pl-5 space-y-1.5 my-3">
-                          {items.map((it, i) => (
-                            <li key={i}>{it.replace('- ', '')}</li>
-                          ))}
-                        </ul>
-                      );
-                    }
-                    return <p key={idx}>{paragraph}</p>;
-                  })
+                  blog.content.includes('<') && blog.content.includes('>') ? (
+                    <div dangerouslySetInnerHTML={{ __html: blog.content }} className="space-y-3" />
+                  ) : (
+                    blog.content.split('\n\n').map((paragraph, idx) => {
+                      if (paragraph.startsWith('### ')) {
+                        return (
+                          <h3 key={idx} className="text-xl font-bold font-montserrat text-[#173B26] pt-2">
+                            {paragraph.replace('### ', '')}
+                          </h3>
+                        );
+                      }
+                      if (paragraph.startsWith('- ')) {
+                        const items = paragraph.split('\n').filter(Boolean);
+                        return (
+                          <ul key={idx} className="list-disc pl-5 space-y-1.5 my-3">
+                            {items.map((it, i) => (
+                              <li key={i}>{it.replace('- ', '')}</li>
+                            ))}
+                          </ul>
+                        );
+                      }
+                      return <p key={idx}>{paragraph}</p>;
+                    })
+                  )
                 ) : (
                   <p>Read the complete study and field documentation at our liaison office.</p>
                 )}
@@ -152,7 +163,7 @@ export default async function BlogDetailPage({ params }) {
                         className="bg-white p-6 rounded-2xl border border-[#DCE5DD] hover:border-[#216B35] transition-all card-hover flex flex-col justify-between"
                       >
                         <div>
-                          <span className="text-[11px] font-bold text-[#087EA4] uppercase tracking-wider font-poppins block mb-2">
+                          <span className="text-[11px] font-bold text-[#216B35] uppercase tracking-wider font-poppins block mb-2">
                             {rel.category}
                           </span>
                           <h4 className="text-base font-bold font-montserrat text-[#173B26] hover:text-[#216B35]">

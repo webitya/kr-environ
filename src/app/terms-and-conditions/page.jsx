@@ -12,16 +12,16 @@ export default function TermsPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
 
-      <main className="flex-1 py-16 bg-white">
-        <Container className="max-w-4xl">
-          <h1 className="text-3xl sm:text-4xl font-bold font-montserrat text-[#173B26] mb-6">
+      <main className="flex-1 py-10 sm:py-12 bg-white">
+        <Container>
+          <h1 className="text-2xl sm:text-3xl font-bold font-montserrat text-[#173B26] mb-2">
             Terms & Conditions
           </h1>
-          <p className="text-xs text-[#68756D] font-mono mb-8">
+          <p className="text-xs text-[#68756D] font-mono mb-4">
             Last Updated: March 2024 &bull; Version 1.0
           </p>
 
-          <div className="prose max-w-none text-[#4B5563] font-lato text-base leading-relaxed space-y-6">
+          <div className="prose max-w-none text-[#4B5563] font-lato text-sm sm:text-base leading-relaxed space-y-4">
             <h2 className="text-xl font-bold font-montserrat text-[#173B26]">
               1. General Disclaimer
             </h2>

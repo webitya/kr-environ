@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Climate+Crisis:YEAR@1979&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Manrope:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
   /* Brand Core Colors */
   --color-primary: #216B35;
   --color-primary-hover: #174D28;
-  --color-secondary: #087EA4;
-  --color-secondary-hover: #06617F;
-  --color-accent: #F2BE36;
+  --color-secondary: #216B35;
+  --color-secondary-hover: #174D28;
+  --color-accent: #216B35;
 
   /* Typography Colors */
   --color-heading-h1: #173B26;
@@ -21,27 +21,35 @@
   /* Backgrounds */
   --bg-main: #FFFFFF;
   --bg-alt-green: #F5F8F3;
-  --bg-alt-blue: #EFF7FA;
+  --bg-alt-blue: #F5F8F3;
   --bg-footer: #142D20;
 
   /* Borders & Dividers */
   --border-light: #DCE5DD;
 
-  /* Fonts */
-  --font-climate: 'Climate Crisis', cursive, sans-serif;
-  --font-montserrat: 'Montserrat', sans-serif;
-  --font-manrope: 'Manrope', sans-serif;
-  --font-poppins: 'Poppins', sans-serif;
-  --font-lato: 'Lato', sans-serif;
-  --font-opensans: 'Open Sans', sans-serif;
+  /* Single Universal Font System: Manrope */
+  --font-manrope: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-climate: var(--font-manrope);
+  --font-montserrat: var(--font-manrope);
+  --font-poppins: var(--font-manrope);
+  --font-lato: var(--font-manrope);
+  --font-opensans: var(--font-manrope);
+}
+
+/* Universal Typography Enforcement: ONLY Manrope with clean, normal weights */
+*, *::before, *::after {
+  font-family: var(--font-manrope) !important;
 }
 
 body {
-  font-family: var(--font-lato), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-manrope) !important;
   color: var(--color-text-body);
   background-color: var(--bg-main);
   line-height: 1.65;
   overflow-x: hidden;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Ensure all interactive buttons, links, and form triggers display pointer cursor */
@@ -69,86 +77,91 @@ select:disabled {
   cursor: not-allowed;
 }
 
-/* Typography Helpers */
-.font-climate {
-  font-family: var(--font-climate);
-}
-.font-montserrat {
-  font-family: var(--font-montserrat);
-}
-.font-manrope {
-  font-family: var(--font-manrope);
-}
-.font-poppins {
-  font-family: var(--font-poppins);
-}
-.font-lato {
-  font-family: var(--font-lato);
-}
+/* Legacy font utility class overrides to enforce Manrope cleanly */
+.font-climate,
+.font-montserrat,
+.font-manrope,
+.font-poppins,
+.font-lato,
 .font-opensans {
-  font-family: var(--font-opensans);
+  font-family: var(--font-manrope) !important;
 }
 
+/* Headings: Clean, modern, normal/semibold weight - avoids harsh heavy bolding */
 h1, .h1 {
-  font-family: var(--font-montserrat);
+  font-family: var(--font-manrope) !important;
   color: var(--color-heading-h1);
-  font-weight: 700;
-  line-height: 1.15;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 h2, .h2 {
-  font-family: var(--font-montserrat);
+  font-family: var(--font-manrope) !important;
   color: var(--color-heading-h2);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.25;
 }
 
 h3, .h3 {
-  font-family: var(--font-manrope);
+  font-family: var(--font-manrope) !important;
   color: var(--color-heading-h3);
   font-weight: 600;
   line-height: 1.35;
 }
 
+h4, h5, h6, .h4, .h5, .h6 {
+  font-family: var(--font-manrope) !important;
+  font-weight: 500;
+}
+
+/* Ensure footer and dark container headings are crisp, high-contrast white */
+footer h1, footer h2, footer h3, footer h4, footer h5, footer h6,
+.bg-deep-forest h1, .bg-deep-forest h2, .bg-deep-forest h3,
+[class*="bg-[#142D20]"] h1, [class*="bg-[#142D20]"] h2, [class*="bg-[#142D20]"] h3,
+[class*="bg-[#173B26]"] h1, [class*="bg-[#173B26]"] h2, [class*="bg-[#173B26]"] h3 {
+  color: #FFFFFF !important;
+}
+
 /* Custom UI Tokens */
 .bg-primary-green { background-color: #216B35; }
 .bg-primary-green-hover:hover { background-color: #174D28; }
-.bg-environmental-blue { background-color: #087EA4; }
-.bg-environmental-blue-hover:hover { background-color: #06617F; }
-.bg-solar-gold { background-color: #F2BE36; }
+.bg-environmental-blue { background-color: #216B35; }
+.bg-environmental-blue-hover:hover { background-color: #174D28; }
+.bg-solar-gold { background-color: #216B35; }
 .bg-soft-green { background-color: #F5F8F3; }
-.bg-pale-blue { background-color: #EFF7FA; }
+.bg-pale-blue { background-color: #F5F8F3; }
 .bg-deep-forest { background-color: #142D20; }
 
 .text-primary-green { color: #216B35; }
 .text-deep-forest { color: #173B26; }
-.text-environmental-blue { color: #087EA4; }
-.text-solar-gold { color: #F2BE36; }
+.text-environmental-blue { color: #216B35; }
+.text-solar-gold { color: #216B35; }
 .text-slate-gray { color: #4B5563; }
 .text-muted-gray { color: #68756D; }
 
 .border-light-green { border-color: #DCE5DD; }
 
-/* Custom button styles */
+/* Custom button styles with clean, normal weight typography */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   background-color: #216B35;
   color: #FFFFFF;
-  font-family: var(--font-poppins);
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.75rem 1.75rem;
-  border-radius: 0.625rem;
+  font-family: var(--font-manrope) !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 0.45rem 1rem;
+  border-radius: 0.25rem;
   transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 12px rgba(33, 107, 53, 0.2);
+  box-shadow: 0 2px 8px rgba(33, 107, 53, 0.15);
   text-decoration: none;
+  cursor: pointer;
 }
 .btn-primary:hover {
   background-color: #174D28;
-  box-shadow: 0 6px 16px rgba(23, 77, 40, 0.3);
+  box-shadow: 0 4px 12px rgba(23, 77, 40, 0.2);
   transform: translateY(-1px);
 }
 
@@ -156,22 +169,23 @@ h3, .h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   background-color: #FFFFFF;
-  color: #087EA4;
-  border: 1.5px solid #087EA4;
-  font-family: var(--font-poppins);
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.75rem 1.75rem;
-  border-radius: 0.625rem;
+  color: #216B35;
+  border: 1.5px solid #216B35;
+  font-family: var(--font-manrope) !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 0.45rem 1rem;
+  border-radius: 0.25rem;
   transition: all 0.2s ease-in-out;
   text-decoration: none;
+  cursor: pointer;
 }
 .btn-secondary:hover {
-  background-color: #EFF7FA;
-  border-color: #06617F;
-  color: #06617F;
+  background-color: #F5F8F3;
+  border-color: #174D28;
+  color: #174D28;
   transform: translateY(-1px);
 }
 
@@ -179,20 +193,21 @@ h3, .h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background-color: #F2BE36;
-  color: #173B26;
-  font-family: var(--font-poppins);
-  font-weight: 700;
-  font-size: 0.95rem;
-  padding: 0.75rem 1.75rem;
-  border-radius: 0.625rem;
+  gap: 0.45rem;
+  background-color: #216B35;
+  color: #FFFFFF;
+  font-family: var(--font-manrope) !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 0.45rem 1rem;
+  border-radius: 0.25rem;
   transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 14px rgba(242, 190, 54, 0.25);
+  box-shadow: 0 2px 8px rgba(33, 107, 53, 0.15);
   text-decoration: none;
+  cursor: pointer;
 }
 .btn-accent:hover {
-  background-color: #deb12b;
+  background-color: #174D28;
   transform: translateY(-1px);
 }
 
