@@ -3,12 +3,10 @@
 import { useState, useEffect } from 'react';
 import SiteHeader from '@/components/layout/SiteHeader';
 import SiteFooter from '@/components/layout/SiteFooter';
-import Container from '@/components/common/Container';
-import { Camera, X, Filter } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export default function GalleryPage() {
   const [items, setItems] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('All');
   const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -84,120 +82,108 @@ export default function GalleryPage() {
     }
   ];
 
-  const categories = ['All', 'Field Presence', 'Government Partnership', 'Field Operations', 'Credentials'];
-
   const displayList = items.length > 0 ? items : defaultItems;
 
-  const filteredItems = activeCategory === 'All'
-    ? displayList
-    : displayList.filter((it) => it.category === activeCategory);
-
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-white">
       <SiteHeader />
 
-      <main className="flex-1">
-        {/* Gallery Hero */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white pt-6 pb-2 sm:pt-8 sm:pb-3">
-          <Container>
+      <main className="flex-1 w-full">
+        {/* Gallery Hero - Minimal Compact Spacing, No HR line */}
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white pt-6 pb-2 sm:pt-8 sm:pb-3 w-full">
+          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
             <div className="max-w-3xl">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-manrope font-extrabold text-[#173B26] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-manrope font-extrabold text-[#173B26] tracking-tight leading-tight">
                 Field Operations &amp; Equipment Gallery
               </h1>
               <p className="mt-1.5 text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed">
                 Photographic documentation of our field deployments, live wildlife rescues, equipment installations, and forestry training programs.
               </p>
             </div>
-          </Container>
+          </div>
         </section>
 
-        {/* Gallery Content */}
-        <section className="pt-2 pb-10 sm:pt-3 sm:pb-14 bg-white">
-          <Container>
-            {/* Filter Pills */}
-            <div className="flex flex-wrap items-center gap-2 mb-6 pb-3 border-b border-[#DCE5DD]">
-              <span className="text-xs font-bold text-[#68756D] uppercase tracking-wider mr-2 font-poppins flex items-center gap-1">
-                <Filter className="w-3.5 h-3.5" /> Filter by:
-              </span>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-3.5 py-1 rounded-lg text-xs font-poppins font-medium transition-colors ${
-                    activeCategory === cat
-                      ? 'bg-[#216B35] text-white font-semibold shadow-xs'
-                      : 'bg-[#F5F8F3] text-[#4B5563] hover:bg-[#DCE5DD]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredItems.map((item) => (
+        {/* Gallery Grid - Full Width, 3 Images per Row, Clean High-Contrast Overlays */}
+        <section className="pt-2 pb-12 sm:pt-3 sm:pb-16 bg-white w-full">
+          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
+            {/* 3 Images Per Row Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayList.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => setSelectedImage(item)}
-                  className="group relative rounded-2xl overflow-hidden aspect-4/3 cursor-pointer shadow-xs border border-[#DCE5DD] bg-slate-200"
+                  className="group relative rounded-2xl overflow-hidden aspect-[4/3] cursor-pointer shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-[#DCE5DD] bg-slate-100"
                 >
+                  {/* Photo */}
                   <img
                     src={item.imageUrl}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#142D20]/90 via-[#142D20]/25 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
 
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <div className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">
-                      {item.category}
-                    </div>
-                    <h3 className="text-base font-bold leading-snug">
+                  {/* Seamless Bottom Overlay - Clean, Compact, Crystal-Clear White Text, No Badge */}
+                  <div className="absolute inset-x-0 bottom-0 pt-10 pb-4 px-4 bg-gradient-to-t from-black/95 via-black/80 to-transparent flex flex-col justify-end">
+                    <h3 
+                      className="text-sm sm:text-base font-bold font-manrope !text-white leading-snug line-clamp-1 drop-shadow-md"
+                      style={{ color: '#ffffff' }}
+                    >
                       {item.title}
                     </h3>
-                    <p className="text-xs text-white/80 mt-1 line-clamp-1">
-                      {item.caption}
-                    </p>
+                    {item.caption && (
+                      <p 
+                        className="text-xs !text-white/95 font-manrope mt-1 line-clamp-2 leading-relaxed"
+                        style={{ color: '#f3f4f6' }}
+                      >
+                        {item.caption}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-          </Container>
+          </div>
         </section>
       </main>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal - White BG with Glassmorphism Frosted Look, Slightly Compact */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/45 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="relative max-w-4xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl"
+            className="relative max-w-2xl w-full bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/60 shadow-2xl overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close Button */}
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition-colors"
+              className="absolute top-3.5 right-3.5 z-20 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-[#173B26] backdrop-blur-md shadow-md border border-[#DCE5DD] flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+              aria-label="Close modal"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
-            <img
-              src={selectedImage.imageUrl}
-              alt={selectedImage.title}
-              className="w-full max-h-[70vh] object-contain bg-black"
-            />
-            <div className="p-6 bg-[#142D20] text-white">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                {selectedImage.category}
-              </span>
-              <h3 className="text-xl font-bold mt-1">
+
+            {/* Compact Image Container */}
+            <div className="relative w-full max-h-[50vh] sm:max-h-[56vh] bg-slate-50 flex items-center justify-center overflow-hidden border-b border-[#DCE5DD]/60">
+              <img
+                src={selectedImage.imageUrl}
+                alt={selectedImage.title}
+                className="w-full max-h-[50vh] sm:max-h-[56vh] object-contain"
+              />
+            </div>
+
+            {/* Content Drawer: Clean White / Glassmorphic background with dark text (No Badge) */}
+            <div className="p-5 sm:p-6 bg-white/95 backdrop-blur-md text-left">
+              <h3 className="text-lg sm:text-xl font-bold font-manrope text-[#173B26] leading-snug">
                 {selectedImage.title}
               </h3>
-              <p className="text-sm text-[#E4EEE6]/80 mt-2">
-                {selectedImage.caption}
-              </p>
+              {selectedImage.caption && (
+                <p className="text-xs sm:text-sm text-[#4B5563] font-manrope mt-2 leading-relaxed">
+                  {selectedImage.caption}
+                </p>
+              )}
             </div>
           </div>
         </div>
