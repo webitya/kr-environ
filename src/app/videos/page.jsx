@@ -77,18 +77,18 @@ export default function VideosPage() {
 
       <main className="flex-1">
         {/* Videos Hero */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-6 sm:py-8 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white pt-6 pb-2 sm:pt-8 sm:pb-3">
           <Container>
             <div className="max-w-3xl">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#173B26] tracking-tight">
-                Field Demonstrations & Media Coverage
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#173B26] font-manrope tracking-tight">
+                Field Demonstrations &amp; Media Coverage
               </h1>
             </div>
           </Container>
         </section>
 
         {/* Video Grid */}
-        <section className="py-8 sm:py-12 bg-white">
+        <section className="pt-2 pb-10 sm:pt-3 sm:pb-14 bg-white">
           <Container>
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-2 mb-6 pb-3 border-b border-[#DCE5DD]">

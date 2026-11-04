@@ -4,7 +4,6 @@ import HomeHero from '@/components/home/HomeHero';
 import HomeClients from '@/components/home/HomeClients';
 import HomeAbout from '@/components/home/HomeAbout';
 import HomeWhyChooseUs from '@/components/home/HomeWhyChooseUs';
-import HomeExpertise from '@/components/home/HomeExpertise';
 import HomeBlog from '@/components/home/HomeBlog';
 import HomeContact from '@/components/home/HomeContact';
 
@@ -33,10 +32,7 @@ export default async function HomePage() {
         {/* 4. Why Choose Us / Verified Differentiators */}
         <HomeWhyChooseUs />
 
-        {/* 5. Environmental & Technical Expertise */}
-        <HomeExpertise />
-
-        {/* 6. Knowledge & Conservation Blog */}
+        {/* 5. Knowledge & Conservation Blog */}
         <HomeBlog blogs={blogs} />
 
         {/* 7. Contact & Enquiry Entry Point */}

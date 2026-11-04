@@ -98,13 +98,13 @@ export default function GalleryPage() {
 
       <main className="flex-1">
         {/* Gallery Hero */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-10 sm:py-14 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white pt-6 pb-2 sm:pt-8 sm:pb-3">
           <Container>
             <div className="max-w-3xl">
-              <h1 className="text-3xl sm:text-4xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
-                Field Operations & Equipment Gallery
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-manrope font-extrabold text-[#173B26] tracking-tight">
+                Field Operations &amp; Equipment Gallery
               </h1>
-              <p className="mt-2.5 text-base text-[#4B5563] font-lato leading-relaxed">
+              <p className="mt-1.5 text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed">
                 Photographic documentation of our field deployments, live wildlife rescues, equipment installations, and forestry training programs.
               </p>
             </div>
@@ -112,7 +112,7 @@ export default function GalleryPage() {
         </section>
 
         {/* Gallery Content */}
-        <section className="py-10 sm:py-12 bg-white">
+        <section className="pt-2 pb-10 sm:pt-3 sm:pb-14 bg-white">
           <Container>
             {/* Filter Pills */}
             <div className="flex flex-wrap items-center gap-2 mb-6 pb-3 border-b border-[#DCE5DD]">

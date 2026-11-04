@@ -1,7 +1,7 @@
 import SiteHeader from '@/components/layout/SiteHeader';
 import SiteFooter from '@/components/layout/SiteFooter';
 import Link from 'next/link';
-import { ShieldCheck, PhoneCall, CheckCircle2, ArrowRight } from 'lucide-react';
+import { PhoneCall, ArrowRight } from 'lucide-react';
 import { getServices } from '@/lib/db';
 import ServicesGrid from '@/components/services/ServicesGrid';
 
@@ -22,35 +22,21 @@ export default async function ServicesPage() {
 
       <main className="flex-1">
         {/* Full-Width Services Hero Header */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] via-white to-[#F5F8F3]/30 py-8 sm:py-12 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] via-white to-[#F5F8F3]/30 pt-6 pb-2 sm:pt-8 sm:pb-3">
           <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
-              <div className="max-w-3xl space-y-2">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
-                  Our Services &amp; Technical Solutions
-                </h1>
-                <p className="text-xs sm:text-sm text-[#4B5563] font-lato leading-relaxed max-w-2xl">
-                  Engineered in partnership with <strong>Kyari Innovations</strong>, our non-lethal deterrent devices and ranger safety equipment deliver 91% conflict mitigation without harming wildlife or humans.
-                </p>
-              </div>
-
-              {/* Fast Highlights Badges */}
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#DCE5DD] text-xs font-semibold text-[#173B26] shadow-2xs">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#216B35]" />
-                  <span>100% Non-Lethal</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#DCE5DD] text-xs font-semibold text-[#173B26] shadow-2xs">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#216B35]" />
-                  <span>21+ State Forest Depts</span>
-                </div>
-              </div>
+            <div className="max-w-3xl space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
+                Our Services &amp; Technical Solutions
+              </h1>
+              <p className="text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed max-w-2xl">
+                Engineered in partnership with <strong>Kyari Innovations</strong>, our non-lethal deterrent devices and ranger safety equipment deliver 91% conflict mitigation without harming wildlife or humans.
+              </p>
             </div>
           </div>
         </section>
 
         {/* Full-Width Interactive 4-Cards Grid Section */}
-        <section className="py-8 sm:py-12">
+        <section className="pt-2 pb-8 sm:pt-3 sm:pb-12">
           <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 space-y-10">
             {/* Interactive Grid with Dynamic Filter and Search */}
             <ServicesGrid services={services} />

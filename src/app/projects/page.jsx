@@ -19,13 +19,13 @@ export default async function ProjectsPage() {
 
       <main className="flex-1">
         {/* Projects Hero */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-10 sm:py-14 border-b border-[#DCE5DD]">
+        <section className="bg-gradient-to-b from-[#F5F8F3] to-white pt-6 pb-2 sm:pt-8 sm:pb-3">
           <Container>
             <div className="max-w-3xl">
-              <h1 className="text-3xl sm:text-4xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
-                Conservation Deployments & Field Projects
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-manrope font-extrabold text-[#173B26] tracking-tight">
+                Conservation Deployments &amp; Field Projects
               </h1>
-              <p className="mt-2.5 text-base text-[#4B5563] font-lato leading-relaxed">
+              <p className="mt-1.5 text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed">
                 Documenting real-world deployments across tiger reserves, border agricultural zones, and high-altitude habitats across India.
               </p>
             </div>
@@ -33,7 +33,7 @@ export default async function ProjectsPage() {
         </section>
 
         {/* Projects Grid */}
-        <section className="py-12 lg:py-14 bg-white">
+        <section className="pt-2 pb-10 sm:pt-3 sm:pb-14 bg-white">
           <Container>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {projects.map((project) => (

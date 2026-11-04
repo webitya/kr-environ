@@ -3,7 +3,7 @@ import SiteFooter from '@/components/layout/SiteFooter';
 import Container from '@/components/common/Container';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Calendar, User, Tag, Share2, PhoneCall, BookOpen } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, User, Tag, Share2, PhoneCall, BookOpen } from 'lucide-react';
 import { getBlogBySlug, getBlogs } from '@/lib/db';
 
 export async function generateMetadata({ params }) {
