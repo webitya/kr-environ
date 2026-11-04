@@ -51,9 +51,9 @@ export default function HomeAbout() {
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
             <div className="relative w-full max-w-md lg:max-w-none aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 group">
               <img
-                src="/img4.jpeg"
-                alt="KR Environ Solutions - Van Bhawan Forest Headquarters"
-                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                src="/img1.jpeg"
+                alt="Sarika Gupta in consultation at D.F.O. Ranchi Desk"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
             </div>
           </div>
