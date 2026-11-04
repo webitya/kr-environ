@@ -227,3 +227,24 @@ footer h1, footer h2, footer h3, footer h4, footer h5, footer h6,
   transform: translateY(-4px);
   box-shadow: 0 16px 36px -12px rgba(23, 59, 38, 0.14);
 }
+
+/* Infinite Client Logos Marquee Animation (Right to Left) */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 28s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-infinite:hover {
+  animation-play-state: paused;
+}

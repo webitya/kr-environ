@@ -6,6 +6,7 @@ import Gallery from '@/models/Gallery';
 import Video from '@/models/Video';
 import Enquiry from '@/models/Enquiry';
 import Category from '@/models/Category';
+import Client from '@/models/Client';
 
 // Helper to convert Mongoose doc to clean plain JSON objects (stripping BSON ObjectId and __v)
 function serializeDoc(doc) {
@@ -55,8 +56,9 @@ export async function upsertService(serviceData) {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
 
-    const filter = serviceData.id && serviceData.id.length === 24
-      ? { _id: serviceData.id }
+    const targetId = serviceData.id || serviceData._id;
+    const filter = (targetId && String(targetId).length === 24)
+      ? { _id: targetId }
       : { slug: serviceData.slug };
 
     const { id, _id, ...cleanData } = serviceData;
@@ -493,6 +495,57 @@ export async function deleteEnquiry(id) {
     return true;
   } catch (err) {
     console.error('MongoDB deleteEnquiry error:', err.message);
+    throw err;
+  }
+}
+
+// ==================== CLIENTS ====================
+export async function getClients() {
+  try {
+    const conn = await connectToDatabase();
+    if (conn) {
+      const items = await Client.find().sort({ displayOrder: 1, createdAt: 1 }).lean();
+      return (items || []).map(serializeDoc);
+    }
+  } catch (err) {
+    console.error('Error fetching clients from MongoDB:', err.message);
+  }
+  return [];
+}
+
+export async function upsertClient(clientData) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    const { id, _id, ...cleanData } = clientData;
+
+    let doc;
+    if (id && id.length === 24) {
+      doc = await Client.findByIdAndUpdate(
+        id,
+        { $set: cleanData },
+        { new: true, runValidators: true }
+      ).lean();
+    } else {
+      doc = await Client.create(cleanData);
+    }
+
+    return serializeDoc(doc);
+  } catch (err) {
+    console.error('MongoDB upsertClient error:', err.message);
+    throw err;
+  }
+}
+
+export async function deleteClient(id) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+    await Client.findByIdAndDelete(id);
+    return true;
+  } catch (err) {
+    console.error('MongoDB deleteClient error:', err.message);
     throw err;
   }
 }

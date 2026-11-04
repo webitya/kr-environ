@@ -113,10 +113,7 @@ export default function HomeContact({ showHeading = true }) {
 
             {/* Credential Note from brochure */}
             <div className="p-4 sm:p-5 rounded-2xl border border-[#DCE5DD] bg-white shadow-xs">
-              <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider">
-                Expert Leadership
-              </span>
-              <h4 className="text-base font-bold text-[#173B26] mt-1">
+              <h4 className="text-base font-bold text-[#173B26]">
                 S. Gupta, Proprietor & Environmentalist
               </h4>
               <p className="text-xs text-[#68756D] mt-0.5 leading-relaxed">

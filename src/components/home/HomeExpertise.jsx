@@ -73,9 +73,6 @@ export default function HomeExpertise() {
         {/* Technical Callout Banner */}
         <div className="mt-8 p-5 sm:p-6 rounded-2xl bg-white border border-[#DCE5DD] shadow-sm flex flex-col lg:flex-row items-center justify-between gap-5">
           <div className="space-y-1 text-left">
-            <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins">
-              Government & Institutional Consultations
-            </span>
             <h3 className="text-lg sm:text-xl font-bold font-montserrat text-[#173B26]">
               Planning an HWC Mitigation Project in your Forest Division?
             </h3>

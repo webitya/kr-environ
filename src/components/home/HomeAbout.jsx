@@ -1,98 +1,63 @@
 import Link from 'next/link';
 import { ShieldCheck, Award, ArrowRight, UserCheck, Building2 } from 'lucide-react';
-import SectionHeading from '../common/SectionHeading';
 
 export default function HomeAbout() {
   return (
-    <section className="py-12 lg:py-14 bg-[#F5F8F3] border-y border-[#DCE5DD]">
-      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
-        <SectionHeading
-          title="Bridging Advanced Technology & Forest Stewardship"
-          subtitle="KR Environ Solutions is a premier Jharkhand-based environmental enterprise dedicated to eliminating lethal human-wildlife conflict."
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* Left Column: Visual Collage with Partnership Card */}
-          <div className="space-y-4">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-white">
-              <img
-                src="/img4.jpeg"
-                alt="Sarika Gupta at Forest Headquarters Jharkhand"
-                className="w-full h-72 object-cover object-top"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#142D20]/90 via-[#142D20]/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 text-white">
-                <span className="text-xs uppercase font-poppins font-bold text-emerald-400 tracking-wider">
-                  Operational Presence
-                </span>
-                <h4 className="text-base sm:text-lg font-montserrat font-bold text-white">
-                  Forest Headquarters Jharkhand (Van Bhawan, Doranda, Ranchi)
-                </h4>
-                <p className="text-xs text-white/80 font-lato mt-0.5">
-                  Liaising with State Forest & Wildlife Departments, SEIAA, and Wasteland Boards.
-                </p>
-              </div>
+    <section className="py-12 lg:py-16 bg-[#F5F8F3] border-b border-[#DCE5DD]">
+      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          {/* Left Column: Heading & All Content */}
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
+            <div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
+                Bridging Advanced Technology &amp; Forest Stewardship
+              </h2>
             </div>
 
-            {/* Photo 2: Meeting with DFO Ranchi */}
-            <div className="bg-white p-4 rounded-2xl border border-[#DCE5DD] shadow-sm flex items-center gap-4">
-              <img
-                src="/img1.jpeg"
-                alt="Consultation with DFO Ranchi"
-                className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#DCE5DD]"
-              />
-              <div>
-                <span className="text-[11px] font-bold text-[#216B35] uppercase tracking-wider font-poppins">
-                  Official Forest Liaison
-                </span>
-                <h4 className="text-sm sm:text-base font-bold text-[#173B26] font-manrope mt-0.5">
-                  Consultation at D.F.O. Ranchi
-                </h4>
-                <p className="text-xs text-[#4B5563] font-lato mt-0.5">
-                  Presenting environmental dossiers and non-lethal wildlife conflict solutions.
-                </p>
-              </div>
-            </div>
-          </div>
+            <p className="text-sm sm:text-base text-[#4B5563] font-lato leading-relaxed">
+              Headed by proprietor <strong>Sarika Gupta</strong> in Ranchi, Jharkhand, <strong>KR Environ Solutions</strong> spearheads certified non-lethal wildlife conflict management, statutory environmental clearances, and frontline ranger safety gear in strategic alliance with <strong>Kyari Innovations</strong>.
+            </p>
 
-          {/* Right Column: Narrative & Values */}
-          <div className="space-y-4 text-left">
-            <div className="space-y-3 text-sm sm:text-base text-[#4B5563] font-lato leading-relaxed">
-              <p>
-                Headed by proprietor <strong>Sarika Gupta</strong>, <strong>KR Environ Solutions</strong> spearheads the on-ground adoption of smart ecological technologies that protect agricultural perimeters and forest beats without causing injury to wildlife.
-              </p>
-              <p>
-                From deploying over 1,400 smart bio-acoustic scarecrows (ANIDERS) to equipping frontline foot patrollers with tactical Smart Sticks, we turn complex conservation challenges into harmonious coexistence.
-              </p>
-            </div>
-
-            {/* Key Differentiator Bullets */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-poppins text-xs sm:text-sm">
-              <div className="p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5">
+            {/* Compact Key Highlights */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 font-poppins text-xs sm:text-sm">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5 shadow-2xs">
                 <ShieldCheck className="w-4 h-4 text-[#216B35] shrink-0" />
-                <span className="text-[#173B26] font-medium">100% Non-Harmful Deterrence</span>
+                <span className="text-[#173B26] font-medium text-xs sm:text-sm">100% Non-Harmful Deterrence</span>
               </div>
-              <div className="p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5">
-                <UserCheck className="w-4 h-4 text-[#216B35] shrink-0" />
-                <span className="text-[#173B26] font-medium">Certified Ranger Training</span>
-              </div>
-              <div className="p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5 shadow-2xs">
                 <Building2 className="w-4 h-4 text-[#216B35] shrink-0" />
-                <span className="text-[#173B26] font-medium">Government Agency Liaison</span>
+                <span className="text-[#173B26] font-medium text-xs sm:text-sm">Statutory Forest Clearances</span>
               </div>
-              <div className="p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5 shadow-2xs">
+                <UserCheck className="w-4 h-4 text-[#216B35] shrink-0" />
+                <span className="text-[#173B26] font-medium text-xs sm:text-sm">Certified Frontline Ranger Gear</span>
+              </div>
+              <div className="p-2.5 sm:p-3 rounded-xl bg-white border border-[#DCE5DD] flex items-center gap-2.5 shadow-2xs">
                 <Award className="w-4 h-4 text-[#216B35] shrink-0" />
-                <span className="text-[#173B26] font-medium">Field-Proven Nationwide</span>
+                <span className="text-[#173B26] font-medium text-xs sm:text-sm">Field-Proven (21+ States)</span>
               </div>
             </div>
 
             <div className="pt-2">
-              <Link href="/about-us" className="btn-primary w-full sm:w-auto text-center justify-center">
-                <span>Learn More About Our Mission</span>
+              <Link href="/about-us" className="btn-primary inline-flex items-center gap-2 text-xs sm:text-sm px-5 py-2.5">
+                <span>Learn More About Us</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
+
+          {/* Right Column: ONLY Square Image */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-none aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 group">
+              <img
+                src="/img4.jpeg"
+                alt="KR Environ Solutions - Van Bhawan Forest Headquarters"
+                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          </div>
+
         </div>
       </div>
     </section>

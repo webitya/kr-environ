@@ -24,9 +24,11 @@ import {
   MapPin,
   Calendar,
   ArrowLeft,
-  X
+  X,
+  Building2
 } from 'lucide-react';
 import ArticleEditor from '@/components/admin/ArticleEditor';
+import ServiceEditor from '@/components/admin/ServiceEditor';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -37,14 +39,27 @@ export default function AdminDashboardPage() {
   const [gallery, setGallery] = useState([]);
   const [videos, setVideos] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
+
+  // Client modal state
+  const [clientModalOpen, setClientModalOpen] = useState(false);
+  const [currentClient, setCurrentClient] = useState({
+    id: '',
+    name: '',
+    logoUrl: '',
+    websiteUrl: '',
+    displayOrder: 0
+  });
+
+  // Service embedded editor state (Right-side full-width embedded)
+  const [isEditingService, setIsEditingService] = useState(false);
 
   // Article embedded editor state (Right-side full-width embedded)
   const [isEditingBlog, setIsEditingBlog] = useState(false);
 
   // Modals state
-  const [serviceModalOpen, setServiceModalOpen] = useState(false);
   const [currentService, setCurrentService] = useState({
     id: '',
     title: '',
@@ -156,22 +171,24 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      const [srvRes, blgRes, prjRes, galRes, vidRes, enqRes] = await Promise.all([
+      const [srvRes, blgRes, prjRes, galRes, vidRes, enqRes, cliRes] = await Promise.all([
         fetch('/api/services'),
         fetch('/api/blogs'),
         fetch('/api/projects'),
         fetch('/api/gallery'),
         fetch('/api/videos'),
-        fetch('/api/enquiries')
+        fetch('/api/enquiries'),
+        fetch('/api/clients')
       ]);
 
-      const [srvData, blgData, prjData, galData, vidData, enqData] = await Promise.all([
+      const [srvData, blgData, prjData, galData, vidData, enqData, cliData] = await Promise.all([
         srvRes.json(),
         blgRes.json(),
         prjRes.json(),
         galRes.json(),
         vidRes.json(),
-        enqRes.json()
+        enqRes.json(),
+        cliRes.json()
       ]);
 
       setServices(srvData.services || []);
@@ -180,6 +197,7 @@ export default function AdminDashboardPage() {
       setGallery(galData.gallery || []);
       setVideos(vidData.videos || []);
       setEnquiries(enqData.enquiries || []);
+      setClients(cliData.clients || []);
 
       // Fetch dynamic video categories from MongoDB Atlas
       try {
@@ -284,6 +302,8 @@ export default function AdminDashboardPage() {
         setCurrentGallery((prev) => ({ ...prev, imageUrl: data.url }));
       } else if (targetForm === 'video') {
         setCurrentVideo((prev) => ({ ...prev, thumbnail: data.url }));
+      } else if (targetForm === 'client') {
+        setCurrentClient((prev) => ({ ...prev, logoUrl: data.url }));
       }
 
       setMessage({ 
@@ -335,22 +355,24 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleSaveService = async (e) => {
-    e.preventDefault();
+  const handleSaveService = async (servicePayload) => {
     try {
+      const payload = servicePayload && servicePayload.title ? servicePayload : currentService;
       const res = await fetch('/api/services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentService)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save service');
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save service');
 
-      setMessage({ text: `Service '${currentService.title}' saved successfully!`, type: 'success' });
-      setServiceModalOpen(false);
+      setMessage({ text: `Service '${payload.title}' saved successfully!`, type: 'success' });
+      setIsEditingService(false);
       fetchData();
+      return data;
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
+      throw err;
     }
   };
 
@@ -577,8 +599,76 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // ---------------- CLIENTS HANDLERS ----------------
+  const handleOpenClientModal = (cli = null) => {
+    if (cli) {
+      setCurrentClient({
+        id: cli._id || cli.id || '',
+        name: cli.name || '',
+        logoUrl: cli.logoUrl || '',
+        websiteUrl: cli.websiteUrl || '',
+        displayOrder: cli.displayOrder || 0
+      });
+    } else {
+      setCurrentClient({
+        id: '',
+        name: '',
+        logoUrl: '',
+        websiteUrl: '',
+        displayOrder: clients.length + 1
+      });
+    }
+    setClientModalOpen(true);
+  };
+
+  const handleSaveClient = async (e) => {
+    e.preventDefault();
+    if (!currentClient.name.trim()) {
+      alert('Please enter client or organization name');
+      return;
+    }
+    if (!currentClient.logoUrl.trim()) {
+      alert('Please upload or provide client logo image URL');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentClient)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save client');
+      }
+
+      setMessage({ text: `Client '${currentClient.name}' saved successfully!`, type: 'success' });
+      setClientModalOpen(false);
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleDeleteClient = async (id, name) => {
+    if (!confirm(`Are you sure you want to delete client logo "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/clients?id=${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to delete client');
+      }
+      setMessage({ text: `Client logo removed`, type: 'success' });
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
   const tabTitles = {
     services: 'Services & Products',
+    clients: 'Our Clients',
     blogs: 'Blogs & Articles',
     projects: 'Projects & Case Studies',
     gallery: 'Photo Gallery',
@@ -588,6 +678,7 @@ export default function AdminDashboardPage() {
 
   const tabCounts = {
     services: services.length,
+    clients: clients.length,
     blogs: blogs.length,
     projects: projects.length,
     gallery: gallery.length,
@@ -597,6 +688,7 @@ export default function AdminDashboardPage() {
 
   const tabDescriptions = {
     services: 'Manage active wildlife technologies, specifications, and service pages.',
+    clients: 'Manage official partner and client logos moving infinitely in the homepage marquee.',
     blogs: 'Publish research updates, conflict mitigation articles, and company news.',
     projects: 'Showcase forest department deployments, field results, and case studies.',
     gallery: 'Curate high-resolution field photos and deployment event images.',
@@ -606,6 +698,7 @@ export default function AdminDashboardPage() {
 
   const navItems = [
     { id: 'services', label: 'Services & Products', count: services.length, icon: Layers },
+    { id: 'clients', label: 'Our Clients', count: clients.length, icon: Building2 },
     { id: 'blogs', label: 'Blogs & Articles', count: blogs.length, icon: BookOpen },
     { id: 'projects', label: 'Projects & Case Studies', count: projects.length, icon: FolderKanban },
     { id: 'gallery', label: 'Photo Gallery', count: gallery.length, icon: Camera },
@@ -666,7 +759,11 @@ export default function AdminDashboardPage() {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                if (item.id !== 'blogs') setIsEditingBlog(false);
+                if (item.id !== 'services') setIsEditingService(false);
+              }}
               className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded text-xs whitespace-nowrap transition-all ${
                 isActive
                   ? 'bg-[#216B35] text-white font-medium shadow-xs'
@@ -717,6 +814,7 @@ export default function AdminDashboardPage() {
                 onClick={() => {
                   setActiveTab(item.id);
                   if (item.id !== 'blogs') setIsEditingBlog(false);
+                  if (item.id !== 'services') setIsEditingService(false);
                 }}
                 className={`w-full flex items-center justify-between px-2 py-1 rounded text-xs transition-all text-left ${
                   isActive
@@ -776,7 +874,8 @@ export default function AdminDashboardPage() {
 
       {/* MAIN CONTENT AREA - MAX 3PX LEFT/RIGHT SPACE */}
       <main className="flex-1 min-w-0 bg-[#F5F8F3] flex flex-col min-h-screen w-full">
-        {/* Content Area Sticky Top Bar */}
+        {/* Content Area Sticky Top Bar (Hidden during full-width editing) */}
+        {!isEditingBlog && !isEditingService && (
         <header className="bg-white border-b border-[#DCE5DD] px-[3px] py-1.5 sticky top-[74px] md:top-0 z-20 shadow-xs flex flex-wrap items-center justify-between gap-1.5">
           <div className="flex items-center gap-1.5">
             <h1 className="text-xs sm:text-sm font-semibold text-[#173B26] leading-tight flex items-center gap-1.5">
@@ -793,24 +892,47 @@ export default function AdminDashboardPage() {
 
           <div>
             {activeTab === 'services' && (
+              isEditingService ? (
+                <button
+                  onClick={() => setIsEditingService(false)}
+                  className="inline-flex items-center gap-1 bg-[#F5F8F3] hover:bg-[#EAEFE8] text-[#173B26] px-2 py-0.5 rounded text-xs font-medium border border-[#DCE5DD] shadow-xs transition-colors"
+                >
+                  <ArrowLeft className="w-3 h-3" />
+                  <span>Back to Services</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setCurrentService({
+                      id: '',
+                      title: '',
+                      slug: '',
+                      category: 'Wildlife Deterrence & Smart Sensors',
+                      shortDescription: '',
+                      featuredImage: '/img4.jpeg',
+                      status: 'published',
+                      content: '',
+                      seoTitle: '',
+                      metaDescription: '',
+                      specs: []
+                    });
+                    setIsEditingService(true);
+                  }}
+                  className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Add Service</span>
+                </button>
+              )
+            )}
+
+            {activeTab === 'clients' && (
               <button
-                onClick={() => {
-                  setCurrentService({
-                    id: '',
-                    title: '',
-                    slug: '',
-                    category: 'Wildlife Deterrence & Smart Sensors',
-                    shortDescription: '',
-                    featuredImage: '/img4.jpeg',
-                    status: 'published',
-                    content: ''
-                  });
-                  setServiceModalOpen(true);
-                }}
+                onClick={() => handleOpenClientModal()}
                 className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
               >
                 <Plus className="w-3 h-3" />
-                <span>Add Service</span>
+                <span>Add Client Logo</span>
               </button>
             )}
 
@@ -951,9 +1073,10 @@ export default function AdminDashboardPage() {
             )}
           </div>
         </header>
+        )}
 
-        {/* Content Body: Exactly max 3px left/right space */}
-        <div className="w-full px-[3px] py-1 flex-1">
+        {/* Content Body: Exactly max 3px left/right space (or 0 when editing) */}
+        <div className={`w-full flex-1 ${isEditingService || isEditingBlog ? 'p-0' : 'px-[3px] py-1'}`}>
           {/* Banner Alert Message */}
           {message.text && (
             <div className={`mb-1.5 p-1.5 rounded flex items-center justify-between text-xs ${
@@ -980,71 +1103,186 @@ export default function AdminDashboardPage() {
 
         {/* ================= TAB 1: SERVICES ================= */}
         {activeTab === 'services' && (
-          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-[#4B5563] min-w-[550px]">
-                <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
-                  <tr>
-                    <th className="px-2 py-1 font-semibold w-10">Image</th>
-                    <th className="px-2 py-1 font-semibold">Service / Solution</th>
-                    <th className="px-2 py-1 font-semibold">Category</th>
-                    <th className="px-2 py-1 font-semibold">Slug URL</th>
-                    <th className="px-2 py-1 font-semibold text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#DCE5DD]">
-                  {services.map((srv) => (
-                    <tr key={srv.id || srv.slug} className="hover:bg-[#F5F8F3]/50 transition-colors">
-                      <td className="px-2 py-1 w-10">
-                        <img
-                          src={srv.featuredImage || '/img4.jpeg'}
-                          alt={srv.title}
-                          className="w-8 h-8 rounded-sm object-cover border border-[#DCE5DD] shrink-0"
-                        />
-                      </td>
-                      <td className="px-2 py-1">
-                        <div className="font-semibold text-[#173B26] text-xs leading-tight">{srv.title}</div>
-                        <div className="text-[10px] text-[#68756D] line-clamp-1 max-w-sm">{srv.shortDescription}</div>
-                      </td>
-                      <td className="px-2 py-1 whitespace-nowrap">
-                        <span className="text-[10px] bg-[#F5F8F3] text-[#216B35] px-1.5 py-0.5 rounded font-medium border border-[#216B35]/20 inline-block">
-                          {srv.category}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1 font-mono text-[10px] whitespace-nowrap">
-                        <Link
-                          href={`/services/${srv.slug}`}
-                          target="_blank"
-                          className="inline-flex items-center gap-1 text-[#216B35] hover:underline"
-                        >
-                          <span>/services/{srv.slug}</span>
-                          <ExternalLink className="w-2.5 h-2.5" />
-                        </Link>
-                      </td>
-                      <td className="px-2 py-1 text-right whitespace-nowrap space-x-0.5">
-                        <button
-                          onClick={() => {
-                            setCurrentService(srv);
-                            setServiceModalOpen(true);
-                          }}
-                          className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3] transition-colors"
-                          title="Edit Service"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteService(srv.id || srv.slug, srv.title)}
-                          className="p-0.5 rounded text-red-600 hover:bg-red-50 transition-colors"
-                          title="Delete Service"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          isEditingService ? (
+            <div className="w-full">
+              <ServiceEditor
+                key={currentService.id || currentService.slug || 'new-service'}
+                initialService={currentService}
+                categories={serviceCategories}
+                onSave={handleSaveService}
+                onCancel={() => setIsEditingService(false)}
+                onUploadImage={handleImageUpload}
+                onAddCategory={async (name) => {
+                  const res = await fetch('/api/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, type: 'service' })
+                  });
+                  const data = await res.json();
+                  if (!res.ok || !data.success) throw new Error(data.error || 'Failed');
+                  setServiceCategories((prev) => Array.from(new Set([...prev, name])).sort());
+                }}
+              />
             </div>
+          ) : (
+            <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#4B5563] min-w-[550px]">
+                  <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
+                    <tr>
+                      <th className="px-2 py-1 font-semibold w-10">Image</th>
+                      <th className="px-2 py-1 font-semibold">Service / Solution</th>
+                      <th className="px-2 py-1 font-semibold">Category</th>
+                      <th className="px-2 py-1 font-semibold">Slug URL</th>
+                      <th className="px-2 py-1 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCE5DD]">
+                    {services.map((srv) => (
+                      <tr key={srv.id || srv.slug} className="hover:bg-[#F5F8F3]/50 transition-colors">
+                        <td className="px-2 py-1 w-10">
+                          <img
+                            src={srv.featuredImage || '/img4.jpeg'}
+                            alt={srv.title}
+                            className="w-8 h-8 rounded-sm object-cover border border-[#DCE5DD] shrink-0"
+                          />
+                        </td>
+                        <td className="px-2 py-1">
+                          <div className="font-semibold text-[#173B26] text-xs leading-tight">{srv.title}</div>
+                          <div className="text-[10px] text-[#68756D] line-clamp-1 max-w-sm">{srv.shortDescription}</div>
+                        </td>
+                        <td className="px-2 py-1 whitespace-nowrap">
+                          <span className="text-[10px] bg-[#F5F8F3] text-[#216B35] px-1.5 py-0.5 rounded font-medium border border-[#216B35]/20 inline-block">
+                            {srv.category}
+                          </span>
+                        </td>
+                        <td className="px-2 py-1 font-mono text-[10px] whitespace-nowrap">
+                          <Link
+                            href={`/services/${srv.slug}`}
+                            target="_blank"
+                            className="inline-flex items-center gap-1 text-[#216B35] hover:underline"
+                          >
+                            <span>/services/{srv.slug}</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </Link>
+                        </td>
+                        <td className="px-2 py-1 text-right whitespace-nowrap space-x-0.5">
+                          <button
+                            onClick={() => {
+                              setCurrentService(srv);
+                              setIsEditingService(true);
+                            }}
+                            className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3] transition-colors"
+                            title="Edit Service"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteService(srv.id || srv.slug, srv.title)}
+                            className="p-0.5 rounded text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete Service"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        )}
+
+        {/* ================= TAB: CLIENTS ================= */}
+        {activeTab === 'clients' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+            {clients.length === 0 ? (
+              <div className="p-10 text-center text-xs text-[#68756D] space-y-2">
+                <Building2 className="w-8 h-8 text-[#216B35]/40 mx-auto" />
+                <p className="font-semibold text-sm text-[#173B26]">No Client Logos Added Yet</p>
+                <p className="max-w-md mx-auto text-[#68756D]">
+                  Click the button below to upload your first official client or partner logo.
+                </p>
+                <button
+                  onClick={() => handleOpenClientModal()}
+                  className="btn-primary text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 mt-2"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First Client</span>
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#4B5563]">
+                  <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
+                    <tr>
+                      <th className="px-3 py-2 font-semibold w-16">Logo</th>
+                      <th className="px-3 py-2 font-semibold">Client / Partner Name</th>
+                      <th className="px-3 py-2 font-semibold">Website Link</th>
+                      <th className="px-3 py-2 font-semibold w-24">Display Order</th>
+                      <th className="px-3 py-2 font-semibold text-right w-24">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCE5DD]">
+                    {clients.map((cli) => (
+                      <tr key={cli.id || cli._id} className="hover:bg-[#F5F8F3]/50 transition-colors">
+                        <td className="px-3 py-2">
+                          <div className="w-12 h-10 rounded bg-white border border-[#DCE5DD] flex items-center justify-center p-1 overflow-hidden">
+                            <img
+                              src={cli.logoUrl}
+                              alt={cli.name}
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="font-semibold text-[#173B26]">{cli.name}</span>
+                        </td>
+                        <td className="px-3 py-2">
+                          {cli.websiteUrl ? (
+                            <a
+                              href={cli.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#216B35] hover:underline flex items-center gap-1 max-w-xs truncate font-mono text-[11px]"
+                            >
+                              <span>{cli.websiteUrl}</span>
+                              <ExternalLink className="w-3 h-3 shrink-0" />
+                            </a>
+                          ) : (
+                            <span className="text-[#9CA3AF] text-[11px]">—</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="px-2 py-0.5 rounded bg-[#F5F8F3] text-[#173B26] border border-[#DCE5DD] font-mono text-[11px]">
+                            #{cli.displayOrder ?? 0}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleOpenClientModal(cli)}
+                              className="p-1 rounded text-[#216B35] hover:bg-[#F5F8F3]"
+                              title="Edit Client Logo"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClient(cli.id || cli._id, cli.name)}
+                              className="p-1 rounded text-red-600 hover:bg-red-50"
+                              title="Delete Client Logo"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
@@ -1382,219 +1620,6 @@ export default function AdminDashboardPage() {
         )}
         </div>
       </main>
-
-      {/* ================= MODAL: ADD / EDIT SERVICE ================= */}
-      {serviceModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
-          <div className="bg-white rounded-md max-w-xl w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4">
-            <h3 className="text-base font-bold text-[#173B26] mb-0.5">
-              {currentService.id ? 'Edit Service / Product' : 'Add New Service / Product'}
-            </h3>
-            <p className="text-[11px] text-[#68756D] mb-4">
-              Updates in MongoDB Atlas and renders at <span className="font-mono text-[#216B35]">/services/[slug]</span>
-            </p>
-
-            <form onSubmit={handleSaveService} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold text-[#173B26] mb-1">Service / Product Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={currentService.title}
-                  onChange={(e) => setCurrentService({ ...currentService, title: e.target.value })}
-                  placeholder="e.g. ANIDERS (Animal Intrusion Detection System)"
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#173B26] mb-1">URL Slug (auto-generated if empty)</label>
-                  <input
-                    type="text"
-                    value={currentService.slug}
-                    onChange={(e) => setCurrentService({ ...currentService, slug: e.target.value })}
-                    placeholder="aniders-animal-intrusion-detection-system"
-                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block font-semibold text-[#173B26]">Category *</label>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddServiceCategory(!showAddServiceCategory)}
-                      className="text-[11px] text-emerald-700 hover:text-emerald-900 font-semibold inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded transition-colors"
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>+ Add Category</span>
-                    </button>
-                  </div>
-
-                  <select
-                    value={currentService.category}
-                    onChange={(e) => {
-                      if (e.target.value === '__ADD_NEW__') {
-                        setShowAddServiceCategory(true);
-                      } else {
-                        setCurrentService({ ...currentService, category: e.target.value });
-                      }
-                    }}
-                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-medium bg-white focus:outline-none focus:border-[#216B35]"
-                  >
-                    {serviceCategories.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                    {currentService.category && !serviceCategories.includes(currentService.category) && (
-                      <option value={currentService.category}>{currentService.category}</option>
-                    )}
-                    <option value="__ADD_NEW__" className="text-emerald-700 font-bold bg-emerald-50">
-                      + Add Custom Category...
-                    </option>
-                  </select>
-
-                  {showAddServiceCategory && (
-                    <div className="mt-2 p-2.5 bg-emerald-50/70 rounded-lg border border-emerald-200 space-y-2 animate-in fade-in duration-150">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1">
-                          <Plus className="w-3 h-3 text-emerald-700" />
-                          <span>Create Custom Service Category</span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => { setShowAddServiceCategory(false); setNewServiceCategoryName(''); }}
-                          className="text-emerald-700 hover:text-emerald-950 p-0.5 rounded hover:bg-emerald-100"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <div className="flex gap-1.5">
-                        <input
-                          type="text"
-                          autoFocus
-                          value={newServiceCategoryName}
-                          onChange={(e) => setNewServiceCategoryName(e.target.value)}
-                          onKeyDown={async (e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              await handleCreateServiceCategory();
-                            }
-                          }}
-                          placeholder="e.g. Acoustic & Ultrasonic Fencing..."
-                          className="flex-1 px-2.5 py-1.5 text-xs bg-white rounded border border-emerald-300 focus:border-emerald-600 focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          disabled={savingServiceCategory || !newServiceCategoryName.trim()}
-                          onClick={handleCreateServiceCategory}
-                          className="px-3 py-1.5 bg-[#216B35] hover:bg-[#174D28] text-white text-xs font-semibold rounded transition-colors disabled:opacity-50 inline-flex items-center gap-1 shrink-0"
-                        >
-                          {savingServiceCategory ? (
-                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Plus className="w-3 h-3" />
-                          )}
-                          <span>Save</span>
-                        </button>
-                      </div>
-                      <p className="text-[10px] text-emerald-800">
-                        Saves directly into MongoDB Atlas and selects it for this service.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#173B26] mb-1">Short Description</label>
-                <textarea
-                  rows={2}
-                  value={currentService.shortDescription}
-                  onChange={(e) => setCurrentService({ ...currentService, shortDescription: e.target.value })}
-                  placeholder="Summary for catalog card preview..."
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block font-semibold text-[#173B26]">Featured Image *</label>
-                  {currentService.featuredImage?.includes('cloudinary.com') && (
-                    <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded">
-                      ☁️ Cloudinary Hosted
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={currentService.featuredImage}
-                      onChange={(e) => setCurrentService({ ...currentService, featuredImage: e.target.value })}
-                      placeholder="/img4.jpeg or Cloudinary URL"
-                      className="flex-1 p-2 rounded border border-[#DCE5DD] text-xs font-mono"
-                    />
-                    <label className="btn-secondary px-3 py-1.5 rounded cursor-pointer shrink-0 text-xs inline-flex items-center gap-1 font-semibold text-[#216B35] border-[#216B35]/40 hover:bg-[#F5F8F3]">
-                      {uploadingImage ? (
-                        <div className="w-3.5 h-3.5 border-2 border-[#216B35] border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Upload className="w-3.5 h-3.5" />
-                      )}
-                      <span>{uploadingImage ? 'Uploading...' : 'Upload (Cloudinary)'}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        disabled={uploadingImage}
-                        onChange={(e) => handleImageUpload(e, 'service')}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                  {currentService.featuredImage && (
-                    <div className="relative rounded-lg overflow-hidden border border-[#DCE5DD] bg-slate-100 h-28 flex items-center justify-center">
-                      <img
-                        src={currentService.featuredImage}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#173B26] mb-1">Full Technical Content / Specifications (Markdown)</label>
-                <textarea
-                  rows={5}
-                  value={currentService.content}
-                  onChange={(e) => setCurrentService({ ...currentService, content: e.target.value })}
-                  placeholder="### Detailed Specifications..."
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#DCE5DD]">
-                <button
-                  type="button"
-                  onClick={() => setServiceModalOpen(false)}
-                  className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary px-4 py-1.5 rounded text-xs"
-                >
-                  Save Service
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-
 
       {/* ================= MODAL: ADD / EDIT PROJECT ================= */}
       {projectModalOpen && (
@@ -2131,6 +2156,138 @@ export default function AdminDashboardPage() {
                   className="btn-primary px-4 py-1.5 rounded text-xs"
                 >
                   Save Video
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ================= MODAL: CLIENT LOGO ================= */}
+      {clientModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
+          <div className="bg-white rounded-md max-w-md w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <h3 className="text-base font-bold text-[#173B26]">
+                {currentClient.id ? 'Edit Client / Partner Logo' : 'Add New Client / Partner Logo'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setClientModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveClient} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Client / Organization Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={currentClient.name}
+                  onChange={(e) => setCurrentClient({ ...currentClient, name: e.target.value })}
+                  placeholder="e.g. Jharkhand State Forest Department, Wildlife Institute of India..."
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Logo Image <span className="text-red-500">*</span>
+                </label>
+                
+                {/* Upload or Direct URL */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="inline-flex items-center gap-1.5 bg-[#216B35] hover:bg-[#174D28] text-white px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors shadow-xs">
+                      {uploadingImage ? (
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5" />
+                      )}
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload Logo File'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingImage}
+                        className="hidden"
+                        onChange={async (e) => {
+                          await handleImageUpload(e, 'client');
+                        }}
+                      />
+                    </label>
+                    <span className="text-[11px] text-[#68756D]">PNG, SVG, JPG (transparent recommended)</span>
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    value={currentClient.logoUrl}
+                    onChange={(e) => setCurrentClient({ ...currentClient, logoUrl: e.target.value })}
+                    placeholder="or paste direct logo image URL..."
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                  />
+
+                  {currentClient.logoUrl && (
+                    <div className="mt-2 p-2 rounded border border-[#DCE5DD] bg-[#F5F8F3] flex items-center gap-3">
+                      <div className="w-16 h-12 rounded bg-white border border-[#DCE5DD] flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                        <img
+                          src={currentClient.logoUrl}
+                          alt="Logo Preview"
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </div>
+                      <div className="overflow-hidden">
+                        <span className="text-[10px] uppercase font-bold text-[#216B35] block">Logo Preview</span>
+                        <span className="text-[11px] text-[#68756D] truncate block">{currentClient.logoUrl}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Website URL <span className="text-[11px] font-normal text-[#68756D]">(Optional)</span>
+                </label>
+                <input
+                  type="url"
+                  value={currentClient.websiteUrl}
+                  onChange={(e) => setCurrentClient({ ...currentClient, websiteUrl: e.target.value })}
+                  placeholder="https://example.gov.in"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  value={currentClient.displayOrder}
+                  onChange={(e) => setCurrentClient({ ...currentClient, displayOrder: parseInt(e.target.value) || 0 })}
+                  className="w-24 p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+                <span className="text-[10px] text-[#68756D] ml-2">Lower numbers appear first</span>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#DCE5DD]">
+                <button
+                  type="button"
+                  onClick={() => setClientModalOpen(false)}
+                  className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-4 py-1.5 rounded text-xs"
+                >
+                  {currentClient.id ? 'Save Changes' : 'Add Client Logo'}
                 </button>
               </div>
             </form>

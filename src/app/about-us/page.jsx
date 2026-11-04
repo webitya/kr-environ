@@ -58,9 +58,6 @@ export default function AboutUsPage() {
         <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-10 sm:py-14 border-b border-[#DCE5DD]">
           <Container>
             <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35] mb-2">
-                Sustainable &bull; Responsible &bull; Reliable
-              </p>
               <h1 className="text-3xl sm:text-4xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
                 Your Trusted Environmental & Forest Consultancy Partner
               </h1>
@@ -76,9 +73,6 @@ export default function AboutUsPage() {
           <Container>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-7 space-y-4">
-                <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins">
-                  Official Mandate & Capabilities
-                </span>
                 <h2 className="text-2xl sm:text-3xl font-bold font-montserrat text-[#173B26]">
                   Bridging Environmental Clearance, GIS Technology & Wildlife Safety
                 </h2>
@@ -148,10 +142,7 @@ export default function AboutUsPage() {
         <section className="py-12 lg:py-14 bg-[#F5F8F3] border-b border-[#DCE5DD]">
           <Container>
             <div className="text-center max-w-3xl mx-auto mb-8">
-              <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins">
-                Our Advisory & Executive Board
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold font-montserrat text-[#173B26] mt-1.5">
+              <h2 className="text-2xl sm:text-3xl font-bold font-montserrat text-[#173B26]">
                 Expert Leadership Team
               </h2>
               <p className="mt-2 text-xs sm:text-sm text-[#4B5563] font-lato">
@@ -201,10 +192,7 @@ export default function AboutUsPage() {
         <section className="py-12 lg:py-14 bg-white border-b border-[#DCE5DD]">
           <Container>
             <div className="text-center max-w-2xl mx-auto mb-6">
-              <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins">
-                Credentials & Documents
-              </span>
-              <h2 className="text-2xl font-bold font-montserrat text-[#173B26] mt-1">
+              <h2 className="text-2xl font-bold font-montserrat text-[#173B26]">
                 Official Company Visiting Card & Overview
               </h2>
             </div>

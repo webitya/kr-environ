@@ -9,10 +9,6 @@ export default function HomeCTA() {
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-[#216B35]/25 blur-3xl pointer-events-none" />
 
       <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 relative z-10 text-center">
-        <p className="text-xs uppercase tracking-wider font-semibold text-emerald-300 mb-2.5">
-          Transforming Human-Wildlife Coexistence Across India
-        </p>
-
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-montserrat tracking-tight text-white max-w-4xl mx-auto leading-tight">
           Ready to Deploy Field-Proven Wildlife Technology in Your Division?
         </h2>

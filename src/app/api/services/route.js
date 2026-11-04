@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getServices, upsertService, deleteService } from '@/lib/db';
 
 function slugify(text) {
@@ -38,6 +39,15 @@ export async function POST(req) {
     };
 
     const saved = await upsertService(serviceData);
+    try {
+      revalidatePath('/services');
+      revalidatePath(`/services/${slug}`);
+      revalidatePath('/');
+      revalidatePath('/admin');
+    } catch (e) {
+      console.warn('Revalidate path warning:', e.message);
+    }
+
     return NextResponse.json({ success: true, service: saved });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
@@ -53,6 +63,14 @@ export async function DELETE(req) {
     }
 
     await deleteService(id);
+    try {
+      revalidatePath('/services');
+      revalidatePath('/');
+      revalidatePath('/admin');
+    } catch (e) {
+      console.warn('Revalidate path warning:', e.message);
+    }
+
     return NextResponse.json({ success: true, message: 'Service deleted successfully' });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

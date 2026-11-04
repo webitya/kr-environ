@@ -101,9 +101,6 @@ export default function GalleryPage() {
         <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-10 sm:py-14 border-b border-[#DCE5DD]">
           <Container>
             <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-wider font-semibold text-[#173B26] mb-2">
-                Photo Archive
-              </p>
               <h1 className="text-3xl sm:text-4xl font-montserrat font-extrabold text-[#173B26] tracking-tight">
                 Field Operations & Equipment Gallery
               </h1>

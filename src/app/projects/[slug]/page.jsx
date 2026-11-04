@@ -49,10 +49,6 @@ export default async function ProjectDetailPage({ params }) {
                 <span>Back to All Field Deployments</span>
               </Link>
 
-              <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35]">
-                {project.category || 'Field Deployment'}
-              </p>
-
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-extrabold text-[#173B26] leading-tight">
                 {project.title}
               </h1>

@@ -14,6 +14,9 @@ import {
 } from 'lucide-react';
 import { getServiceBySlug, getServices } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const service = await getServiceBySlug(resolvedParams.slug);
@@ -64,10 +67,6 @@ export default async function ServiceDetailPage({ params }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
               <div className="lg:col-span-8 space-y-3">
-                <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35]">
-                  {service.category || 'Wildlife Technology'}
-                </p>
-
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-montserrat font-extrabold text-[#173B26] leading-tight">
                   {service.title}
                 </h1>
@@ -161,10 +160,7 @@ export default async function ServiceDetailPage({ params }) {
                 )}
 
                 {/* Direct Action Card */}
-                <div className="bg-[#142D20] text-white p-6 rounded-2xl shadow-lg space-y-4">
-                  <span className="text-xs font-bold font-poppins text-emerald-400 uppercase tracking-wider block">
-                    Government Procurements
-                  </span>
+                <div className="bg-[#142D20] text-white p-6 rounded-2xl shadow-lg space-y-3">
                   <h4 className="text-lg font-bold font-montserrat text-white leading-snug">
                     Schedule Ground Audit in Your Division
                   </h4>
@@ -180,36 +176,43 @@ export default async function ServiceDetailPage({ params }) {
 
             {/* Related Services */}
             {relatedServices.length > 0 && (
-              <div className="mt-20 pt-12 border-t border-[#DCE5DD]">
-                <h3 className="text-2xl font-bold font-montserrat text-[#173B26] mb-8">
-                  Related Wildlife & Field Solutions
+              <div className="mt-16 pt-10 border-t border-[#DCE5DD]">
+                <h3 className="text-xl sm:text-2xl font-bold font-manrope text-[#173B26] mb-6">
+                  Related Wildlife &amp; Field Solutions
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                   {relatedServices.map((rel) => (
-                    <div
-                      key={rel.id || rel.slug}
-                      className="bg-white p-6 rounded-2xl border border-[#DCE5DD] hover:border-[#216B35] transition-all card-hover flex flex-col justify-between"
+                    <Link
+                      key={rel.id || rel._id || rel.slug}
+                      href={`/services/${rel.slug}`}
+                      className="group bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden hover:border-[#216B35]/60 hover:shadow-md transition-all duration-300 flex flex-col justify-between"
                     >
                       <div>
-                        <span className="text-xs font-bold text-[#216B35] uppercase tracking-wider font-poppins block mb-2">
-                          {rel.category}
-                        </span>
-                        <h4 className="text-lg font-bold font-montserrat text-[#173B26] hover:text-[#216B35]">
-                          <Link href={`/services/${rel.slug}`}>{rel.title}</Link>
-                        </h4>
-                        <p className="mt-2 text-xs text-[#4B5563] font-lato line-clamp-2">
-                          {rel.shortDescription}
-                        </p>
+                        {/* Featured Image instead of top badge */}
+                        <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                          <img
+                            src={rel.featuredImage || '/img4.jpeg'}
+                            alt={rel.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        <div className="p-4 sm:p-5">
+                          <h4 className="text-sm sm:text-base font-bold font-manrope text-[#173B26] group-hover:text-[#216B35] transition-colors leading-snug line-clamp-2">
+                            {rel.title}
+                          </h4>
+                          <p className="mt-2 text-xs text-[#4B5563] font-lato line-clamp-2 leading-relaxed">
+                            {rel.shortDescription}
+                          </p>
+                        </div>
                       </div>
-                      <div className="mt-4 pt-3 border-t border-[#DCE5DD]/60">
-                        <Link
-                          href={`/services/${rel.slug}`}
-                          className="text-xs font-semibold text-[#216B35] hover:underline"
-                        >
-                          View Details &rarr;
-                        </Link>
+
+                      <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-[#DCE5DD]/60 flex items-center justify-between text-xs font-semibold text-[#216B35] group-hover:text-[#174D28]">
+                        <span>View Details &amp; Specs</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
