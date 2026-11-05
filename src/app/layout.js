@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import "./globals.css";
 import FloatingContactButtons from "@/components/common/FloatingContactButtons";
+import TopProgressBar from "@/components/common/TopProgressBar";
 
 export const metadata = {
   metadataBase: new URL('https://www.krenviron.in'),
@@ -83,6 +85,9 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FFFFFF] text-[#4B5563]" suppressHydrationWarning>
+        <Suspense fallback={null}>
+          <TopProgressBar />
+        </Suspense>
         {children}
         <FloatingContactButtons />
       </body>

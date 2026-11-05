@@ -331,7 +331,12 @@ export async function ensureProjectsInitialized() {
       const conn = await connectToDatabase();
       if (!conn) return;
 
-      // Clean up legacy fallback demo projects so only admin panel projects are displayed
+      const db = conn.connection.db;
+      const settingsCol = db.collection('settings');
+      const marker = await settingsCol.findOne({ key: 'projects_initialized_v2' });
+      if (marker) return;
+
+      // Clean up legacy fallback demo projects once so only admin panel projects are displayed
       const demoSlugs = ['bihar-nepal-border-aniders', 'ladakh-valmiki-smart-sticks-patrol', 'odisha-ranger-net-gun-training'];
       await Project.deleteMany({
         $or: [
@@ -340,11 +345,9 @@ export async function ensureProjectsInitialized() {
         ]
       }).catch(() => {});
 
-      const db = conn.connection.db;
-      const settingsCol = db.collection('settings');
       await settingsCol.updateOne(
-        { key: 'projects_initialized' },
-        { $set: { key: 'projects_initialized', initializedAt: new Date() } },
+        { key: 'projects_initialized_v2' },
+        { $set: { key: 'projects_initialized_v2', initializedAt: new Date() } },
         { upsert: true }
       ).catch(() => {});
     } catch (e) {
@@ -648,7 +651,12 @@ export async function ensureVideosInitialized() {
       const conn = await connectToDatabase();
       if (!conn) return;
 
-      // Clean up legacy fallback demo videos so only admin panel videos are displayed
+      const db = conn.connection.db;
+      const settingsCol = db.collection('settings');
+      const marker = await settingsCol.findOne({ key: 'videos_initialized_v2' });
+      if (marker) return;
+
+      // Clean up legacy fallback demo videos once so only admin panel videos are displayed
       const demoTitles = [
         'ANIDERS | Patented Animal Intrusion Detection & Repellent System',
         'ANIDERS Nocturnal Deterrence & Animal Repellent Field Test',
@@ -667,11 +675,9 @@ export async function ensureVideosInitialized() {
         ]
       }).catch(() => {});
 
-      const db = conn.connection.db;
-      const settingsCol = db.collection('settings');
       await settingsCol.updateOne(
-        { key: 'videos_initialized' },
-        { $set: { key: 'videos_initialized', initializedAt: new Date() } },
+        { key: 'videos_initialized_v2' },
+        { $set: { key: 'videos_initialized_v2', initializedAt: new Date() } },
         { upsert: true }
       ).catch(() => {});
     } catch (e) {
