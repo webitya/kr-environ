@@ -206,15 +206,32 @@ export default function SiteFooter() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-5 mt-2 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#E4EEE6]/60">
+        <div className="pt-5 mt-2 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#E4EEE6]/60 font-manrope">
           <p>
-            &copy; 2024 KR Environ Solutions (Proprietor: Sarika Gupta). All rights reserved.
+            &copy; 2026 KR Environ Solutions (Proprietor: Sarika Gupta). All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms-and-conditions" className="hover:text-white transition-colors">Terms of Service</Link>
             <Link href="/contact-us" className="hover:text-white transition-colors">Enquiry Desk</Link>
           </div>
+        </div>
+
+        {/* Webitya Developer & Architect Attribution */}
+        <hr className="border-white/10 mt-4 mb-3.5" />
+        <div className="text-center text-xs text-[#E4EEE6]/70 font-manrope">
+          <p>
+            Website Architected, Designed &amp; Maintained by{' '}
+            <a
+              href="https://www.webitya.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors underline underline-offset-2"
+              title="Webitya - Custom Web Architecture & Digital Growth"
+            >
+              Webitya
+            </a>
+          </p>
         </div>
       </div>
     </footer>

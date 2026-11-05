@@ -507,11 +507,31 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteProject = async (id, title) => {
+    if (!id && !title) {
+      setMessage({ text: 'Cannot delete project: Project identifier is missing.', type: 'error' });
+      return;
+    }
     if (!confirm(`Are you sure you want to delete project "${title}"?`)) return;
     try {
-      const res = await fetch(`/api/projects?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      setMessage({ text: `Project deleted`, type: 'success' });
+      const targetId = id || '';
+      const res = await fetch(`/api/projects?id=${encodeURIComponent(targetId)}&title=${encodeURIComponent(title || '')}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Delete failed');
+      }
+      setMessage({ text: `Project "${title}" deleted successfully`, type: 'success' });
+
+      // Optimistically remove from state immediately
+      setProjects((prev) =>
+        prev.filter((p) => {
+          if (targetId && (p.id === targetId || p._id === targetId || p.slug === targetId)) return false;
+          if (title && p.title === title) return false;
+          return true;
+        })
+      );
+
       fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
@@ -2170,7 +2190,7 @@ export default function AdminDashboardPage() {
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDeleteProject(prj.id || prj.slug, prj.title)}
+                          onClick={() => handleDeleteProject(prj._id || prj.id || prj.slug, prj.title)}
                           className="p-0.5 rounded text-red-600 hover:bg-red-50 transition-colors"
                           title="Delete Project"
                         >

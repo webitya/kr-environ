@@ -62,15 +62,15 @@ function slugify(text) {
 function generateSchemaJson({ title, excerpt, metaDescription, featuredImage, slug, author, date, focusKeywords }) {
   const cleanSlug = slug || slugify(title) || 'article';
   const cleanImage = featuredImage
-    ? (featuredImage.startsWith('http') ? featuredImage : `https://krenviron.com${featuredImage}`)
-    : 'https://krenviron.com/img4.jpeg';
+    ? (featuredImage.startsWith('http') ? featuredImage : `https://www.krenviron.in${featuredImage}`)
+    : 'https://www.krenviron.in/img4.jpeg';
 
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     'mainEntityOfPage': {
       '@type': 'WebPage',
-      '@id': `https://krenviron.com/blog/${cleanSlug}`
+      '@id': `https://www.krenviron.in/blog/${cleanSlug}`
     },
     'headline': title || 'Untitled Article',
     'description': metaDescription || excerpt || '',
@@ -86,7 +86,7 @@ function generateSchemaJson({ title, excerpt, metaDescription, featuredImage, sl
       'name': 'KR Environ Solutions',
       'logo': {
         '@type': 'ImageObject',
-        'url': 'https://krenviron.com/logo.jpeg'
+        'url': 'https://www.krenviron.in/logo.jpeg'
       }
     },
     'keywords': focusKeywords || ''

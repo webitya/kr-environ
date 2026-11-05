@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Play, X, Tv, Filter } from 'lucide-react';
+import { Play, X, Tv } from 'lucide-react';
 
 export default function VideosClient({ initialVideos = [] }) {
   const [videos, setVideos] = useState(initialVideos);
   const [activeVideo, setActiveVideo] = useState(null);
-  const [activeCategory, setActiveCategory] = useState('All');
 
   // Sync with API on mount to ensure real-time updates from admin panel
   useEffect(() => {
@@ -26,13 +25,6 @@ export default function VideosClient({ initialVideos = [] }) {
     loadVideos();
   }, []);
 
-  // Compute categories strictly from real admin/DB videos
-  const categories = ['All', ...Array.from(new Set(videos.map((v) => v.category).filter(Boolean)))];
-
-  const filteredVideos = activeCategory === 'All'
-    ? videos
-    : videos.filter((v) => v.category === activeCategory);
-
   return (
     <div className="w-full">
       {/* Empty State when no videos exist in database/admin panel */}
@@ -45,36 +37,13 @@ export default function VideosClient({ initialVideos = [] }) {
           </p>
         </div>
       ) : (
-        <>
-          {/* Dynamic Category Filters */}
-          {categories.length > 1 && (
-            <div className="flex flex-wrap items-center gap-2 mb-6 pb-3 border-b border-[#DCE5DD]">
-              <span className="text-xs font-bold text-[#68756D] uppercase tracking-wider mr-2 flex items-center gap-1 font-manrope">
-                <Filter className="w-3.5 h-3.5" /> Filter by:
-              </span>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-3.5 py-1 rounded-lg text-xs font-medium font-manrope transition-colors ${
-                    activeCategory === cat
-                      ? 'bg-[#216B35] text-white font-semibold shadow-xs'
-                      : 'bg-[#F5F8F3] text-[#4B5563] hover:bg-[#DCE5DD]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Videos Grid - Only Real Database Videos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredVideos.map((video) => (
-              <div
-                key={video._id || video.id}
-                className="bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden shadow-xs hover:border-[#216B35]/50 transition-all flex flex-col justify-between"
-              >
+        /* Videos Grid - Only Real Database Videos */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {videos.map((video) => (
+            <div
+              key={video._id || video.id}
+              className="bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden shadow-xs hover:border-[#216B35]/50 transition-all flex flex-col justify-between"
+            >
                 <div>
                   {/* Video Thumbnail with Play Button */}
                   <div
@@ -125,7 +94,6 @@ export default function VideosClient({ initialVideos = [] }) {
               </div>
             ))}
           </div>
-        </>
       )}
 
       {/* Video Modal Player */}

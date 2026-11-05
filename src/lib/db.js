@@ -331,19 +331,12 @@ export async function ensureProjectsInitialized() {
       const conn = await connectToDatabase();
       if (!conn) return;
 
-      const count = await Project.countDocuments();
-      if (count > 0) return;
+      // Clean up legacy fallback demo projects so they never reappear
+      const demoSlugs = ['bihar-nepal-border-aniders', 'ladakh-valmiki-smart-sticks-patrol', 'odisha-ranger-net-gun-training'];
+      await Project.deleteMany({ slug: { $in: demoSlugs } }).catch(() => {});
 
       const db = conn.connection.db;
       const settingsCol = db.collection('settings');
-      const marker = await settingsCol.findOne({ key: 'projects_initialized' });
-      if (marker) return;
-
-      for (const p of FALLBACK_PROJECTS) {
-        const { id, ...clean } = p;
-        await Project.create(clean).catch(() => {});
-      }
-
       await settingsCol.updateOne(
         { key: 'projects_initialized' },
         { $set: { key: 'projects_initialized', initializedAt: new Date() } },
@@ -368,7 +361,7 @@ export async function getProjects() {
   } catch (err) {
     console.error('Error fetching projects from MongoDB:', err.message);
   }
-  return FALLBACK_PROJECTS;
+  return [];
 }
 
 export async function getProjectBySlug(slug) {
@@ -382,8 +375,7 @@ export async function getProjectBySlug(slug) {
   } catch (err) {
     console.error('Error fetching project by slug:', err.message);
   }
-  const fallback = FALLBACK_PROJECTS.find(p => p.slug === slug);
-  return fallback ? serializeDoc(fallback) : null;
+  return null;
 }
 
 export async function upsertProject(projectData) {
@@ -410,15 +402,42 @@ export async function upsertProject(projectData) {
   }
 }
 
-export async function deleteProject(idOrSlug) {
+export async function deleteProject(idOrSlug, title = '') {
   try {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
 
-    if (idOrSlug && idOrSlug.length === 24) {
-      await Project.findByIdAndDelete(idOrSlug);
-    } else {
-      await Project.findOneAndDelete({ slug: idOrSlug });
+    // Guarantee initialized marker is saved so count reaching 0 never resurrects default demo projects
+    try {
+      const db = conn.connection.db;
+      await db.collection('settings').updateOne(
+        { key: 'projects_initialized' },
+        { $set: { key: 'projects_initialized', initializedAt: new Date() } },
+        { upsert: true }
+      );
+    } catch (e) {}
+
+    const isValidObjectId = typeof idOrSlug === 'string' && /^[0-9a-fA-F]{24}$/.test(idOrSlug);
+    let deleted = null;
+    if (isValidObjectId) {
+      deleted = await Project.findByIdAndDelete(idOrSlug);
+    }
+
+    if (!deleted) {
+      const orConditions = [];
+      if (isValidObjectId) orConditions.push({ _id: idOrSlug });
+      if (idOrSlug && idOrSlug !== 'undefined' && idOrSlug !== 'null') {
+        orConditions.push({ id: idOrSlug });
+        orConditions.push({ slug: idOrSlug });
+        orConditions.push({ title: idOrSlug });
+      }
+      if (title && title.trim()) {
+        orConditions.push({ title: title.trim() });
+      }
+
+      if (orConditions.length > 0) {
+        deleted = await Project.findOneAndDelete({ $or: orConditions });
+      }
     }
     return true;
   } catch (err) {

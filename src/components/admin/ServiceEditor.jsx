@@ -785,7 +785,7 @@ export default function ServiceEditor({
                   {formData.seoTitle || formData.title || 'Service Title'} | KR Environ Solutions
                 </div>
                 <div className="text-[11px] text-[#006621] font-mono truncate">
-                  https://krenviron.com/services/{formData.slug || 'slug'}
+                  https://www.krenviron.in/services/{formData.slug || 'slug'}
                 </div>
                 <p className="text-[11px] text-[#545454] line-clamp-2 leading-tight">
                   {formData.metaDescription || formData.shortDescription || 'KR Environ Solutions advanced wildlife technology and ecological engineering solutions.'}

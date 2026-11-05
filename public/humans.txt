@@ -1,0 +1,25 @@
+/* TEAM */
+  Owner & Lead Engineer: Aditya Kumar
+  Agency: Webitya
+  Contact Email: info@webitya.com
+  Phone: +91 9693245941
+  Official Website: https://www.webitya.com
+  Services: Web Architecture, Full-Stack Next.js Engineering, Advanced SEO & AEO, Digital Growth
+  Location: India
+
+/* ABOUT WEBITYA */
+  Bridging the gap between engineering excellence, practical education, and revenue growth.
+
+  At Webitya, we empower ambitious businesses, students, and working professionals to scale through clean software architecture, search-first strategy, and high-performance digital marketing. Our core mission is to engineer your online presence with clarity, creative precision, and measurable return on investment.
+
+  Combining deep technical expertise in custom web development, advanced search engine optimization (SEO & AEO), and performance marketing, we provide 1-on-1 mentorship and tailored enterprise solutions that drive long-term digital authority.
+
+/* SITE ATTRIBUTION */
+  Website: KR Environ Solutions (https://www.krenviron.in/)
+  Website Architect, Designer & Maintainer: Webitya (https://www.webitya.com)
+  Client: KR Environ Solutions
+  Proprietor: Sarika Gupta (Environmentalist & Lead Analyst)
+  Technology Stack: Next.js 16 (App Router), React, Tailwind CSS, MongoDB Atlas, Lucide Icons
+  Architecture: High-Performance Server Components, Mobile-First Responsive Design, Schema.org Microdata
+  Year: 2026
+
