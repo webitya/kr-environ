@@ -12,7 +12,7 @@ export default function TermsPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
 
-      <main className="flex-1 py-10 sm:py-12 bg-white">
+      <main className="flex-1 w-full min-h-[calc(100vh-80px)] py-10 sm:py-12 bg-white">
         <Container>
           <h1 className="text-2xl sm:text-3xl font-bold font-montserrat text-[#173B26] mb-2">
             Terms & Conditions

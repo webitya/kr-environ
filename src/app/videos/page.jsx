@@ -14,7 +14,7 @@ export default function VideosPage() {
   useEffect(() => {
     async function loadVideos() {
       try {
-        const res = await fetch('/api/videos');
+        const res = await fetch('/api/videos', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (data.videos && data.videos.length > 0) {
@@ -75,7 +75,7 @@ export default function VideosPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col justify-between">
         {/* Videos Hero */}
         <section className="bg-gradient-to-b from-[#F5F8F3] to-white pt-6 pb-2 sm:pt-8 sm:pb-3">
           <Container>

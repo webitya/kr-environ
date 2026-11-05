@@ -106,56 +106,20 @@ export default function AboutUsPage() {
     <div className="flex flex-col min-h-screen bg-white">
       <SiteHeader />
 
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col justify-between">
         {/* =========================================================================
-            1. HERO SECTION: Meaningful, Authoritative Headline & Impact Metrics
+            1. WHO WE ARE: In-Depth Company Story & Dual-Photo Presentation
             ========================================================================= */}
-        <section className="bg-gradient-to-b from-[#F5F8F3] via-white to-[#F5F8F3]/20 pt-8 pb-4 sm:pt-10 sm:pb-6 w-full">
-          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-            <div className="max-w-4xl space-y-2.5">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
-                Engineering Sustainable Coexistence &amp; Environmental Stewardship
-              </h1>
-              <p className="text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed max-w-3xl">
-                KR Environ Solutions is an environmental enterprise based in Ranchi, Jharkhand. We bridge regulatory statutory forest clearances, GIS drone mapping, and National Award-winning non-lethal wildlife protection technology across India.
-              </p>
-            </div>
-
-            {/* Credibility Quick Stats Strip */}
-            <div className="mt-8 pt-6 border-t border-[#DCE5DD] grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-left">
-              <div className="p-3 sm:p-4 rounded-xl bg-white border border-[#DCE5DD] shadow-2xs">
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#173B26] font-manrope">15+ Years</div>
-                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">Environmental Analytics Track Record</div>
-              </div>
-              <div className="p-3 sm:p-4 rounded-xl bg-white border border-[#DCE5DD] shadow-2xs">
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#216B35] font-manrope">21+ States</div>
-                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">State Forest Department Deployments</div>
-              </div>
-              <div className="p-3 sm:p-4 rounded-xl bg-white border border-[#DCE5DD] shadow-2xs">
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#173B26] font-manrope">4,000+</div>
-                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">Active Non-Lethal Hardware Units</div>
-              </div>
-              <div className="p-3 sm:p-4 rounded-xl bg-white border border-[#DCE5DD] shadow-2xs">
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#216B35] font-manrope">100%</div>
-                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">Non-Lethal &amp; Regulatory Compliant</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            2. WHO WE ARE: In-Depth Company Story & Dual-Photo Presentation
-            ========================================================================= */}
-        <section className="py-10 sm:py-14 bg-white w-full border-t border-[#DCE5DD]">
+        <section className="pt-8 pb-10 sm:pt-10 sm:pb-14 bg-white w-full">
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
               
               {/* Left Column: Comprehensive Profile & Capabilities */}
               <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
                 <div>
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
                     Who We Are: Rooted in Jharkhand, Protecting Pan-India Ecosystems
-                  </h2>
+                  </h1>
                 </div>
 
                 <div className="space-y-3.5 text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed">
@@ -419,7 +383,43 @@ export default function AboutUsPage() {
         </section>
 
         {/* =========================================================================
-            6. INSTITUTIONAL CALL TO ACTION
+            6. TRACK RECORD & IMPACT: Engineering Sustainable Coexistence & Stewardship
+            ========================================================================= */}
+        <section className="py-10 sm:py-14 bg-white w-full border-t border-[#DCE5DD]">
+          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
+            <div className="max-w-4xl space-y-2.5 mb-8">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
+                Engineering Sustainable Coexistence &amp; Environmental Stewardship
+              </h2>
+              <p className="text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed max-w-3xl">
+                KR Environ Solutions is an environmental enterprise based in Ranchi, Jharkhand. We bridge regulatory statutory forest clearances, GIS drone mapping, and National Award-winning non-lethal wildlife protection technology across India.
+              </p>
+            </div>
+
+            {/* Credibility Quick Stats Strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-left">
+              <div className="p-4 sm:p-5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] shadow-2xs hover:border-[#216B35]/40 transition-colors">
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#173B26] font-manrope">15+ Years</div>
+                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">Environmental Analytics Track Record</div>
+              </div>
+              <div className="p-4 sm:p-5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] shadow-2xs hover:border-[#216B35]/40 transition-colors">
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#216B35] font-manrope">21+ States</div>
+                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">State Forest Department Deployments</div>
+              </div>
+              <div className="p-4 sm:p-5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] shadow-2xs hover:border-[#216B35]/40 transition-colors">
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#173B26] font-manrope">4,000+</div>
+                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">Active Non-Lethal Hardware Units</div>
+              </div>
+              <div className="p-4 sm:p-5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] shadow-2xs hover:border-[#216B35]/40 transition-colors">
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#216B35] font-manrope">100%</div>
+                <div className="text-xs text-[#68756D] font-manrope font-medium mt-1">Non-Lethal &amp; Regulatory Compliant</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            7. INSTITUTIONAL CALL TO ACTION
             ========================================================================= */}
         <section className="py-12 sm:py-16 bg-[#173B26] text-white text-center w-full">
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 max-w-5xl mx-auto">

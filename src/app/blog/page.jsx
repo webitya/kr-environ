@@ -19,7 +19,7 @@ export default async function BlogPage() {
     <div className="flex flex-col min-h-screen bg-white">
       <SiteHeader />
 
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col justify-between">
         {/* Full-Width Blogs Section (No HR line, compact top & bottom spacing) */}
         <section className="pt-6 pb-12 sm:pt-8 sm:pb-16 w-full">
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">

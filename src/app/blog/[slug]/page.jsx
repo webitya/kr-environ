@@ -49,7 +49,7 @@ export default async function BlogDetailPage({ params }) {
 
       <SiteHeader />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full min-h-[calc(100vh-80px)]">
         {/* Article Header */}
         <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-8 sm:py-12 border-b border-[#DCE5DD]">
           <Container>

@@ -20,7 +20,7 @@ export default async function ServicesPage() {
     <div className="flex flex-col min-h-screen bg-[#F5F8F3]/40">
       <SiteHeader />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col justify-between">
         {/* Full-Width Services Hero Header */}
         <section className="bg-gradient-to-b from-[#F5F8F3] via-white to-[#F5F8F3]/30 pt-6 pb-2 sm:pt-8 sm:pb-3">
           <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">

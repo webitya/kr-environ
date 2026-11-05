@@ -21,7 +21,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-full scroll-smooth antialiased" suppressHydrationWarning>
+    <html lang="en" className="min-h-full scroll-smooth antialiased" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
           type="video/mp4"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#FFFFFF] text-[#4B5563]" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col bg-[#FFFFFF] text-[#4B5563]" suppressHydrationWarning>
         {children}
         <FloatingContactButtons />
       </body>

@@ -25,7 +25,16 @@ import {
   Calendar,
   ArrowLeft,
   X,
-  Building2
+  Building2,
+  Package,
+  Handshake,
+  Award,
+  FileCheck2,
+  FileText,
+  Download,
+  Eye,
+  Play,
+  Video
 } from 'lucide-react';
 import ArticleEditor from '@/components/admin/ArticleEditor';
 import ServiceEditor from '@/components/admin/ServiceEditor';
@@ -40,8 +49,50 @@ export default function AdminDashboardPage() {
   const [videos, setVideos] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
   const [clients, setClients] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [partners, setPartners] = useState([]);
+  const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
+
+  // Product modal state
+  const [productModalOpen, setProductModalOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState({
+    id: '',
+    title: '',
+    slug: '',
+    modelCode: '',
+    category: 'Bird Diverters & Avian Protection',
+    shortDescription: '',
+    featuredImage: '',
+    price: 'Custom Forest Dept Quote',
+    status: 'published',
+    specs: [{ label: '', value: '' }],
+    content: ''
+  });
+
+  // Partner modal state
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+  const [currentPartner, setCurrentPartner] = useState({
+    id: '',
+    name: '',
+    category: 'Technology & Hardware Alliance',
+    logoUrl: '',
+    websiteUrl: '',
+    collaborationType: 'Strategic Implementation & Supply',
+    description: '',
+    displayOrder: 0
+  });
+
+  // Certificate modal state
+  const [certificateModalOpen, setCertificateModalOpen] = useState(false);
+  const [currentCertificate, setCurrentCertificate] = useState({
+    id: '',
+    title: '',
+    originalTitle: '',
+    pdfUrl: '',
+    displayOrder: 0
+  });
 
   // Client modal state
   const [clientModalOpen, setClientModalOpen] = useState(false);
@@ -171,24 +222,30 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      const [srvRes, blgRes, prjRes, galRes, vidRes, enqRes, cliRes] = await Promise.all([
+      const [srvRes, blgRes, prjRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes] = await Promise.all([
         fetch('/api/services'),
         fetch('/api/blogs'),
         fetch('/api/projects'),
         fetch('/api/gallery'),
         fetch('/api/videos'),
         fetch('/api/enquiries'),
-        fetch('/api/clients')
+        fetch('/api/clients'),
+        fetch('/api/products'),
+        fetch('/api/partners'),
+        fetch('/api/certificates')
       ]);
 
-      const [srvData, blgData, prjData, galData, vidData, enqData, cliData] = await Promise.all([
+      const [srvData, blgData, prjData, galData, vidData, enqData, cliData, prodData, partData, certData] = await Promise.all([
         srvRes.json(),
         blgRes.json(),
         prjRes.json(),
         galRes.json(),
         vidRes.json(),
         enqRes.json(),
-        cliRes.json()
+        cliRes.json(),
+        prodRes.json(),
+        partRes.json(),
+        certRes.json()
       ]);
 
       setServices(srvData.services || []);
@@ -198,6 +255,9 @@ export default function AdminDashboardPage() {
       setVideos(vidData.videos || []);
       setEnquiries(enqData.enquiries || []);
       setClients(cliData.clients || []);
+      setProducts(prodData.products || []);
+      setPartners(partData.partners || []);
+      setCertificates(certData.certificates || []);
 
       // Fetch dynamic video categories from MongoDB Atlas
       try {
@@ -304,6 +364,12 @@ export default function AdminDashboardPage() {
         setCurrentVideo((prev) => ({ ...prev, thumbnail: data.url }));
       } else if (targetForm === 'client') {
         setCurrentClient((prev) => ({ ...prev, logoUrl: data.url }));
+      } else if (targetForm === 'product') {
+        setCurrentProduct((prev) => ({ ...prev, featuredImage: data.url }));
+      } else if (targetForm === 'partner') {
+        setCurrentPartner((prev) => ({ ...prev, logoUrl: data.url }));
+      } else if (targetForm === 'certificate') {
+        setCurrentCertificate((prev) => ({ ...prev, imageUrl: data.url }));
       }
 
       setMessage({ 
@@ -491,10 +557,14 @@ export default function AdminDashboardPage() {
   const handleSaveGallery = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...currentGallery,
+        id: currentGallery.id || currentGallery._id
+      };
       const res = await fetch('/api/gallery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentGallery)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save gallery photo');
@@ -508,11 +578,18 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteGallery = async (id, title) => {
+    if (!id || id === 'undefined' || id === 'null') {
+      setMessage({ text: 'Cannot delete photo: Photo ID is missing.', type: 'error' });
+      return;
+    }
     if (!confirm(`Are you sure you want to delete photo "${title}"?`)) return;
     try {
-      const res = await fetch(`/api/gallery?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      setMessage({ text: `Gallery photo deleted`, type: 'success' });
+      const res = await fetch(`/api/gallery?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Delete failed');
+      }
+      setMessage({ text: `Gallery photo deleted successfully`, type: 'success' });
       fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
@@ -555,8 +632,42 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleOpenVideoModal = (video = null) => {
+    if (video) {
+      setCurrentVideo({
+        id: video._id || video.id || '',
+        title: video.title || '',
+        category: video.category || 'Product Demonstration',
+        thumbnail: video.thumbnail || '',
+        embedUrl: video.embedUrl || '',
+        description: video.description || '',
+        displayOrder: typeof video.displayOrder === 'number' ? video.displayOrder : 0
+      });
+    } else {
+      setCurrentVideo({
+        id: '',
+        title: '',
+        category: 'Product Demonstration',
+        thumbnail: '',
+        embedUrl: '',
+        description: '',
+        displayOrder: (videos && videos.length) ? videos.length + 1 : 1
+      });
+    }
+    setVideoModalOpen(true);
+  };
+
   const handleSaveVideo = async (e) => {
     e.preventDefault();
+    if (!currentVideo.title.trim()) {
+      alert('Please enter video title');
+      return;
+    }
+    if (!currentVideo.embedUrl.trim()) {
+      alert('Please enter YouTube Video URL or Embed URL');
+      return;
+    }
+
     try {
       const res = await fetch('/api/videos', {
         method: 'POST',
@@ -564,10 +675,27 @@ export default function AdminDashboardPage() {
         body: JSON.stringify(currentVideo)
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save video');
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save video');
 
       setMessage({ text: `Video '${currentVideo.title}' saved successfully!`, type: 'success' });
       setVideoModalOpen(false);
+
+      if (data.video) {
+        setVideos((prev) => {
+          const matchIndex = prev.findIndex(
+            (v) =>
+              (data.video.id && (v.id === data.video.id || v._id === data.video.id)) ||
+              (currentVideo.title && v.title === currentVideo.title)
+          );
+          if (matchIndex >= 0) {
+            const next = [...prev];
+            next[matchIndex] = data.video;
+            return next;
+          }
+          return [...prev, data.video];
+        });
+      }
+
       fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
@@ -575,11 +703,31 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteVideo = async (id, title) => {
+    if (!id && !title) {
+      setMessage({ text: 'Cannot delete video: Video identifier is missing.', type: 'error' });
+      return;
+    }
     if (!confirm(`Are you sure you want to delete video "${title}"?`)) return;
     try {
-      const res = await fetch(`/api/videos?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      setMessage({ text: `Video deleted`, type: 'success' });
+      const targetId = id || '';
+      const res = await fetch(`/api/videos?id=${encodeURIComponent(targetId)}&title=${encodeURIComponent(title || '')}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Delete failed');
+      }
+      setMessage({ text: `Video "${title}" deleted successfully`, type: 'success' });
+
+      // Optimistically remove from state immediately
+      setVideos((prev) =>
+        prev.filter((v) => {
+          if (targetId && (v.id === targetId || v._id === targetId)) return false;
+          if (title && v.title === title) return false;
+          return true;
+        })
+      );
+
       fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
@@ -588,11 +736,18 @@ export default function AdminDashboardPage() {
 
   // ---------------- ENQUIRIES HANDLERS ----------------
   const handleDeleteEnquiry = async (id, name) => {
+    if (!id || id === 'undefined' || id === 'null') {
+      setMessage({ text: 'Cannot delete enquiry: Enquiry ID is missing.', type: 'error' });
+      return;
+    }
     if (!confirm(`Are you sure you want to delete enquiry from "${name}"?`)) return;
     try {
-      const res = await fetch(`/api/enquiries?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      setMessage({ text: `Enquiry removed`, type: 'success' });
+      const res = await fetch(`/api/enquiries?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Delete failed');
+      }
+      setMessage({ text: `Enquiry removed successfully`, type: 'success' });
       fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
@@ -666,9 +821,282 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // ---------------- PRODUCTS HANDLERS ----------------
+  const handleOpenProductModal = (product = null) => {
+    if (product) {
+      setCurrentProduct({
+        id: product.id || product._id || '',
+        title: product.title || '',
+        slug: product.slug || '',
+        modelCode: product.modelCode || '',
+        category: product.category || 'Bird Diverters & Avian Protection',
+        shortDescription: product.shortDescription || '',
+        featuredImage: product.featuredImage || '/details.jpeg',
+        price: product.price || 'Custom Forest Dept Quote',
+        status: product.status || 'published',
+        specs: (product.specs && product.specs.length > 0) ? product.specs : [{ label: '', value: '' }],
+        content: product.content || ''
+      });
+    } else {
+      setCurrentProduct({
+        id: '',
+        title: '',
+        slug: '',
+        modelCode: '',
+        category: 'Bird Diverters & Avian Protection',
+        shortDescription: '',
+        featuredImage: '/details.jpeg',
+        price: 'Custom Forest Dept Quote',
+        status: 'published',
+        specs: [{ label: '', value: '' }],
+        content: ''
+      });
+    }
+    setProductModalOpen(true);
+  };
+
+  const handleAddProductSpec = () => {
+    setCurrentProduct((prev) => ({
+      ...prev,
+      specs: [...(prev.specs || []), { label: '', value: '' }]
+    }));
+  };
+
+  const handleRemoveProductSpec = (index) => {
+    setCurrentProduct((prev) => ({
+      ...prev,
+      specs: prev.specs.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleProductSpecChange = (index, field, value) => {
+    setCurrentProduct((prev) => {
+      const updatedSpecs = [...prev.specs];
+      updatedSpecs[index] = { ...updatedSpecs[index], [field]: value };
+      return { ...prev, specs: updatedSpecs };
+    });
+  };
+
+  const handleSaveProduct = async (e) => {
+    e.preventDefault();
+    if (!currentProduct.title.trim()) {
+      alert('Please enter product title');
+      return;
+    }
+
+    try {
+      const cleanSpecs = (currentProduct.specs || []).filter(s => s.label.trim() && s.value.trim());
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...currentProduct, specs: cleanSpecs })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save product');
+      }
+
+      setMessage({ text: `Product '${currentProduct.title}' saved successfully!`, type: 'success' });
+      setProductModalOpen(false);
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleDeleteProduct = async (id, title) => {
+    if (!confirm(`Are you sure you want to delete product "${title}"?`)) return;
+    try {
+      const res = await fetch(`/api/products?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to delete product');
+      }
+      setMessage({ text: `Product '${title}' removed successfully`, type: 'success' });
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  // ---------------- PARTNERS HANDLERS ----------------
+  const handleOpenPartnerModal = (partner = null) => {
+    if (partner) {
+      setCurrentPartner({
+        id: partner.id || partner._id || '',
+        name: partner.name || '',
+        category: partner.category || 'Technology & Hardware Alliance',
+        logoUrl: partner.logoUrl || '/logo.jpeg',
+        websiteUrl: partner.websiteUrl || '',
+        collaborationType: partner.collaborationType || 'Strategic Implementation & Supply',
+        description: partner.description || '',
+        displayOrder: partner.displayOrder || 0
+      });
+    } else {
+      setCurrentPartner({
+        id: '',
+        name: '',
+        category: 'Technology & Hardware Alliance',
+        logoUrl: '',
+        websiteUrl: '',
+        collaborationType: 'Strategic Implementation & Supply',
+        description: '',
+        displayOrder: partners.length + 1
+      });
+    }
+    setPartnerModalOpen(true);
+  };
+
+  const handleSavePartner = async (e) => {
+    e.preventDefault();
+    if (!currentPartner.name.trim()) {
+      alert('Please enter partner name');
+      return;
+    }
+    if (!currentPartner.logoUrl.trim()) {
+      alert('Please upload partner logo');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/partners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentPartner)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save partner');
+      }
+
+      setMessage({ text: `Partner '${currentPartner.name}' saved successfully!`, type: 'success' });
+      setPartnerModalOpen(false);
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleDeletePartner = async (id, name) => {
+    if (!confirm(`Are you sure you want to delete partner "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/partners?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to delete partner');
+      }
+      setMessage({ text: `Partner '${name}' removed successfully`, type: 'success' });
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  // ---------------- CERTIFICATES HANDLERS ----------------
+  const handleOpenCertificateModal = (cert = null) => {
+    if (cert) {
+      setCurrentCertificate({
+        id: cert.id || cert._id || '',
+        title: cert.title || '',
+        originalTitle: cert.title || '',
+        pdfUrl: cert.pdfUrl || cert.pdfLink || cert.imageUrl || '',
+        displayOrder: cert.displayOrder ?? 0
+      });
+    } else {
+      setCurrentCertificate({
+        id: '',
+        title: '',
+        originalTitle: '',
+        pdfUrl: '',
+        displayOrder: certificates.length + 1
+      });
+    }
+    setCertificateModalOpen(true);
+  };
+
+  const handleSaveCertificate = async (e) => {
+    e.preventDefault();
+    if (!currentCertificate.title.trim()) {
+      alert('Please enter certificate / PDF title');
+      return;
+    }
+    if (!currentCertificate.pdfUrl.trim()) {
+      alert('Please enter PDF link or Google Drive URL');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/certificates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentCertificate)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save certificate');
+      }
+
+      setMessage({ text: `Certificate '${currentCertificate.title}' saved successfully!`, type: 'success' });
+      setCertificateModalOpen(false);
+
+      if (data.certificate) {
+        setCertificates((prev) => {
+          const matchIndex = prev.findIndex(
+            (c) =>
+              (data.certificate.id && (c.id === data.certificate.id || c._id === data.certificate.id)) ||
+              (currentCertificate.originalTitle && c.title === currentCertificate.originalTitle) ||
+              c.title === currentCertificate.title
+          );
+          if (matchIndex >= 0) {
+            const next = [...prev];
+            next[matchIndex] = data.certificate;
+            return next;
+          }
+          return [...prev, data.certificate];
+        });
+      }
+
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleDeleteCertificate = async (id, title) => {
+    if (!confirm(`Are you sure you want to delete certificate "${title}"?`)) return;
+    try {
+      const targetId = id || '';
+      const res = await fetch(`/api/certificates?id=${encodeURIComponent(targetId)}&title=${encodeURIComponent(title || '')}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to delete certificate');
+      }
+
+      setMessage({ text: `Certificate "${title}" removed successfully`, type: 'success' });
+
+      // Optimistically remove from React state immediately
+      setCertificates((prev) =>
+        prev.filter((c) => {
+          if (targetId && (c.id === targetId || c._id === targetId)) return false;
+          if (title && c.title === title) return false;
+          return true;
+        })
+      );
+
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
   const tabTitles = {
-    services: 'Services & Products',
-    clients: 'Our Clients',
+    services: 'Services & Consulting',
+    products: 'Products & Hardware',
+    partners: 'Our Partners & Alliances',
+    certificates: 'Our Certifications',
+    clients: 'Marquee Logos',
     blogs: 'Blogs & Articles',
     projects: 'Projects & Case Studies',
     gallery: 'Photo Gallery',
@@ -678,6 +1106,9 @@ export default function AdminDashboardPage() {
 
   const tabCounts = {
     services: services.length,
+    products: products.length,
+    partners: partners.length,
+    certificates: certificates.length,
     clients: clients.length,
     blogs: blogs.length,
     projects: projects.length,
@@ -688,7 +1119,10 @@ export default function AdminDashboardPage() {
 
   const tabDescriptions = {
     services: 'Manage active wildlife technologies, specifications, and service pages.',
-    clients: 'Manage official partner and client logos moving infinitely in the homepage marquee.',
+    products: 'Manage field hardware, bio-acoustic sentinels, ranger gear, and specs.',
+    partners: 'Manage official institutional alliances, MoUs, and forest department collaborations.',
+    certificates: 'Manage ISO certifications, MSME credentials, and government recognitions.',
+    clients: 'Manage official partner and client logos moving in the homepage marquee.',
     blogs: 'Publish research updates, conflict mitigation articles, and company news.',
     projects: 'Showcase forest department deployments, field results, and case studies.',
     gallery: 'Curate high-resolution field photos and deployment event images.',
@@ -697,8 +1131,11 @@ export default function AdminDashboardPage() {
   };
 
   const navItems = [
-    { id: 'services', label: 'Services & Products', count: services.length, icon: Layers },
-    { id: 'clients', label: 'Our Clients', count: clients.length, icon: Building2 },
+    { id: 'services', label: 'Services & Consulting', count: services.length, icon: Layers },
+    { id: 'products', label: 'Products & Hardware', count: products.length, icon: Package },
+    { id: 'partners', label: 'Our Partners', count: partners.length, icon: Handshake },
+    { id: 'certificates', label: 'Our Certificates', count: certificates.length, icon: Award },
+    { id: 'clients', label: 'Marquee Logos', count: clients.length, icon: Building2 },
     { id: 'blogs', label: 'Blogs & Articles', count: blogs.length, icon: BookOpen },
     { id: 'projects', label: 'Projects & Case Studies', count: projects.length, icon: FolderKanban },
     { id: 'gallery', label: 'Photo Gallery', count: gallery.length, icon: Camera },
@@ -926,6 +1363,36 @@ export default function AdminDashboardPage() {
               )
             )}
 
+            {activeTab === 'products' && (
+              <button
+                onClick={() => handleOpenProductModal()}
+                className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Product</span>
+              </button>
+            )}
+
+            {activeTab === 'partners' && (
+              <button
+                onClick={() => handleOpenPartnerModal()}
+                className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Partner</span>
+              </button>
+            )}
+
+            {activeTab === 'certificates' && (
+              <button
+                onClick={() => handleOpenCertificateModal()}
+                className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Certificate</span>
+              </button>
+            )}
+
             {activeTab === 'clients' && (
               <button
                 onClick={() => handleOpenClientModal()}
@@ -1053,18 +1520,7 @@ export default function AdminDashboardPage() {
 
             {activeTab === 'videos' && (
               <button
-                onClick={() => {
-                  setCurrentVideo({
-                    id: '',
-                    title: '',
-                    category: 'Product Demonstration',
-                    thumbnail: '/img4.jpeg',
-                    embedUrl: 'https://www.youtube.com/embed/sKlBSzb0TUA',
-                    description: '',
-                    displayOrder: 0
-                  });
-                  setVideoModalOpen(true);
-                }}
+                onClick={() => handleOpenVideoModal()}
                 className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
               >
                 <Plus className="w-3 h-3" />
@@ -1192,6 +1648,299 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           )
+        )}
+
+        {/* ================= TAB: PRODUCTS ================= */}
+        {activeTab === 'products' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+            {products.length === 0 ? (
+              <div className="p-10 text-center text-xs text-[#68756D] space-y-2">
+                <Package className="w-8 h-8 text-[#216B35]/40 mx-auto" />
+                <p className="font-semibold text-sm text-[#173B26]">No Products Added Yet</p>
+                <p className="max-w-md mx-auto text-[#68756D]">
+                  Click the button below to add your first conservation technology or hardware product.
+                </p>
+                <button
+                  onClick={() => handleOpenProductModal()}
+                  className="btn-primary text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 mt-2"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First Product</span>
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#4B5563]">
+                  <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
+                    <tr>
+                      <th className="px-3 py-2 font-semibold w-16">Image</th>
+                      <th className="px-3 py-2 font-semibold">Product Title &amp; Category</th>
+                      <th className="px-3 py-2 font-semibold">Pricing / Framework</th>
+                      <th className="px-3 py-2 font-semibold">Specs Count</th>
+                      <th className="px-3 py-2 font-semibold">Status</th>
+                      <th className="px-3 py-2 font-semibold text-right w-28">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCE5DD]">
+                    {products.map((prod) => (
+                      <tr key={prod.id || prod._id || prod.slug} className="hover:bg-[#F5F8F3]/50 transition-colors">
+                        <td className="px-3 py-2">
+                          <div className="w-12 h-10 rounded bg-[#F5F8F3] border border-[#DCE5DD] flex items-center justify-center p-0.5 overflow-hidden">
+                            <img
+                              src={prod.featuredImage || '/details.jpeg'}
+                              alt={prod.title}
+                              className="w-full h-full object-cover rounded-xs"
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-[#173B26]">{prod.title}</span>
+                            {prod.modelCode && (
+                              <span className="text-[9px] font-mono font-bold bg-[#F5F8F3] text-[#216B35] px-1.5 py-0.2 rounded border border-[#DCE5DD]">
+                                {prod.modelCode}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-[#216B35] block">{prod.category}</span>
+                        </td>
+                        <td className="px-3 py-2 text-[11px] text-[#4B5563]">
+                          {prod.price || 'Official Quote'}
+                        </td>
+                        <td className="px-3 py-2 text-[11px]">
+                          <span className="bg-[#F5F8F3] text-[#173B26] px-2 py-0.5 rounded border border-[#DCE5DD]">
+                            {prod.specs ? prod.specs.length : 0} specs
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className={`inline-block px-1.5 py-0.2 rounded text-[10px] font-medium border ${
+                            prod.status === 'published'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}>
+                            {prod.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right whitespace-nowrap space-x-1">
+                          <Link
+                            href={prod.slug ? `/products/${prod.slug}` : '/products'}
+                            target="_blank"
+                            className="p-1 rounded text-[#4B5563] hover:text-[#216B35] inline-block"
+                            title="View on site"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </Link>
+                          <button
+                            onClick={() => handleOpenProductModal(prod)}
+                            className="p-1 rounded text-[#216B35] hover:bg-[#F5F8F3]"
+                            title="Edit Product"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProduct(prod._id || prod.id || prod.slug, prod.title)}
+                            className="p-1 rounded text-red-600 hover:bg-red-50"
+                            title="Delete Product"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= TAB: PARTNERS ================= */}
+        {activeTab === 'partners' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+            {partners.length === 0 ? (
+              <div className="p-10 text-center text-xs text-[#68756D] space-y-2">
+                <Handshake className="w-8 h-8 text-[#216B35]/40 mx-auto" />
+                <p className="font-semibold text-sm text-[#173B26]">No Partners Added Yet</p>
+                <p className="max-w-md mx-auto text-[#68756D]">
+                  Click the button below to add your first official institutional partner or MoU collaboration.
+                </p>
+                <button
+                  onClick={() => handleOpenPartnerModal()}
+                  className="btn-primary text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 mt-2"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First Partner</span>
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#4B5563]">
+                  <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
+                    <tr>
+                      <th className="px-3 py-2 font-semibold w-16">Logo</th>
+                      <th className="px-3 py-2 font-semibold">Partner / Entity Name</th>
+                      <th className="px-3 py-2 font-semibold">Category</th>
+                      <th className="px-3 py-2 font-semibold">Collaboration Scope</th>
+                      <th className="px-3 py-2 font-semibold w-20">Order</th>
+                      <th className="px-3 py-2 font-semibold text-right w-24">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCE5DD]">
+                    {partners.map((part) => (
+                      <tr key={part.id || part._id || part.name} className="hover:bg-[#F5F8F3]/50 transition-colors">
+                        <td className="px-3 py-2">
+                          <div className="w-12 h-10 rounded bg-[#F5F8F3] border border-[#DCE5DD] flex items-center justify-center p-1 overflow-hidden">
+                            <img
+                              src={part.logoUrl || '/logo.jpeg'}
+                              alt={part.name}
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="font-semibold text-[#173B26] block">{part.name}</span>
+                          {part.websiteUrl && (
+                            <a
+                              href={part.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-[#216B35] hover:underline inline-flex items-center gap-0.5"
+                            >
+                              <span>Website</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-[11px] font-medium text-[#173B26]">
+                          {part.category}
+                        </td>
+                        <td className="px-3 py-2 text-[11px] text-[#4B5563] max-w-xs truncate">
+                          {part.collaborationType || part.description}
+                        </td>
+                        <td className="px-3 py-2 text-[11px] text-[#68756D]">
+                          {part.displayOrder || 0}
+                        </td>
+                        <td className="px-3 py-2 text-right whitespace-nowrap space-x-1">
+                          <button
+                            onClick={() => handleOpenPartnerModal(part)}
+                            className="p-1 rounded text-[#216B35] hover:bg-[#F5F8F3]"
+                            title="Edit Partner"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeletePartner(part._id || part.id || part.name, part.name)}
+                            className="p-1 rounded text-red-600 hover:bg-red-50"
+                            title="Delete Partner"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= TAB: CERTIFICATES ================= */}
+        {activeTab === 'certificates' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+            {certificates.length === 0 ? (
+              <div className="p-10 text-center text-xs text-[#68756D] space-y-2">
+                <FileText className="w-8 h-8 text-red-500/50 mx-auto" />
+                <p className="font-semibold text-sm text-[#173B26]">No PDF Certificates Added Yet</p>
+                <p className="max-w-md mx-auto text-[#68756D]">
+                  Add your ISO certificates, statutory approvals, and credentials with their Google Drive or direct PDF link.
+                </p>
+                <button
+                  onClick={() => handleOpenCertificateModal()}
+                  className="btn-primary text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 mt-2"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First PDF Certificate</span>
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#4B5563]">
+                  <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
+                    <tr>
+                      <th className="px-3 py-2 font-semibold w-16 text-center">Format</th>
+                      <th className="px-3 py-2 font-semibold">Certificate / PDF Title</th>
+                      <th className="px-3 py-2 font-semibold">Google Drive / PDF Link</th>
+                      <th className="px-3 py-2 font-semibold w-16 text-center">Order</th>
+                      <th className="px-3 py-2 font-semibold text-right w-28">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCE5DD]">
+                    {certificates.map((cert) => {
+                      const link = cert.pdfUrl || cert.pdfLink || cert.imageUrl || '';
+                      return (
+                        <tr key={cert.id || cert._id || cert.title} className="hover:bg-[#F5F8F3]/50 transition-colors">
+                          <td className="px-3 py-2 text-center">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded">
+                              <FileText className="w-3 h-3 text-red-600" />
+                              PDF
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <span className="font-semibold text-[#173B26] block text-xs">{cert.title}</span>
+                            <span className="text-[10px] text-[#216B35]">Square Card Display</span>
+                          </td>
+                          <td className="px-3 py-2 font-mono text-[11px] text-[#68756D] max-w-xs truncate">
+                            {link ? (
+                              <a
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#216B35] hover:underline inline-flex items-center gap-1 max-w-xs truncate"
+                                title={link}
+                              >
+                                <span className="truncate">{link}</span>
+                                <ExternalLink className="w-3 h-3 shrink-0" />
+                              </a>
+                            ) : (
+                              <span className="text-gray-400">No link set</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-center text-[11px] font-mono text-[#173B26]">
+                            {cert.displayOrder ?? 0}
+                          </td>
+                          <td className="px-3 py-2 text-right whitespace-nowrap space-x-1">
+                            <Link
+                              href="/certificates"
+                              target="_blank"
+                              className="p-1 rounded text-[#68756D] hover:text-[#173B26] hover:bg-[#F5F8F3] inline-block"
+                              title="View on Public Certificates Page"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </Link>
+                            <button
+                              onClick={() => handleOpenCertificateModal(cert)}
+                              className="p-1 rounded text-[#216B35] hover:bg-[#F5F8F3]"
+                              title="Edit Certificate"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCertificate(cert.id || cert._id, cert.title)}
+                              className="p-1 rounded text-red-600 hover:bg-red-50"
+                              title="Delete Certificate"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         )}
 
         {/* ================= TAB: CLIENTS ================= */}
@@ -1501,7 +2250,10 @@ export default function AdminDashboardPage() {
                   <div className="p-1 pt-0 border-t border-[#DCE5DD]/60 flex justify-end gap-0.5">
                     <button
                       onClick={() => {
-                        setCurrentGallery(gal);
+                        setCurrentGallery({
+                          ...gal,
+                          id: gal._id || gal.id
+                        });
                         setGalleryModalOpen(true);
                       }}
                       className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3]"
@@ -1510,7 +2262,7 @@ export default function AdminDashboardPage() {
                       <Edit3 className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => handleDeleteGallery(gal.id, gal.title)}
+                      onClick={() => handleDeleteGallery(gal._id || gal.id || gal.imageUrl, gal.title)}
                       className="p-0.5 rounded text-red-600 hover:bg-red-50"
                       title="Delete Photo"
                     >
@@ -1525,49 +2277,84 @@ export default function AdminDashboardPage() {
 
         {/* ================= TAB 5: VIDEOS ================= */}
         {activeTab === 'videos' && (
-          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden p-2 w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5">
-              {videos.map((vid) => (
-                <div key={vid.id} className="rounded border border-[#DCE5DD] overflow-hidden bg-slate-50 flex flex-col justify-between">
-                  <div>
-                    <div className="relative h-24 sm:h-28 w-full bg-slate-900">
-                      <img
-                        src={vid.thumbnail || '/img4.jpeg'}
-                        alt={vid.title}
-                        className="w-full h-full object-cover"
-                      />
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden p-3 w-full">
+            {videos.length === 0 ? (
+              <div className="p-10 text-center text-xs text-[#68756D] space-y-2">
+                <Video className="w-8 h-8 text-[#216B35]/40 mx-auto" />
+                <p className="font-semibold text-sm text-[#173B26]">No Demonstration Videos Found</p>
+                <p className="max-w-md mx-auto text-[#68756D]">
+                  Add YouTube tech demos, field operational tests, and equipment reviews.
+                </p>
+                <button
+                  onClick={() => handleOpenVideoModal()}
+                  className="btn-primary text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 mt-2"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First Video</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {videos.map((vid) => (
+                  <div key={vid._id || vid.id} className="rounded-xl border border-[#DCE5DD] overflow-hidden bg-white hover:border-[#216B35]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="relative h-32 w-full bg-slate-900 group overflow-hidden">
+                        <img
+                          src={vid.thumbnail || '/img4.jpeg'}
+                          alt={vid.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-[#216B35] text-white flex items-center justify-center shadow-md">
+                            <Play className="w-4 h-4 fill-current ml-0.5" />
+                          </div>
+                        </div>
+                        {vid.category && (
+                          <span className="absolute top-2 left-2 text-[10px] font-semibold text-[#173B26] bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded shadow-xs border border-[#DCE5DD]">
+                            {vid.category}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-3 space-y-1.5">
+                        <h4 className="font-bold text-[#173B26] text-xs leading-snug line-clamp-2" title={vid.title}>
+                          {vid.title}
+                        </h4>
+                        <p className="text-[11px] text-[#68756D] line-clamp-2 leading-relaxed">
+                          {vid.description || 'No description provided.'}
+                        </p>
+                        <div className="pt-1 flex items-center gap-1 text-[10px] text-[#216B35] font-mono truncate">
+                          <ExternalLink className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{vid.embedUrl}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-1.5">
-                      <span className="text-[9px] font-medium text-emerald-400 bg-[#142D20] px-1 py-0.2 rounded">
-                        {vid.category}
+
+                    <div className="p-2.5 pt-2 border-t border-[#DCE5DD]/60 bg-[#F5F8F3]/40 flex items-center justify-between">
+                      <span className="text-[10px] text-[#68756D] font-mono">
+                        Order: {vid.displayOrder || 0}
                       </span>
-                      <h4 className="font-semibold text-[#173B26] text-xs mt-1 truncate">{vid.title}</h4>
-                      <p className="text-[10px] text-[#68756D] line-clamp-1">{vid.description}</p>
-                      <div className="text-[9px] font-mono text-[#216B35] mt-0.5 truncate">{vid.embedUrl}</div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleOpenVideoModal(vid)}
+                          className="p-1.5 rounded text-[#216B35] hover:bg-white border border-transparent hover:border-[#DCE5DD] transition-colors"
+                          title="Edit Video"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteVideo(vid._id || vid.id, vid.title)}
+                          className="p-1.5 rounded text-red-600 hover:bg-red-50 transition-colors"
+                          title="Delete Video"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-1 pt-0 border-t border-[#DCE5DD]/60 flex justify-end gap-0.5">
-                    <button
-                      onClick={() => {
-                        setCurrentVideo(vid);
-                        setVideoModalOpen(true);
-                      }}
-                      className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3]"
-                      title="Edit Video"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteVideo(vid.id, vid.title)}
-                      className="p-0.5 rounded text-red-600 hover:bg-red-50"
-                      title="Delete Video"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -1581,7 +2368,7 @@ export default function AdminDashboardPage() {
                 </div>
               ) : (
                 enquiries.map((enq) => (
-                  <div key={enq.id} className="p-2 hover:bg-[#F5F8F3]/50 transition-colors">
+                  <div key={enq._id || enq.id} className="p-2 hover:bg-[#F5F8F3]/50 transition-colors">
                     <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
                       <div className="flex items-center gap-1.5">
                         <span className="font-semibold text-[#173B26] text-xs">{enq.name}</span>
@@ -1594,7 +2381,7 @@ export default function AdminDashboardPage() {
                           {new Date(enq.date).toLocaleString()}
                         </span>
                         <button
-                          onClick={() => handleDeleteEnquiry(enq.id, enq.name)}
+                          onClick={() => handleDeleteEnquiry(enq._id || enq.id, enq.name)}
                           className="p-0.5 rounded text-red-600 hover:bg-red-50"
                           title="Delete Enquiry"
                         >
@@ -1977,13 +2764,24 @@ export default function AdminDashboardPage() {
       {/* ================= MODAL: ADD / EDIT VIDEO ================= */}
       {videoModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
-          <div className="bg-white rounded-md max-w-lg w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4">
-            <h3 className="text-base font-bold text-[#173B26] mb-0.5">
-              {currentVideo.id ? 'Edit Demonstration Video' : 'Add Demonstration Video'}
-            </h3>
-            <p className="text-[11px] text-[#68756D] mb-4">
-              Displayed in the video demonstration gallery at <span className="font-mono text-[#216B35]">/videos</span>
-            </p>
+          <div className="bg-white rounded-md max-w-lg w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <div>
+                <h3 className="text-base font-bold text-[#173B26]">
+                  {currentVideo.id ? 'Edit Demonstration Video' : 'Add Demonstration Video'}
+                </h3>
+                <p className="text-[11px] text-[#68756D]">
+                  Displayed in the video demonstration gallery at <span className="font-mono text-[#216B35]">/videos</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVideoModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
             <form onSubmit={handleSaveVideo} className="space-y-3 text-xs">
               <div>
@@ -1994,21 +2792,54 @@ export default function AdminDashboardPage() {
                   value={currentVideo.title}
                   onChange={(e) => setCurrentVideo({ ...currentVideo, title: e.target.value })}
                   placeholder="e.g. ANIDERS | Animal Intrusion Detection and Repellent System"
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-[#173B26] mb-1">YouTube Embed URL *</label>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  YouTube Video or Embed URL *
+                </label>
                 <input
                   type="text"
                   required
                   value={currentVideo.embedUrl}
-                  onChange={(e) => setCurrentVideo({ ...currentVideo, embedUrl: e.target.value })}
-                  placeholder="https://www.youtube.com/embed/sKlBSzb0TUA"
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono"
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    const match = val.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/))([a-zA-Z0-9_-]{11})/);
+                    if (match && match[1]) {
+                      val = `https://www.youtube.com/embed/${match[1]}`;
+                      if (!currentVideo.thumbnail) {
+                        setCurrentVideo(prev => ({
+                          ...prev,
+                          embedUrl: val,
+                          thumbnail: `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
+                        }));
+                        return;
+                      }
+                    }
+                    setCurrentVideo(prev => ({ ...prev, embedUrl: val }));
+                  }}
+                  placeholder="https://www.youtube.com/watch?v=sKlBSzb0TUA (auto-embeds)"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
                 />
+                <span className="text-[10px] text-[#68756D] mt-0.5 block">
+                  Paste any YouTube link: watch, youtu.be, shorts, or embed URL (auto-normalizes).
+                </span>
               </div>
+
+              {/* Live Video Preview if URL valid */}
+              {currentVideo.embedUrl && currentVideo.embedUrl.includes('embed') && (
+                <div className="rounded-lg overflow-hidden border border-[#DCE5DD] aspect-video w-full bg-black">
+                  <iframe
+                    src={currentVideo.embedUrl}
+                    title="Video Preview"
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block font-semibold text-[#173B26] mb-1">Thumbnail Image URL / Upload</label>
@@ -2018,8 +2849,8 @@ export default function AdminDashboardPage() {
                       type="text"
                       value={currentVideo.thumbnail}
                       onChange={(e) => setCurrentVideo({ ...currentVideo, thumbnail: e.target.value })}
-                      placeholder="/img4.jpeg or Cloudinary URL"
-                      className="flex-1 p-2 rounded border border-[#DCE5DD] text-xs font-mono"
+                      placeholder="/img4.jpeg or Cloudinary URL (auto-generated from YouTube if blank)"
+                      className="flex-1 p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
                     />
                     <label className="btn-secondary px-3 py-1.5 rounded cursor-pointer shrink-0 text-xs inline-flex items-center gap-1 font-semibold text-[#216B35] border-[#216B35]/40 hover:bg-[#F5F8F3]">
                       {uploadingImage ? (
@@ -2027,7 +2858,7 @@ export default function AdminDashboardPage() {
                       ) : (
                         <Upload className="w-3.5 h-3.5" />
                       )}
-                      <span>{uploadingImage ? 'Uploading...' : 'Upload (Cloudinary)'}</span>
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload Image'}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -2049,88 +2880,100 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block font-semibold text-[#173B26]">Category *</label>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddVideoCategory(!showAddVideoCategory)}
-                    className="text-[11px] text-emerald-700 hover:text-emerald-900 font-semibold inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded transition-colors"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-semibold text-[#173B26]">Category *</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddVideoCategory(!showAddVideoCategory)}
+                      className="text-[11px] text-emerald-700 hover:text-emerald-900 font-semibold inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded transition-colors"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>+ Add Category</span>
+                    </button>
+                  </div>
+
+                  <select
+                    value={currentVideo.category}
+                    onChange={(e) => {
+                      if (e.target.value === '__ADD_NEW__') {
+                        setShowAddVideoCategory(true);
+                      } else {
+                        setCurrentVideo({ ...currentVideo, category: e.target.value });
+                      }
+                    }}
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-medium bg-white focus:outline-none focus:border-[#216B35]"
                   >
-                    <Plus className="w-3 h-3" />
-                    <span>+ Add Category</span>
-                  </button>
+                    {videoCategories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    <option value="__ADD_NEW__" className="text-emerald-700 font-bold bg-emerald-50">
+                      + Add Custom Category...
+                    </option>
+                  </select>
                 </div>
 
-                <select
-                  value={currentVideo.category}
-                  onChange={(e) => {
-                    if (e.target.value === '__ADD_NEW__') {
-                      setShowAddVideoCategory(true);
-                    } else {
-                      setCurrentVideo({ ...currentVideo, category: e.target.value });
-                    }
-                  }}
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-medium bg-white focus:outline-none focus:border-[#216B35]"
-                >
-                  {videoCategories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                  <option value="__ADD_NEW__" className="text-emerald-700 font-bold bg-emerald-50">
-                    + Add Custom Category...
-                  </option>
-                </select>
-
-                {showAddVideoCategory && (
-                  <div className="mt-2 p-2.5 bg-emerald-50/70 rounded-lg border border-emerald-200 space-y-2 animate-in fade-in duration-150">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1">
-                        <Plus className="w-3 h-3 text-emerald-700" />
-                        <span>Create Custom Video Category</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => { setShowAddVideoCategory(false); setNewVideoCategoryName(''); }}
-                        className="text-emerald-700 hover:text-emerald-950 p-0.5 rounded hover:bg-emerald-100"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        autoFocus
-                        value={newVideoCategoryName}
-                        onChange={(e) => setNewVideoCategoryName(e.target.value)}
-                        onKeyDown={async (e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            await handleCreateVideoCategory();
-                          }
-                        }}
-                        placeholder="e.g. Drone Surveillance, Night Footage..."
-                        className="flex-1 px-2.5 py-1.5 text-xs bg-white rounded border border-emerald-300 focus:border-emerald-600 focus:outline-none"
-                      />
-                      <button
-                        type="button"
-                        disabled={savingVideoCategory || !newVideoCategoryName.trim()}
-                        onClick={handleCreateVideoCategory}
-                        className="px-3 py-1.5 bg-[#216B35] hover:bg-[#174D28] text-white text-xs font-semibold rounded transition-colors disabled:opacity-50 inline-flex items-center gap-1 shrink-0"
-                      >
-                        {savingVideoCategory ? (
-                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Plus className="w-3 h-3" />
-                        )}
-                        <span>Save</span>
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-emerald-800">
-                      Saves directly into MongoDB Atlas and selects it for this video.
-                    </p>
-                  </div>
-                )}
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Display Order</label>
+                  <input
+                    type="number"
+                    value={currentVideo.displayOrder || 0}
+                    onChange={(e) => setCurrentVideo({ ...currentVideo, displayOrder: parseInt(e.target.value, 10) || 0 })}
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
               </div>
+
+              {showAddVideoCategory && (
+                <div className="mt-2 p-2.5 bg-emerald-50/70 rounded-lg border border-emerald-200 space-y-2 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1">
+                      <Plus className="w-3 h-3 text-emerald-700" />
+                      <span>Create Custom Video Category</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { setShowAddVideoCategory(false); setNewVideoCategoryName(''); }}
+                      className="text-emerald-700 hover:text-emerald-950 p-0.5 rounded hover:bg-emerald-100"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      autoFocus
+                      value={newVideoCategoryName}
+                      onChange={(e) => setNewVideoCategoryName(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          await handleCreateVideoCategory();
+                        }
+                      }}
+                      placeholder="e.g. Drone Surveillance, Night Footage..."
+                      className="flex-1 px-2.5 py-1.5 text-xs bg-white rounded border border-emerald-300 focus:border-emerald-600 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={savingVideoCategory || !newVideoCategoryName.trim()}
+                      onClick={handleCreateVideoCategory}
+                      className="px-3 py-1.5 bg-[#216B35] hover:bg-[#174D28] text-white text-xs font-semibold rounded transition-colors disabled:opacity-50 inline-flex items-center gap-1 shrink-0"
+                    >
+                      {savingVideoCategory ? (
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Plus className="w-3 h-3" />
+                      )}
+                      <span>Save</span>
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-emerald-800">
+                    Saves directly into MongoDB Atlas and selects it for this video.
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block font-semibold text-[#173B26] mb-1">Description</label>
@@ -2139,7 +2982,7 @@ export default function AdminDashboardPage() {
                   value={currentVideo.description}
                   onChange={(e) => setCurrentVideo({ ...currentVideo, description: e.target.value })}
                   placeholder="Video overview and operational summary..."
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
                 />
               </div>
 
@@ -2155,7 +2998,7 @@ export default function AdminDashboardPage() {
                   type="submit"
                   className="btn-primary px-4 py-1.5 rounded text-xs"
                 >
-                  Save Video
+                  {currentVideo.id ? 'Save Changes' : 'Add Video'}
                 </button>
               </div>
             </form>
@@ -2288,6 +3131,517 @@ export default function AdminDashboardPage() {
                   className="btn-primary px-4 py-1.5 rounded text-xs"
                 >
                   {currentClient.id ? 'Save Changes' : 'Add Client Logo'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: PRODUCT ================= */}
+      {productModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
+          <div className="bg-white rounded-md max-w-lg w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <h3 className="text-base font-bold text-[#173B26]">
+                {currentProduct.id ? 'Edit Product & Hardware' : 'Add New Product & Hardware'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setProductModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProduct} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-[#173B26] mb-1">
+                    Product Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={currentProduct.title}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, title: e.target.value })}
+                    placeholder="e.g. Dynamic Solar-Powered LED Bird Flight Diverter, ANIDERS..."
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">
+                    Model Code
+                  </label>
+                  <input
+                    type="text"
+                    value={currentProduct.modelCode || ''}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, modelCode: e.target.value })}
+                    placeholder="e.g. KR-BFD-SLED-100"
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Category</label>
+                  <select
+                    value={currentProduct.category}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, category: e.target.value })}
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs bg-white focus:border-[#216B35] focus:outline-none"
+                  >
+                    <option value="Bird Diverters & Avian Protection">Bird Diverters &amp; Avian Protection</option>
+                    <option value="Wildlife Deterrence & Smart Sensors">Wildlife Deterrence &amp; Smart Sensors</option>
+                    <option value="Frontline Ranger Gear">Frontline Ranger Gear</option>
+                    <option value="Humane Capture & Rescue">Humane Capture &amp; Rescue</option>
+                    <option value="Perimeter Security & Ground Deterrents">Perimeter Security &amp; Ground Deterrents</option>
+                    <option value="Wildlife Monitoring & AI Sentinels">Wildlife Monitoring &amp; AI Sentinels</option>
+                    <option value="Eco & Smart Green Solutions">Eco &amp; Smart Green Solutions</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Pricing / Framework</label>
+                  <input
+                    type="text"
+                    value={currentProduct.price}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, price: e.target.value })}
+                    placeholder="e.g. GeM Listed / Bulk Utility Tender Supply"
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  URL Slug <span className="text-[10px] text-[#68756D] font-normal">(optional, auto-generated from title if blank)</span>
+                </label>
+                <input
+                  type="text"
+                  value={currentProduct.slug || ''}
+                  onChange={(e) => setCurrentProduct({ ...currentProduct, slug: e.target.value })}
+                  placeholder="e.g. dynamic-solar-led-bird-flight-diverter"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Featured Product Image
+                </label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="inline-flex items-center gap-1.5 bg-[#216B35] hover:bg-[#174D28] text-white px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors shadow-xs">
+                      {uploadingImage ? (
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5" />
+                      )}
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload Image'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingImage}
+                        className="hidden"
+                        onChange={async (e) => {
+                          await handleImageUpload(e, 'product');
+                        }}
+                      />
+                    </label>
+                    <span className="text-[11px] text-[#68756D]">JPG, PNG, WebP</span>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={currentProduct.featuredImage}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, featuredImage: e.target.value })}
+                    placeholder="or paste image URL..."
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                  />
+
+                  {currentProduct.featuredImage && (
+                    <div className="mt-2 p-2 rounded border border-[#DCE5DD] bg-[#F5F8F3] flex items-center gap-3">
+                      <div className="w-16 h-12 rounded bg-white border border-[#DCE5DD] flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                        <img
+                          src={currentProduct.featuredImage}
+                          alt="Product Preview"
+                          className="max-h-full max-w-full object-cover"
+                        />
+                      </div>
+                      <div className="overflow-hidden">
+                        <span className="text-[10px] uppercase font-bold text-[#216B35] block">Image Preview</span>
+                        <span className="text-[11px] text-[#68756D] truncate block">{currentProduct.featuredImage}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Short Description</label>
+                <textarea
+                  rows={2}
+                  value={currentProduct.shortDescription}
+                  onChange={(e) => setCurrentProduct({ ...currentProduct, shortDescription: e.target.value })}
+                  placeholder="Concise technical overview of this product..."
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              {/* Technical Specifications Key-Value Builder */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block font-semibold text-[#173B26]">Technical Specifications</label>
+                  <button
+                    type="button"
+                    onClick={handleAddProductSpec}
+                    className="text-[11px] text-[#216B35] hover:text-[#174D28] font-semibold inline-flex items-center gap-1 bg-[#F5F8F3] border border-[#DCE5DD] px-2 py-0.5 rounded"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Add Spec Row</span>
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {(currentProduct.specs || []).map((spec, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={spec.label}
+                        onChange={(e) => handleProductSpecChange(idx, 'label', e.target.value)}
+                        placeholder="Label (e.g. Power Source)"
+                        className="w-1/2 p-1.5 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={spec.value}
+                        onChange={(e) => handleProductSpecChange(idx, 'value', e.target.value)}
+                        placeholder="Value (e.g. Solar / 12V LiFePO4)"
+                        className="w-1/2 p-1.5 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProductSpec(idx)}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                        title="Remove spec"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  In-Depth Overview &amp; Field Context
+                </label>
+                <textarea
+                  rows={3}
+                  value={currentProduct.content || ''}
+                  onChange={(e) => setCurrentProduct({ ...currentProduct, content: e.target.value })}
+                  placeholder="Comprehensive technical breakdown, deployment methodology, and field notes..."
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Status</label>
+                <select
+                  value={currentProduct.status}
+                  onChange={(e) => setCurrentProduct({ ...currentProduct, status: e.target.value })}
+                  className="w-32 p-2 rounded border border-[#DCE5DD] text-xs bg-white focus:border-[#216B35] focus:outline-none"
+                >
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#DCE5DD]">
+                <button
+                  type="button"
+                  onClick={() => setProductModalOpen(false)}
+                  className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-4 py-1.5 rounded text-xs"
+                >
+                  {currentProduct.id ? 'Save Changes' : 'Add Product'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: PARTNER ================= */}
+      {partnerModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
+          <div className="bg-white rounded-md max-w-md w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <h3 className="text-base font-bold text-[#173B26]">
+                {currentPartner.id ? 'Edit Partner / Alliance' : 'Add New Partner / Alliance'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setPartnerModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePartner} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Partner / Entity Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={currentPartner.name}
+                  onChange={(e) => setCurrentPartner({ ...currentPartner, name: e.target.value })}
+                  placeholder="e.g. Yugantar Bharati, PRAKRITIS Technology, Naman Enterprises, Arcturus..."
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Category</label>
+                  <select
+                    value={currentPartner.category}
+                    onChange={(e) => setCurrentPartner({ ...currentPartner, category: e.target.value })}
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs bg-white focus:border-[#216B35] focus:outline-none"
+                  >
+                    <option value="Analytical & Environmental Testing Laboratory">Analytical &amp; Environmental Testing Laboratory</option>
+                    <option value="Environmental Technology & Engineering Solutions">Environmental Technology &amp; Engineering Solutions</option>
+                    <option value="GIS Mapping & Survey Logistics Partner">GIS Mapping &amp; Survey Logistics Partner</option>
+                    <option value="Heavy Engineering & Infrastructure Consultancy">Heavy Engineering &amp; Infrastructure Consultancy</option>
+                    <option value="Technology & Hardware Alliance">Technology &amp; Hardware Alliance</option>
+                    <option value="State & Central Government Alliance">State &amp; Central Government Alliance</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Collaboration Type</label>
+                  <input
+                    type="text"
+                    value={currentPartner.collaborationType}
+                    onChange={(e) => setCurrentPartner({ ...currentPartner, collaborationType: e.target.value })}
+                    placeholder="e.g. Co-Development & Supply"
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Partner Logo <span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="inline-flex items-center gap-1.5 bg-[#216B35] hover:bg-[#174D28] text-white px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors shadow-xs">
+                      {uploadingImage ? (
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5" />
+                      )}
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload Logo'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingImage}
+                        className="hidden"
+                        onChange={async (e) => {
+                          await handleImageUpload(e, 'partner');
+                        }}
+                      />
+                    </label>
+                    <span className="text-[11px] text-[#68756D]">PNG or SVG recommended</span>
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    value={currentPartner.logoUrl}
+                    onChange={(e) => setCurrentPartner({ ...currentPartner, logoUrl: e.target.value })}
+                    placeholder="or paste logo URL..."
+                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                  />
+
+                  {currentPartner.logoUrl && (
+                    <div className="mt-2 p-2 rounded border border-[#DCE5DD] bg-[#F5F8F3] flex items-center gap-3">
+                      <div className="w-16 h-12 rounded bg-white border border-[#DCE5DD] flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                        <img
+                          src={currentPartner.logoUrl}
+                          alt="Logo Preview"
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </div>
+                      <div className="overflow-hidden">
+                        <span className="text-[10px] uppercase font-bold text-[#216B35] block">Logo Preview</span>
+                        <span className="text-[11px] text-[#68756D] truncate block">{currentPartner.logoUrl}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Website URL</label>
+                <input
+                  type="url"
+                  value={currentPartner.websiteUrl}
+                  onChange={(e) => setCurrentPartner({ ...currentPartner, websiteUrl: e.target.value })}
+                  placeholder="https://example.gov.in"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Partnership Scope / Description</label>
+                <textarea
+                  rows={2}
+                  value={currentPartner.description}
+                  onChange={(e) => setCurrentPartner({ ...currentPartner, description: e.target.value })}
+                  placeholder="Briefly describe the MoU, equipment deployment, or joint field initiative..."
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Display Order</label>
+                <input
+                  type="number"
+                  value={currentPartner.displayOrder}
+                  onChange={(e) => setCurrentPartner({ ...currentPartner, displayOrder: parseInt(e.target.value) || 0 })}
+                  className="w-24 p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#DCE5DD]">
+                <button
+                  type="button"
+                  onClick={() => setPartnerModalOpen(false)}
+                  className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-4 py-1.5 rounded text-xs"
+                >
+                  {currentPartner.id ? 'Save Changes' : 'Add Partner'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: CERTIFICATE ================= */}
+      {certificateModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
+          <div className="bg-white rounded-md max-w-md w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <div>
+                <h3 className="text-base font-bold text-[#173B26]">
+                  {currentCertificate.id ? 'Edit Certificate PDF' : 'Add New Certificate PDF'}
+                </h3>
+                <p className="text-[11px] text-[#68756D] mt-0.5">
+                  Enter certificate title and Google Drive or direct PDF link
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCertificateModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCertificate} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Certificate / PDF Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={currentCertificate.title}
+                  onChange={(e) => setCurrentCertificate({ ...currentCertificate, title: e.target.value })}
+                  placeholder="e.g. ISO 9001:2015 Quality Management System Certification"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  PDF Link or Google Drive Share Link <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={currentCertificate.pdfUrl}
+                  onChange={(e) => setCurrentCertificate({ ...currentCertificate, pdfUrl: e.target.value })}
+                  placeholder="https://drive.google.com/file/d/1.../view?usp=sharing or direct .pdf link"
+                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs font-mono focus:border-[#216B35] focus:outline-none"
+                />
+                <p className="text-[11px] text-[#68756D] mt-1.5 bg-[#F5F8F3] p-2.5 rounded border border-[#DCE5DD]/70 leading-relaxed">
+                  <span className="font-semibold text-[#173B26]">Google Drive Tip:</span> Simply paste the Google Drive share link (e.g. from Google Drive &gt; Share &gt; Anyone with the link). On the certificates page, it will display as a square card with a PDF emblem, viewable directly inside the page without redirecting, and downloadable with 1 click.
+                </p>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Display Order</label>
+                <input
+                  type="number"
+                  value={currentCertificate.displayOrder ?? 0}
+                  onChange={(e) => setCurrentCertificate({ ...currentCertificate, displayOrder: parseInt(e.target.value) || 0 })}
+                  className="w-24 p-2 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              {currentCertificate.pdfUrl && (
+                <div className="p-2.5 rounded bg-[#F5F8F3] border border-[#DCE5DD] flex items-center justify-between">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <FileText className="w-4 h-4 text-red-600 shrink-0" />
+                    <span className="text-[11px] text-[#173B26] font-mono truncate">
+                      {currentCertificate.pdfUrl}
+                    </span>
+                  </div>
+                  <a
+                    href={currentCertificate.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-semibold text-[#216B35] hover:underline flex items-center gap-1 shrink-0 ml-2"
+                  >
+                    <span>Test Link</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#DCE5DD]">
+                <button
+                  type="button"
+                  onClick={() => setCertificateModalOpen(false)}
+                  className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-4 py-1.5 rounded text-xs"
+                >
+                  {currentCertificate.id ? 'Save Changes' : 'Add Certificate'}
                 </button>
               </div>
             </form>

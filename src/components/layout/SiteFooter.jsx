@@ -104,7 +104,16 @@ export default function SiteFooter() {
                 <Link href="/services" className="hover:text-emerald-400 transition-colors">Our Key Services</Link>
               </li>
               <li>
+                <Link href="/products" className="hover:text-emerald-400 transition-colors">Products &amp; Hardware</Link>
+              </li>
+              <li>
                 <Link href="/projects" className="hover:text-emerald-400 transition-colors">Key Projects</Link>
+              </li>
+              <li>
+                <Link href="/partners" className="hover:text-emerald-400 transition-colors">Our Partners</Link>
+              </li>
+              <li>
+                <Link href="/certificates" className="hover:text-emerald-400 transition-colors">Certifications</Link>
               </li>
               <li>
                 <Link href="/gallery" className="hover:text-emerald-400 transition-colors">Field Gallery</Link>

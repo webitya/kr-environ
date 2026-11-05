@@ -52,7 +52,7 @@ export default async function ServiceDetailPage({ params }) {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full min-h-[calc(100vh-80px)]">
         {/* Breadcrumb & Hero */}
         <section className="bg-gradient-to-b from-[#F5F8F3] to-white py-8 sm:py-12 border-b border-[#DCE5DD]">
           <Container>

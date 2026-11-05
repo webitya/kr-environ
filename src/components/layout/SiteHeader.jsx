@@ -19,7 +19,10 @@ const navItems = [
   { name: 'Home', href: '/' },
   { name: 'About Us', href: '/about-us' },
   { name: 'Our Services', href: '/services' },
+  { name: 'Products', href: '/products' },
   { name: 'Projects', href: '/projects' },
+  { name: 'Partners', href: '/partners' },
+  { name: 'Certificates', href: '/certificates' },
   { name: 'Gallery', href: '/gallery' },
   { name: 'Videos', href: '/videos' },
   { name: 'Blog', href: '/blog' },
@@ -87,7 +90,7 @@ export default function SiteHeader() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center space-x-0.5 xl:space-x-1.5">
+          <div className="hidden lg:flex items-center space-x-0.5 xl:space-x-1 2xl:space-x-1.5">
             {navItems.filter((item) => item.href !== '/contact-us').map((item) => {
               const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
@@ -95,7 +98,7 @@ export default function SiteHeader() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition-colors ${
+                  className={`px-1.5 xl:px-2 2xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-[13px] 2xl:text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive
                       ? 'text-[#216B35] font-semibold bg-[#F5F8F3]'
                       : 'text-[#4B5563] hover:text-[#216B35] hover:bg-[#F5F8F3]'
