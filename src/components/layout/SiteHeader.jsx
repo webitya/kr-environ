@@ -181,7 +181,7 @@ export default function SiteHeader() {
 
           {/* Drawer Scrollable Nav Links */}
           <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-1">
-            {navItems.map((item) => {
+            {navItems.filter((item) => item.href !== '/contact-us').map((item) => {
               const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
               return (
@@ -189,7 +189,7 @@ export default function SiteHeader() {
                   key={item.name}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  className={`block px-3 py-2.5 rounded-lg text-sm font-semibold font-manrope transition-colors ${
                     isActive
                       ? 'text-[#216B35] bg-[#F5F8F3]'
                       : 'text-[#173B26] hover:bg-[#F5F8F3]'
@@ -201,12 +201,15 @@ export default function SiteHeader() {
             })}
           </div>
 
-          {/* Drawer Footer Actions */}
-          <div className="p-4 border-t border-[#DCE5DD] bg-[#F5F8F3]/90 shrink-0">
+          {/* Drawer Footer Actions with Comfortable Bottom Breathing Room */}
+          <div 
+            className="p-4 pt-3.5 pb-8 sm:pb-9 border-t border-[#DCE5DD] bg-[#F5F8F3] shrink-0"
+            style={{ paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem))' }}
+          >
             <Link
               href="/contact-us"
               onClick={() => setMobileMenuOpen(false)}
-              className="btn-primary w-full text-center py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm"
+              className="btn-primary w-full text-center py-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm rounded-xl font-manrope"
             >
               <PhoneCall className="w-4 h-4" />
               <span>Contact Us</span>
