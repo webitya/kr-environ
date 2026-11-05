@@ -331,9 +331,14 @@ export async function ensureProjectsInitialized() {
       const conn = await connectToDatabase();
       if (!conn) return;
 
-      // Clean up legacy fallback demo projects so they never reappear
+      // Clean up legacy fallback demo projects so only admin panel projects are displayed
       const demoSlugs = ['bihar-nepal-border-aniders', 'ladakh-valmiki-smart-sticks-patrol', 'odisha-ranger-net-gun-training'];
-      await Project.deleteMany({ slug: { $in: demoSlugs } }).catch(() => {});
+      await Project.deleteMany({
+        $or: [
+          { slug: { $in: demoSlugs } },
+          { title: { $regex: /Bihar-Nepal|Smart Sticks|Net Gun Training|Valmiki|Similipal/i } }
+        ]
+      }).catch(() => {});
 
       const db = conn.connection.db;
       const settingsCol = db.collection('settings');
@@ -643,20 +648,27 @@ export async function ensureVideosInitialized() {
       const conn = await connectToDatabase();
       if (!conn) return;
 
-      const count = await Video.countDocuments();
-      if (count > 0) return;
+      // Clean up legacy fallback demo videos so only admin panel videos are displayed
+      const demoTitles = [
+        'ANIDERS | Patented Animal Intrusion Detection & Repellent System',
+        'ANIDERS Nocturnal Deterrence & Animal Repellent Field Test',
+        'Wildlife Intrusion Detection & Field Training Demonstration',
+        'Tactical Forest Ranger Safety & Deterrent Equipment Review',
+        'Dynamic Bird Flight Diverter (BFD) Transmission Line Operation'
+      ];
+
+      await Video.deleteMany({
+        $or: [
+          { title: { $in: demoTitles } },
+          { title: { $regex: /Tactical Forest Ranger|Dynamic Bird Flight|ANIDERS|Wildlife Intrusion/i } },
+          { embedUrl: 'https://www.youtube.com/embed/sKlBSzb0TUA' },
+          { embedUrl: 'https://www.youtube.com/embed/LyMRKxHR184' },
+          { embedUrl: 'https://www.youtube.com/embed/I41i0_dbCpw' }
+        ]
+      }).catch(() => {});
 
       const db = conn.connection.db;
       const settingsCol = db.collection('settings');
-      const marker = await settingsCol.findOne({ key: 'videos_initialized' });
-      if (marker) return;
-
-      // Initial seeding of fallback videos into MongoDB Atlas
-      for (const v of FALLBACK_VIDEOS) {
-        const { id, ...clean } = v;
-        await Video.create(clean).catch(() => {});
-      }
-
       await settingsCol.updateOne(
         { key: 'videos_initialized' },
         { $set: { key: 'videos_initialized', initializedAt: new Date() } },

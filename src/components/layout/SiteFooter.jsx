@@ -221,7 +221,7 @@ export default function SiteFooter() {
         <hr className="border-white/10 mt-4 mb-3.5" />
         <div className="text-center text-xs text-[#E4EEE6]/70 font-manrope">
           <p>
-            Website Architected, Designed &amp; Maintained by{' '}
+            Website Designed &amp; Maintained by{' '}
             <a
               href="https://www.webitya.com"
               target="_blank"
