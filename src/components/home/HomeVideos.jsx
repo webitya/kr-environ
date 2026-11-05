@@ -8,6 +8,7 @@ import SectionHeading from '../common/SectionHeading';
 export default function HomeVideos({ videos = [] }) {
   const [activeVideo, setActiveVideo] = useState(null);
   const displayVideos = videos.slice(0, 3);
+  if (displayVideos.length === 0) return null;
 
   return (
     <section className="py-12 lg:py-14 bg-white border-b border-[#DCE5DD]">

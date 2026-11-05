@@ -1,87 +1,102 @@
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
-import SectionHeading from '../common/SectionHeading';
+import { ArrowRight } from 'lucide-react';
 
 export default function HomeServices({ services = [] }) {
-  // If no services passed, use empty or slice first 6
-  const displayServices = services.slice(0, 6);
+  // Exactly 4 services in 1 row on desktop
+  const displayServices = services.slice(0, 4);
+
+  if (displayServices.length === 0) return null;
 
   return (
-    <section className="py-12 lg:py-14 bg-white">
-      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
-        <SectionHeading
-          title="Field-Tested Wildlife Safety & Deterrent Hardware"
-          subtitle="Non-lethal sensor systems, electronic capture launchers, and tactical forest ranger equipment engineered for zero harm."
-        />
+    <section className="py-8 sm:py-10 bg-[#F5F8F3]/50 border-b border-[#DCE5DD] w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
+        
+        {/* Section Header - Compact UI/UX */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6 pb-2 border-b border-[#DCE5DD]/60">
+          <div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#173B26] font-manrope tracking-tight">
+              Statutory Services &amp; Technical Solutions
+            </h2>
+            <p className="text-xs sm:text-sm text-[#4B5563] font-manrope max-w-2xl mt-1 leading-relaxed">
+              Statutory Forest Clearances (FC), Environmental Clearances (EC), GIS Drone Topography Mapping, and Human-Wildlife Conflict mitigation.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {displayServices.map((service) => (
-            <div
-              key={service.id || service.slug}
-              className="group bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden card-hover flex flex-col justify-between shadow-xs"
-            >
-              <div>
-                {/* Image Container */}
-                <div className="relative h-44 w-full overflow-hidden bg-slate-100">
-                  <img
-                    src={service.featuredImage || '/img4.jpeg'}
-                    alt={service.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Card Content */}
-                <div className="p-5">
-                  <p className="text-xs uppercase tracking-wider font-semibold text-[#216B35] mb-1.5">
-                    {service.category || 'Wildlife Tech'}
-                  </p>
-
-                  <h3 className="text-base sm:text-lg font-bold font-montserrat text-[#173B26] group-hover:text-[#216B35] transition-colors leading-snug">
-                    <Link href={`/services/${service.slug}`}>
-                      {service.title}
-                    </Link>
-                  </h3>
-
-                  <p className="mt-2 text-xs sm:text-sm text-[#4B5563] font-lato line-clamp-3 leading-relaxed">
-                    {service.shortDescription}
-                  </p>
-
-                  {/* Highlights/Specs preview */}
-                  {service.specs && service.specs.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-[#DCE5DD]/60 flex flex-wrap gap-x-3 gap-y-1">
-                      {service.specs.slice(0, 2).map((sp, idx) => (
-                        <span
-                          key={idx}
-                          className="text-xs font-medium text-[#173B26]"
-                        >
-                          &bull; {sp.value}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Link at Bottom */}
-              <div className="px-5 pb-5 pt-1">
-                <Link
-                  href={`/services/${service.slug}`}
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold font-poppins text-[#216B35] hover:text-[#174D28] group/link transition-colors"
-                >
-                  <span>Explore Technical Specifications</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
-          ))}
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#216B35] hover:text-[#174D28] bg-white hover:bg-[#F5F8F3] border border-[#DCE5DD] hover:border-[#216B35] px-3.5 py-1.5 rounded-lg font-manrope transition-all shadow-xs shrink-0 self-start sm:self-auto"
+          >
+            <span>View All Services</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
-        {/* View All CTAs */}
-        <div className="mt-8 text-center">
-          <Link href="/services" className="btn-secondary">
-            <span>View Complete Product & Service Catalog</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+        {/* 1 Row of 4 Compact Columns Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {displayServices.map((service) => {
+            const serviceHref = service.slug ? `/services/${service.slug}` : `/services`;
+            return (
+              <div
+                key={service.id || service._id || service.slug}
+                className="group bg-white rounded-xl border border-[#DCE5DD] overflow-hidden shadow-xs hover:shadow-md hover:border-[#216B35]/50 hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  {/* Compact Service Image */}
+                  <Link href={serviceHref} className="block relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100 cursor-pointer">
+                    <img
+                      src={service.featuredImage || '/img4.jpeg'}
+                      alt={service.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    {service.category && (
+                      <div className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-semibold text-[#173B26] border border-[#DCE5DD] shadow-xs">
+                        {service.category}
+                      </div>
+                    )}
+                  </Link>
+
+                  {/* Compact Content */}
+                  <div className="p-4 space-y-2">
+                    <Link href={serviceHref} className="block group-hover:text-[#216B35] transition-colors">
+                      <h3 className="text-sm sm:text-base font-bold font-manrope text-[#173B26] line-clamp-1 leading-snug">
+                        {service.title}
+                      </h3>
+                    </Link>
+
+                    <p className="text-xs text-[#4B5563] font-manrope line-clamp-2 leading-relaxed">
+                      {service.shortDescription || 'Turnkey statutory environmental clearances and advanced wildlife conservation engineering.'}
+                    </p>
+
+                    {/* Quick Specs Snippet */}
+                    {service.specs && service.specs.length > 0 && (
+                      <div className="pt-2 border-t border-[#DCE5DD]/60 space-y-1">
+                        {service.specs.slice(0, 2).map((sp, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 text-[11px] text-[#4B5563] truncate">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#216B35] shrink-0" />
+                            <span className="truncate">
+                              <strong className="text-[#173B26] font-medium">{sp.label}:</strong> {sp.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Compact Footer Action */}
+                <div className="p-3.5 pt-2.5 border-t border-[#DCE5DD]/60 bg-[#F5F8F3]/40 flex items-center justify-end">
+                  <Link
+                    href={serviceHref}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#216B35] hover:text-[#174D28] font-manrope group-hover:translate-x-0.5 transition-all"
+                  >
+                    <span>Explore Scope</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

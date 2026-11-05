@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { ArrowRight, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function HomeGallery({ gallery = [] }) {
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -136,11 +136,6 @@ export default function HomeGallery({ gallery = [] }) {
                   </span>
                 </div>
               )}
-
-              {/* Hover Quick View Icon (Top-Right) */}
-              <div className="absolute top-2.5 right-2.5 z-10 w-6 h-6 rounded-md bg-white/20 backdrop-blur-xs flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <Maximize2 className="w-3 h-3" />
-              </div>
 
               {/* Compact Caption at Bottom */}
               <div className="absolute inset-x-0 bottom-0 p-2.5 sm:p-3 text-white z-10">

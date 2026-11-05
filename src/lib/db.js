@@ -662,7 +662,7 @@ export async function getVideos() {
   } catch (err) {
     console.error('Error fetching videos from MongoDB:', err.message);
   }
-  return FALLBACK_VIDEOS;
+  return [];
 }
 
 export async function upsertVideo(videoData) {
@@ -736,7 +736,15 @@ export async function deleteVideo(idOrQuery, title = '') {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
 
-    await ensureVideosInitialized();
+    // Guarantee initialized marker is saved so count reaching 0 never resurrects default videos
+    try {
+      const db = conn.connection.db;
+      await db.collection('settings').updateOne(
+        { key: 'videos_initialized' },
+        { $set: { key: 'videos_initialized', initializedAt: new Date() } },
+        { upsert: true }
+      );
+    } catch (e) {}
 
     if (!idOrQuery && !title) {
       throw new Error('Video ID or title is required');
