@@ -73,8 +73,9 @@ export default function RootLayout({ children }) {
         <link
           rel="preload"
           as="video"
-          href="https://res.cloudinary.com/fjdmukyv/video/upload/v1793781248/1104.mp4"
+          href="https://res.cloudinary.com/fjdmukyv/video/upload/v1793910406/1104_1.mp4"
           type="video/mp4"
+          crossOrigin="anonymous"
         />
         <script
           type="application/ld+json"

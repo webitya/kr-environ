@@ -27,7 +27,18 @@ const SERVICES_LIST = [
 
 export default function HomeHero() {
   const videoRef = useRef(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  // Guarantee immediate fast playback on mount across all browsers
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    }
+  }, []);
 
   // Typewriter state
   const [serviceIndex, setServiceIndex] = useState(0);
@@ -75,7 +86,7 @@ export default function HomeHero() {
       {/* =========================================================================
           1. FULL-WIDTH BACKGROUND VIDEO (AUTOMATIC AUTOPLAY & LOOP, NO CONTROLS)
           ========================================================================= */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden select-none pointer-events-none">
+      <div className="absolute inset-0 w-full h-full overflow-hidden select-none pointer-events-none bg-[#0a1a11]">
         <video
           ref={videoRef}
           autoPlay
@@ -83,14 +94,10 @@ export default function HomeHero() {
           muted
           playsInline
           preload="auto"
-          poster="/img2.jpeg"
-          onLoadedData={() => setVideoLoaded(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 scale-[1.01] transform-gpu ${
-            videoLoaded ? 'opacity-100' : 'opacity-90'
-          }`}
+          className="absolute inset-0 w-full h-full object-cover scale-[1.01] transform-gpu"
         >
           <source 
-            src="https://res.cloudinary.com/fjdmukyv/video/upload/v1793781248/1104.mp4" 
+            src="https://res.cloudinary.com/fjdmukyv/video/upload/v1793910406/1104_1.mp4" 
             type="video/mp4" 
           />
         </video>
