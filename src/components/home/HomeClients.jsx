@@ -44,7 +44,7 @@ export default function HomeClients({ clients = [] }) {
                       <img
                         src={client.logoUrl}
                         alt={client.name || 'Client Logo'}
-                        className="h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[160px] object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                        className="h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[160px] object-contain transition-all duration-300 group-hover:scale-105"
                         loading="lazy"
                       />
                     </a>
@@ -53,7 +53,7 @@ export default function HomeClients({ clients = [] }) {
                       <img
                         src={client.logoUrl}
                         alt={client.name || 'Client Logo'}
-                        className="h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[160px] object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                        className="h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[160px] object-contain transition-all duration-300 group-hover:scale-105"
                         loading="lazy"
                       />
                     </div>

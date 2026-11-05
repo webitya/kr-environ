@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -29,6 +30,11 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close mobile drawer on route change automatically
   useEffect(() => {
@@ -72,7 +78,7 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full transition-all duration-300">
+      <header className="sticky top-0 z-40 w-full transition-all duration-300">
         {/* Main Navigation Bar */}
         <nav className={`w-full transition-all duration-200 ${
           scrolled 
@@ -140,26 +146,32 @@ export default function SiteHeader() {
             </div>
           </div>
         </nav>
+      </header>
 
-        {/* Mobile Navigation Drawer System */}
+      {/* Teleport Mobile Drawer to document.body to escape header sticky/stacking contexts */}
+      {mounted && typeof document !== 'undefined' && createPortal(
         <div className="lg:hidden">
           {/* Backdrop */}
           <div
             onClick={() => setMobileMenuOpen(false)}
-            className={`fixed inset-0 bg-black/60 z-[9998] transition-opacity duration-300 touch-manipulation ${
+            className={`fixed inset-0 bg-black/60 z-[99998] transition-opacity duration-300 touch-manipulation ${
               mobileMenuOpen ? 'opacity-100 pointer-events-auto visible' : 'opacity-0 pointer-events-none invisible'
             }`}
             aria-hidden="true"
           />
 
-          {/* Right-to-Left Mobile Navigation Drawer (Hardware Accelerated GPU Transitions) */}
+          {/* Right-to-Left Mobile Navigation Drawer */}
           <aside
-            className={`fixed inset-y-0 right-0 w-[85vw] max-w-xs sm:max-w-sm h-screen h-[100dvh] bg-white z-[9999] shadow-2xl flex flex-col justify-between transform transition-all duration-300 ease-in-out border-l border-[#DCE5DD] will-change-transform ${
+            className={`fixed top-0 bottom-0 right-0 w-[85vw] max-w-xs sm:max-w-sm h-[100dvh] max-h-[100dvh] bg-white z-[99999] shadow-2xl flex flex-col justify-between border-l border-[#DCE5DD] will-change-transform transform transition-transform duration-300 ease-in-out ${
               mobileMenuOpen ? 'translate-x-0 pointer-events-auto visible' : 'translate-x-full pointer-events-none invisible'
             }`}
+            style={{
+              height: '100dvh',
+              maxHeight: '100dvh'
+            }}
             aria-label="Mobile Navigation"
           >
-            {/* Drawer Header with Logo and Brand Name */}
+            {/* 1. Drawer Header (Fixed at top) */}
             <div className="p-4 border-b border-[#DCE5DD] flex items-center justify-between bg-[#F5F8F3] shrink-0">
               <Link
                 href="/"
@@ -186,8 +198,8 @@ export default function SiteHeader() {
               </button>
             </div>
 
-            {/* Drawer Scrollable Nav Links with Prefetch & Touch Manipulation */}
-            <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-1">
+            {/* 2. Drawer Scrollable Nav Links (min-h-0 guarantees flex shrinkage, preventing offscreen push) */}
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1">
               {navItems.filter((item) => item.href !== '/contact-us').map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
@@ -209,10 +221,12 @@ export default function SiteHeader() {
               })}
             </div>
 
-            {/* Drawer Footer Actions with Comfortable Bottom Breathing Room */}
+            {/* 3. Drawer Footer Actions (Always visible at bottom with 40px+ clearance) */}
             <div 
-              className="p-4 pt-3.5 pb-8 sm:pb-9 border-t border-[#DCE5DD] bg-[#F5F8F3] shrink-0"
-              style={{ paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem))' }}
+              className="p-4 pt-3.5 pb-8 sm:pb-10 border-t border-[#DCE5DD] bg-[#F5F8F3] shrink-0 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]"
+              style={{
+                paddingBottom: 'max(2.5rem, calc(env(safe-area-inset-bottom, 0px) + 2rem))'
+              }}
             >
               <Link
                 href="/contact-us"
@@ -225,8 +239,9 @@ export default function SiteHeader() {
               </Link>
             </div>
           </aside>
-        </div>
-      </header>
+        </div>,
+        document.body
+      )}
     </>
   );
 }
