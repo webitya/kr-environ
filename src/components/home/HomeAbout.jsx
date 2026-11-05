@@ -5,16 +5,28 @@ export default function HomeAbout() {
   return (
     <section className="py-8 lg:py-10 bg-[#F5F8F3] border-b border-[#DCE5DD] w-full">
       <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-5 sm:gap-y-6 lg:gap-y-5 lg:gap-x-12 xl:gap-x-16 items-start lg:grid-rows-[auto_1fr]">
           
-          {/* Left Column: Heading & All Content */}
-          <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
-            <div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
-                Bridging Advanced Technology &amp; Forest Stewardship
-              </h2>
-            </div>
+          {/* 1. Title: 1st in Mobile, Top-Left in Desktop */}
+          <div className="order-1 lg:order-1 lg:col-span-7">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
+              Bridging Advanced Technology &amp; Forest Stewardship
+            </h2>
+          </div>
 
+          {/* 2. Image: 2nd in Mobile, Spanning Right Column in Desktop */}
+          <div className="order-2 lg:order-2 lg:col-span-5 lg:row-span-2 flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-md lg:max-w-none aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 group">
+              <img
+                src="/img1.jpeg"
+                alt="Sarika Gupta in consultation at D.F.O. Ranchi Desk"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          </div>
+
+          {/* 3. Left Text Content: 3rd in Mobile, Bottom-Left in Desktop */}
+          <div className="order-3 lg:order-3 lg:col-span-7 space-y-4 sm:space-y-5 text-left">
             <p className="text-sm sm:text-base text-[#4B5563] font-manrope leading-relaxed">
               Headed by proprietor <strong>Sarika Gupta</strong> in Ranchi, Jharkhand, <strong>KR Environ Solutions</strong> spearheads certified non-lethal wildlife conflict management, statutory environmental clearances, and frontline ranger safety gear in strategic alliance with <strong>Kyari Innovations</strong>.
             </p>
@@ -44,17 +56,6 @@ export default function HomeAbout() {
                 <span>Learn More About Us</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
-            </div>
-          </div>
-
-          {/* Right Column: Square Image - Top aligned with left heading */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-md lg:max-w-none aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 group">
-              <img
-                src="/img1.jpeg"
-                alt="Sarika Gupta in consultation at D.F.O. Ranchi Desk"
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-              />
             </div>
           </div>
 
