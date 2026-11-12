@@ -1720,78 +1720,17 @@ export async function deleteCareerApplication(id) {
 }
 
 // ==================== ABOUT US CAROUSEL IMAGES ====================
-const FALLBACK_ABOUT_IMAGES = [
-  {
-    id: 'about-1',
-    title: 'Sarika Gupta in consultation at D.F.O. Ranchi Desk',
-    imageUrl: '/img1.jpeg',
-    displayOrder: 0
-  },
-  {
-    id: 'about-2',
-    title: 'Institutional Forestry & Environmental Engagement',
-    imageUrl: '/img2.jpeg',
-    displayOrder: 1
-  },
-  {
-    id: 'about-3',
-    title: 'Conservation & Statutory Clearance Briefing',
-    imageUrl: '/img3.jpeg',
-    displayOrder: 2
-  }
-];
-
-let aboutImagesInitPromise = null;
-async function ensureAboutImagesInitialized() {
-  if (aboutImagesInitPromise) return aboutImagesInitPromise;
-
-  aboutImagesInitPromise = (async () => {
-    try {
-      const conn = await connectToDatabase();
-      if (!conn) return;
-
-      const count = await AboutImage.countDocuments();
-      if (count > 0) return;
-
-      const db = conn.connection.db;
-      const settingsCol = db.collection('settings');
-      const marker = await settingsCol.findOne({ key: 'about_images_initialized' });
-      if (marker) return;
-
-      for (const img of FALLBACK_ABOUT_IMAGES) {
-        const { id, ...clean } = img;
-        await AboutImage.create(clean).catch(() => {});
-      }
-
-      await settingsCol.updateOne(
-        { key: 'about_images_initialized' },
-        { $set: { key: 'about_images_initialized', initializedAt: new Date() } },
-        { upsert: true }
-      ).catch(() => {});
-    } catch (e) {
-      console.error('ensureAboutImagesInitialized error:', e.message);
-    }
-  })();
-
-  return aboutImagesInitPromise;
-}
-
 export async function getAboutImages() {
   try {
     const conn = await connectToDatabase();
     if (conn) {
-      await ensureAboutImagesInitialized();
       const items = await AboutImage.find().sort({ displayOrder: 1, createdAt: 1 }).lean();
-      if (items && items.length > 0) {
-        return items.map(serializeDoc);
-      }
-      const marker = await conn.connection.db.collection('settings').findOne({ key: 'about_images_initialized' });
-      if (marker) return [];
+      return (items || []).map(serializeDoc);
     }
   } catch (err) {
     console.error('Error fetching about images from MongoDB:', err.message);
   }
-  return FALLBACK_ABOUT_IMAGES;
+  return [];
 }
 
 export async function upsertAboutImage(imageData) {
@@ -1799,20 +1738,27 @@ export async function upsertAboutImage(imageData) {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
 
-    await ensureAboutImagesInitialized();
-
     const targetId = imageData.id || imageData._id;
     const isValidObjectId = targetId && typeof targetId === 'string' && /^[0-9a-fA-F]{24}$/.test(targetId);
-    const { id, _id, ...cleanData } = imageData;
+    const { id, _id, __v, createdAt, updatedAt, ...rest } = imageData;
 
-    let updated;
+    const cleanData = {
+      title: (rest.title || '').toString().trim(),
+      description: (rest.description || '').toString().trim(),
+      imageUrl: (rest.imageUrl || '').toString().trim(),
+      displayOrder: Number.isFinite(Number(rest.displayOrder)) ? Number(rest.displayOrder) : 0
+    };
+
+    let updated = null;
     if (isValidObjectId) {
       updated = await AboutImage.findByIdAndUpdate(
         targetId,
         { $set: cleanData },
         { returnDocument: 'after', runValidators: true }
       ).lean();
-    } else {
+    }
+
+    if (!updated) {
       updated = await AboutImage.create(cleanData);
     }
 
@@ -1828,7 +1774,10 @@ export async function deleteAboutImage(id) {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
 
-    await ensureAboutImagesInitialized();
+    if (!id || typeof id !== 'string' || !/^[0-9a-fA-F]{24}$/.test(id)) {
+      return false;
+    }
+
     await AboutImage.findByIdAndDelete(id);
     return true;
   } catch (err) {

@@ -6,6 +6,11 @@ const AboutImageSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
+  description: {
+    type: String,
+    default: '',
+    trim: true
+  },
   imageUrl: {
     type: String,
     required: [true, 'Image URL is required'],

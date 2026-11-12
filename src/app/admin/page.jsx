@@ -61,9 +61,11 @@ export default function AdminDashboardPage() {
 
   // About Us Carousel Modal
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [savingAboutImage, setSavingAboutImage] = useState(false);
   const [currentAboutImage, setCurrentAboutImage] = useState({
     id: '',
     title: '',
+    description: '',
     imageUrl: '',
     displayOrder: 0
   });
@@ -408,6 +410,7 @@ export default function AdminDashboardPage() {
       return null;
     } finally {
       setUploadingImage(false);
+      if (e?.target) e.target.value = '';
     }
   };
 
@@ -1302,6 +1305,7 @@ export default function AdminDashboardPage() {
       setCurrentAboutImage({
         id: img.id || img._id || '',
         title: img.title || '',
+        description: img.description || '',
         imageUrl: img.imageUrl || '',
         displayOrder: img.displayOrder ?? 0
       });
@@ -1309,6 +1313,7 @@ export default function AdminDashboardPage() {
       setCurrentAboutImage({
         id: '',
         title: '',
+        description: '',
         imageUrl: '',
         displayOrder: aboutImages.length
       });
@@ -1318,22 +1323,50 @@ export default function AdminDashboardPage() {
 
   const handleSaveAboutImage = async (e) => {
     e.preventDefault();
-    if (!currentAboutImage.imageUrl.trim()) return;
+    if (!currentAboutImage.imageUrl.trim()) {
+      setMessage({ text: 'Please upload an image or enter a valid image URL.', type: 'error' });
+      return;
+    }
 
+    setSavingAboutImage(true);
     try {
+      const payload = {
+        ...(currentAboutImage.id ? { id: currentAboutImage.id } : {}),
+        title: (currentAboutImage.title || '').trim(),
+        description: (currentAboutImage.description || '').trim(),
+        imageUrl: currentAboutImage.imageUrl.trim(),
+        displayOrder: Number.isFinite(Number(currentAboutImage.displayOrder))
+          ? Number(currentAboutImage.displayOrder)
+          : 0
+      };
+
       const res = await fetch('/api/about-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentAboutImage)
+        cache: 'no-store',
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save About Us image');
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save About Us slide');
 
-      setMessage({ text: 'About Us carousel image saved.', type: 'success' });
+      if (data.image) {
+        const savedId = data.image.id || data.image._id;
+        setAboutImages((prev) => {
+          const exists = prev.some((item) => (item.id || item._id) === savedId);
+          const next = exists
+            ? prev.map((item) => ((item.id || item._id) === savedId ? data.image : item))
+            : [...prev, data.image];
+          return next.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+        });
+      }
+
+      setMessage({ text: 'About Us carousel slide saved.', type: 'success' });
       setAboutModalOpen(false);
-      fetchData();
+      await fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setSavingAboutImage(false);
     }
   };
 
@@ -2707,10 +2740,15 @@ export default function AdminDashboardPage() {
                         <span className="absolute top-1 left-1 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded font-mono">
                           #{img.displayOrder ?? 0}
                         </span>
-                        <div className="p-1.5 bg-white border-t border-[#DCE5DD]/60">
+                        <div className="p-1.5 bg-white border-t border-[#DCE5DD]/60 space-y-0.5">
                           <h4 className="font-semibold text-[#173B26] text-[11px] truncate">
                             {img.title || 'Carousel Slide'}
                           </h4>
+                          {img.description && (
+                            <p className="text-[10px] text-[#68756D] line-clamp-2 leading-snug">
+                              {img.description}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="p-1 bg-white border-t border-[#DCE5DD]/60 flex justify-end gap-1">
@@ -3078,13 +3116,26 @@ export default function AdminDashboardPage() {
 
             <form onSubmit={handleSaveAboutImage} className="space-y-2.5 text-xs">
               <div>
-                <label className="block font-semibold text-[#173B26] mb-1">Slide Title / Alt Caption</label>
+                <label className="block font-semibold text-[#173B26] mb-1">Slide Heading / Caption</label>
                 <input
                   type="text"
                   value={currentAboutImage.title}
                   onChange={(e) => setCurrentAboutImage({ ...currentAboutImage, title: e.target.value })}
-                  placeholder="e.g. D.F.O. Ranchi Consultation Meeting"
+                  placeholder="e.g. Institutional Forestry Consultation"
                   className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Paragraph / Text (Displayed Below Image)
+                </label>
+                <textarea
+                  rows={4}
+                  value={currentAboutImage.description}
+                  onChange={(e) => setCurrentAboutImage({ ...currentAboutImage, description: e.target.value })}
+                  placeholder="Enter a short description or paragraph to display at the bottom of the right-side showcase image..."
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none resize-y leading-relaxed"
                 />
               </div>
 
@@ -3108,7 +3159,7 @@ export default function AdminDashboardPage() {
                   required
                   value={currentAboutImage.imageUrl}
                   onChange={(e) => setCurrentAboutImage({ ...currentAboutImage, imageUrl: e.target.value })}
-                  placeholder="/img1.jpeg or Cloudinary URL"
+                  placeholder="Upload image or paste Cloudinary image URL"
                   className="w-full p-1.5 rounded border border-[#DCE5DD] font-mono text-[11px] focus:border-[#216B35] focus:outline-none"
                 />
                 {currentAboutImage.imageUrl && (
@@ -3127,7 +3178,13 @@ export default function AdminDashboardPage() {
                 <input
                   type="number"
                   value={currentAboutImage.displayOrder ?? 0}
-                  onChange={(e) => setCurrentAboutImage({ ...currentAboutImage, displayOrder: parseInt(e.target.value, 10) || 0 })}
+                  onChange={(e) => {
+                    const parsed = parseInt(e.target.value, 10);
+                    setCurrentAboutImage({
+                      ...currentAboutImage,
+                      displayOrder: Number.isNaN(parsed) ? 0 : parsed
+                    });
+                  }}
                   className="w-24 p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
                 />
               </div>
@@ -3142,10 +3199,10 @@ export default function AdminDashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={uploadingImage}
+                  disabled={uploadingImage || savingAboutImage}
                   className="btn-primary px-4 py-1.5 rounded text-xs font-semibold disabled:opacity-60"
                 >
-                  {currentAboutImage.id ? 'Save Slide' : 'Add Slide'}
+                  {savingAboutImage ? 'Saving...' : (currentAboutImage.id ? 'Save Slide' : 'Add Slide')}
                 </button>
               </div>
             </form>

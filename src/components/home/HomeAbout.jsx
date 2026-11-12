@@ -10,7 +10,8 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
-  MapPin
+  MapPin,
+  ImageIcon
 } from 'lucide-react';
 
 const OPERATIONAL_STATES = [
@@ -22,33 +23,62 @@ const OPERATIONAL_STATES = [
   'Odisha'
 ];
 
-const DEFAULT_SLIDES = [
-  {
-    id: 'default-1',
-    title: 'Sarika Gupta in consultation at D.F.O. Ranchi Desk',
-    imageUrl: '/img1.jpeg'
-  }
-];
-
 export default function HomeAbout({ images = [] }) {
-  const slides = images && images.length > 0 ? images : DEFAULT_SLIDES;
+  const [slides, setSlides] = useState(() => (Array.isArray(images) ? images : []));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const safeIndex = currentIndex >= slides.length ? 0 : currentIndex;
+  useEffect(() => {
+    setSlides(Array.isArray(images) ? images : []);
+  }, [images]);
+
+  // Ensure fresh client-side sync from MongoDB (bypasses Next.js Router Cache after Admin edits)
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    async function refreshSlides() {
+      try {
+        const res = await fetch('/api/about-images', {
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (active && data?.success && Array.isArray(data.images)) {
+          setSlides(data.images);
+        }
+      } catch (err) {
+        if (err?.name !== 'AbortError') {
+          console.error('Failed to sync About Us slides:', err);
+        }
+      }
+    }
+
+    refreshSlides();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, []);
+
+  const safeIndex = slides.length > 0 && currentIndex < slides.length ? currentIndex : 0;
+  const activeSlide = slides.length > 0 ? slides[safeIndex] : null;
 
   const goNext = useCallback(() => {
+    if (slides.length <= 1) return;
     setCurrentIndex((prev) => (prev + 1) % slides.length);
   }, [slides.length]);
 
   const goPrev = useCallback(() => {
+    if (slides.length <= 1) return;
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
   // Auto-slide carousel when multiple images exist
   useEffect(() => {
     if (slides.length <= 1 || isPaused) return;
-    const timer = setInterval(goNext, 4000);
+    const timer = setInterval(goNext, 4500);
     return () => clearInterval(timer);
   }, [slides.length, isPaused, goNext]);
 
@@ -64,69 +94,82 @@ export default function HomeAbout({ images = [] }) {
             </h2>
           </div>
 
-          {/* 2. Right-Side Auto-Slide Image Carousel: 2nd in Mobile, Spanning Right Column in Desktop */}
+          {/* 2. Right-Side Image Carousel & Bottom Paragraph Card: 2nd in Mobile, Spanning Right Column in Desktop */}
           <div className="order-2 lg:order-2 lg:col-span-5 lg:row-span-2 flex justify-center lg:justify-end">
-            <div
-              className="relative w-full max-w-md lg:max-w-none aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 select-none"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
-              {/* Slide Track */}
+            {slides.length > 0 ? (
               <div
-                className="flex w-full h-full transition-transform duration-500 ease-out"
-                style={{ transform: `translateX(-${safeIndex * 100}%)` }}
+                className="w-full max-w-md lg:max-w-none rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-white flex flex-col select-none"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
               >
-                {slides.map((slide, idx) => (
-                  <div key={slide.id || slide._id || idx} className="w-full h-full shrink-0 relative">
-                    <img
-                      src={slide.imageUrl}
-                      alt={slide.title || 'KR Environ Solutions Field Highlight'}
-                      className="w-full h-full object-cover object-center"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Left & Right Corner-Center Navigation Controls */}
-              {slides.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={goPrev}
-                    aria-label="Previous image"
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/50 hover:bg-[#216B35] text-white backdrop-blur-xs border border-white/25 flex items-center justify-center transition-colors shadow-md cursor-pointer"
+                {/* Image Viewport */}
+                <div className="relative w-full aspect-[4/3] bg-[#EAEFE8] overflow-hidden">
+                  <div
+                    className="flex w-full h-full transition-transform duration-500 ease-out"
+                    style={{ transform: `translateX(-${safeIndex * 100}%)` }}
                   >
-                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    aria-label="Next image"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/50 hover:bg-[#216B35] text-white backdrop-blur-xs border border-white/25 flex items-center justify-center transition-colors shadow-md cursor-pointer"
-                  >
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-
-                  {/* Bottom Dots Indicator */}
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-full">
                     {slides.map((slide, idx) => (
-                      <button
-                        key={slide.id || slide._id || idx}
-                        type="button"
-                        onClick={() => setCurrentIndex(idx)}
-                        aria-label={`Go to slide ${idx + 1}`}
-                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                          idx === safeIndex
-                            ? 'w-5 bg-white'
-                            : 'w-1.5 bg-white/55 hover:bg-white/80'
-                        }`}
-                      />
+                      <div key={slide.id || slide._id || idx} className="w-full h-full shrink-0 relative">
+                        <img
+                          src={slide.imageUrl}
+                          alt={slide.title || 'KR Environ Solutions Field Highlight'}
+                          className="w-full h-full object-cover object-center"
+                        />
+                      </div>
                     ))}
                   </div>
-                </>
-              )}
-            </div>
+
+                  {/* Left & Right Navigation Controls */}
+                  {slides.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={goPrev}
+                        aria-label="Previous image"
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/50 hover:bg-[#216B35] text-white backdrop-blur-xs border border-white/25 flex items-center justify-center transition-colors shadow-md cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={goNext}
+                        aria-label="Next image"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/50 hover:bg-[#216B35] text-white backdrop-blur-xs border border-white/25 flex items-center justify-center transition-colors shadow-md cursor-pointer"
+                      >
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Bottom Text / Paragraph Area (in place of bottom dots navigation) */}
+                {(activeSlide?.title || activeSlide?.description) && (
+                  <div className="px-4 py-3.5 sm:px-6 sm:py-4 bg-white border-t border-[#DCE5DD] font-manrope space-y-1.5">
+                    {activeSlide.title && (
+                      <h3 className="text-sm sm:text-base font-bold text-[#173B26] leading-snug">
+                        {activeSlide.title}
+                      </h3>
+                    )}
+                    {activeSlide.description && (
+                      <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed whitespace-pre-line">
+                        {activeSlide.description}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="w-full max-w-md lg:max-w-none aspect-[4/3] rounded-2xl sm:rounded-3xl border-2 border-dashed border-[#DCE5DD] bg-white/80 flex flex-col items-center justify-center p-6 text-center font-manrope shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center justify-center text-[#216B35] mb-3">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <p className="text-sm font-bold text-[#173B26]">No Showcase Slides Added Yet</p>
+                <p className="text-xs text-[#68756D] mt-1 max-w-xs">
+                  Upload field photos and text from the Admin Panel under About Us Images.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* 3. Left Text Content: 3rd in Mobile, Bottom-Left in Desktop */}
