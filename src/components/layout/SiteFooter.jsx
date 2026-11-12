@@ -35,8 +35,33 @@ export default function SiteFooter() {
               </div>
             </div>
             <p className="text-sm text-[#E4EEE6]/80 leading-relaxed max-w-sm">
-              Your Trusted Environmental Partner. Specializing in Forest & Environmental Clearance (EC/FC), Wildlife Clearance, EIA/EMP, Ambient Monitoring, Drone Surveys, and non-lethal Human-Wildlife Conflict mitigation across India.
+              Your Trusted Environmental Partner. Specializing in Forest &amp; Environmental Clearance (EC/FC), Wildlife Clearance, EIA/EMP, Ambient Monitoring, Drone Surveys, and non-lethal Human-Wildlife Conflict mitigation across India.
             </p>
+
+            {/* Operational States Footprint */}
+            <div className="pt-2 max-w-sm">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-2.5">
+                <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Operational Footprint Across India</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  'Jharkhand',
+                  'Bihar',
+                  'Uttar Pradesh',
+                  'Madhya Pradesh',
+                  'Chhattisgarh',
+                  'Odisha',
+                ].map((state) => (
+                  <span
+                    key={state}
+                    className="inline-flex items-center px-2.5 py-1 rounded bg-white/10 border border-emerald-400/20 text-[11px] font-medium text-[#E4EEE6]"
+                  >
+                    {state}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Navigation Links */}

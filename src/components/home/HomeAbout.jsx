@@ -9,8 +9,18 @@ import {
   UserCheck,
   Building2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MapPin
 } from 'lucide-react';
+
+const OPERATIONAL_STATES = [
+  'Jharkhand',
+  'Bihar',
+  'Uttar Pradesh',
+  'Madhya Pradesh',
+  'Chhattisgarh',
+  'Odisha'
+];
 
 const DEFAULT_SLIDES = [
   {
@@ -145,7 +155,27 @@ export default function HomeAbout({ images = [] }) {
               </div>
             </div>
 
-            <div className="pt-2">
+            {/* Active Operational States */}
+            <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-[#DCE5DD] shadow-2xs space-y-2.5 font-manrope">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#216B35] shrink-0" />
+                <span className="text-xs sm:text-sm font-bold text-[#173B26]">
+                  Our Active Operational States
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {OPERATIONAL_STATES.map((state) => (
+                  <span
+                    key={state}
+                    className="inline-flex items-center px-2.5 py-1 rounded bg-[#F5F8F3] border border-[#DCE5DD] text-xs font-medium text-[#173B26]"
+                  >
+                    {state}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-1">
               <Link href="/about-us" className="btn-primary inline-flex items-center gap-2 text-xs sm:text-sm px-5 py-2.5 font-manrope">
                 <span>Learn More About Us</span>
                 <ArrowRight className="w-4 h-4" />
