@@ -9,7 +9,6 @@ export default function HomeContact({
   services = [],
   products = [],
   initialService = '',
-  initialSelectionType = '',
   initialSubject = ''
 }) {
   const [fetchedServices, setFetchedServices] = useState(null);
@@ -272,16 +271,9 @@ export default function HomeContact({
               </div>
 
               <div>
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-                  <label className="block text-xs font-semibold text-[#173B26]">
-                    Primary Technology / Service / Product Requirement *
-                  </label>
-                  {selectedService && selectedService === initialService && (initialSelectionType === 'service' || initialSelectionType === 'product') && (
-                    <span className="text-[10px] font-semibold text-[#216B35] bg-[#F5F8F3] border border-[#216B35]/25 px-2 py-0.5 rounded-full">
-                      {initialSelectionType === 'product' ? 'Auto-selected Product' : 'Auto-selected Service'}
-                    </span>
-                  )}
-                </div>
+                <label className="block text-xs font-semibold text-[#173B26] mb-1">
+                  Primary Technology / Service / Product Requirement *
+                </label>
                 <select
                   required
                   value={selectedService}
