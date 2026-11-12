@@ -1287,37 +1287,49 @@ const FALLBACK_PARTNERS = [
   }
 ];
 
+let partnersInitPromise = null;
+
+async function ensurePartnersInitialized() {
+  if (partnersInitPromise) return partnersInitPromise;
+
+  partnersInitPromise = (async () => {
+    try {
+      const conn = await connectToDatabase();
+      if (!conn) return;
+
+      const db = conn.connection.db;
+      const settingsCol = db.collection('settings');
+      const marker = await settingsCol.findOne({ key: 'partners_initialized' });
+      if (marker) return;
+
+      const count = await Partner.countDocuments();
+      if (count === 0) {
+        for (const p of FALLBACK_PARTNERS) {
+          const { id, ...clean } = p;
+          await Partner.create(clean).catch(() => {});
+        }
+      }
+
+      await settingsCol.updateOne(
+        { key: 'partners_initialized' },
+        { $set: { key: 'partners_initialized', initializedAt: new Date() } },
+        { upsert: true }
+      ).catch(() => {});
+    } catch (e) {
+      console.error('ensurePartnersInitialized error:', e.message);
+    }
+  })();
+
+  return partnersInitPromise;
+}
+
 export async function getPartners() {
   try {
     const conn = await connectToDatabase();
     if (conn) {
-      const allowedNames = [
-        'Yugantar Bharati analytical & Environmental Engineering Laboratory, Ranchi',
-        'Yugantar Bharati Analytical & Environmental Engineering Laboratory, Ranchi',
-        'PRAKRITIS Technology, New Delhi',
-        'Naman Enterprises, Ranchi',
-        'Arcturus Engineering Private Limited, New Delhi'
-      ];
-
-      // Remove any obsolete partners from MongoDB that are not in the approved 4 partners list
-      await Partner.deleteMany({
-        name: { $nin: allowedNames }
-      }).catch(() => {});
-
-      // Ensure the 4 partners exist in MongoDB
-      for (const p of FALLBACK_PARTNERS) {
-        const { id, ...clean } = p;
-        await Partner.findOneAndUpdate(
-          { name: clean.name },
-          { $set: clean },
-          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
-        ).catch(() => {});
-      }
-
+      await ensurePartnersInitialized();
       const items = await Partner.find().sort({ displayOrder: 1, createdAt: 1 }).lean();
-      if (items && items.length > 0) {
-        return items.map(serializeDoc);
-      }
+      return (items || []).map(serializeDoc);
     }
   } catch (err) {
     console.error('Error fetching partners from MongoDB:', err.message);
@@ -1330,20 +1342,29 @@ export async function upsertPartner(partnerData) {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
 
+    await ensurePartnersInitialized();
+
     const targetId = partnerData.id || partnerData._id;
     const isValidObjectId = targetId && typeof targetId === 'string' && /^[0-9a-fA-F]{24}$/.test(targetId);
-
-    const filter = isValidObjectId
-      ? { _id: targetId }
-      : { name: partnerData.name };
-
     const { id, _id, ...cleanData } = partnerData;
 
-    const updated = await Partner.findOneAndUpdate(
-      filter,
-      { $set: cleanData },
-      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
-    ).lean();
+    let updated;
+    if (isValidObjectId) {
+      updated = await Partner.findOneAndUpdate(
+        { _id: targetId },
+        { $set: cleanData },
+        { returnDocument: 'after' }
+      ).lean();
+    } else if (targetId) {
+      updated = await Partner.findOneAndUpdate(
+        { name: cleanData.name },
+        { $set: cleanData },
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+      ).lean();
+    } else {
+      const created = await Partner.create(cleanData);
+      updated = created.toObject();
+    }
 
     return serializeDoc(updated);
   } catch (err) {

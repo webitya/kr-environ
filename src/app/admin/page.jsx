@@ -249,9 +249,9 @@ export default function AdminDashboardPage() {
         fetch('/api/videos'),
         fetch('/api/enquiries'),
         fetch('/api/clients'),
-        fetch('/api/products'),
-        fetch('/api/partners'),
-        fetch('/api/certificates'),
+        fetch('/api/products', { cache: 'no-store' }),
+        fetch('/api/partners', { cache: 'no-store' }),
+        fetch('/api/certificates', { cache: 'no-store' }),
         fetch('/api/careers?all=true'),
         fetch('/api/career-applications'),
         fetch('/api/about-images')
@@ -4107,6 +4107,7 @@ export default function AdminDashboardPage() {
                         className="hidden"
                         onChange={async (e) => {
                           await handleImageUpload(e, 'partner');
+                          e.target.value = '';
                         }}
                       />
                     </label>
