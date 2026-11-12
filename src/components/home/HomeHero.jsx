@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Volume2, VolumeX } from 'lucide-react';
 
 const SERVICES_LIST = [
   "Bird Diverters",
@@ -27,18 +28,72 @@ const SERVICES_LIST = [
 
 export default function HomeHero() {
   const videoRef = useRef(null);
+  const userToggledRef = useRef(false);
+  const [isMuted, setIsMuted] = useState(false);
 
-  // Guarantee immediate fast playback on mount across all browsers
+  // Attempt audible autoplay first; fall back to muted + unlock on first interaction if browser blocks unmuted autoplay
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.defaultMuted = true;
-      videoRef.current.muted = true;
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
+    const video = videoRef.current;
+    if (!video) return;
+
+    let unlockListener = null;
+
+    const removeUnlock = () => {
+      if (unlockListener) {
+        window.removeEventListener('pointerdown', unlockListener);
+        window.removeEventListener('keydown', unlockListener);
+        unlockListener = null;
       }
-    }
+    };
+
+    const startPlayback = async () => {
+      try {
+        video.defaultMuted = false;
+        video.muted = false;
+        video.volume = 1;
+        await video.play();
+        setIsMuted(false);
+      } catch {
+        video.muted = true;
+        setIsMuted(true);
+        video.play().catch(() => {});
+
+        unlockListener = (e) => {
+          if (e.target && e.target.closest && e.target.closest('[data-hero-mute-btn]')) {
+            removeUnlock();
+            return;
+          }
+          if (!userToggledRef.current && videoRef.current) {
+            videoRef.current.muted = false;
+            videoRef.current.volume = 1;
+            videoRef.current.play().catch(() => {});
+            setIsMuted(false);
+          }
+          removeUnlock();
+        };
+
+        window.addEventListener('pointerdown', unlockListener, { passive: true });
+        window.addEventListener('keydown', unlockListener, { passive: true });
+      }
+    };
+
+    startPlayback();
+
+    return () => removeUnlock();
   }, []);
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    userToggledRef.current = true;
+    const nextMuted = !video.muted;
+    video.muted = nextMuted;
+    if (!nextMuted) {
+      video.volume = 1;
+      video.play().catch(() => {});
+    }
+    setIsMuted(nextMuted);
+  };
 
   // Typewriter state
   const [serviceIndex, setServiceIndex] = useState(0);
@@ -50,8 +105,8 @@ export default function HomeHero() {
   // Auto-typing animation effect
   useEffect(() => {
     let timer;
-    const typingSpeed = 35;
-    const deletingSpeed = 18;
+    const typingSpeed = 65;
+    const deletingSpeed = 32;
     const holdDuration = 2000;
 
     if (!isDeleting) {
@@ -91,13 +146,12 @@ export default function HomeHero() {
           ref={videoRef}
           autoPlay
           loop
-          muted
           playsInline
           preload="auto"
           className="w-full h-full object-cover scale-[1.01] transform-gpu"
         >
           <source 
-            src="https://res.cloudinary.com/fjdmukyv/video/upload/v1793910406/1104_1.mp4" 
+            src="https://res.cloudinary.com/fjdmukyv/video/upload/v1794487640/1104_2.mp4" 
             type="video/mp4" 
           />
         </video>
@@ -121,17 +175,33 @@ export default function HomeHero() {
           KR Environ Solutions
         </h1>
 
-        {/* Small Typing Text - No Numbers, No Bold */}
-        <div className="mt-1.5 sm:mt-3.5 max-w-2xl px-2 flex items-center justify-center min-h-[22px] sm:min-h-[30px]">
+        {/* Typing Text - Slightly Larger & Readable */}
+        <div className="mt-2 sm:mt-4 max-w-3xl px-2 flex items-center justify-center min-h-[28px] sm:min-h-[38px]">
           <div className="flex items-center justify-center text-center">
-            <span className="text-white/95 font-normal text-xs sm:text-base md:text-lg tracking-wider drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)] font-manrope">
+            <span className="text-white/95 font-medium text-sm sm:text-lg md:text-xl lg:text-2xl tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] font-manrope">
               {displayedText}
             </span>
             {/* Blinking Subtle Typing Cursor */}
-            <span className="inline-block w-[1.5px] sm:w-[2px] h-3 sm:h-4.5 bg-emerald-400 ml-1 animate-pulse align-middle" />
+            <span className="inline-block w-[2px] h-4 sm:h-5 md:h-6 bg-emerald-400 ml-1.5 animate-pulse align-middle" />
           </div>
         </div>
       </div>
+
+      {/* Top-Right Corner Audio Mute / Unmute Button Only (No Other Controls) */}
+      <button
+        type="button"
+        data-hero-mute-btn="true"
+        onClick={toggleMute}
+        aria-label={isMuted ? 'Unmute video audio' : 'Mute video audio'}
+        title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
+        className="absolute top-3 right-3 sm:top-5 sm:right-5 z-30 w-10 h-10 rounded-full bg-black/55 hover:bg-[#216B35] text-white backdrop-blur-md border border-white/25 flex items-center justify-center shadow-lg transition-all cursor-pointer"
+      >
+        {isMuted ? (
+          <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />
+        ) : (
+          <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+        )}
+      </button>
     </section>
   );
 }
