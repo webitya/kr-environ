@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getGallery, upsertGallery, deleteGallery } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const gallery = await getGallery();

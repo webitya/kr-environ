@@ -26,12 +26,12 @@ export default function ServicesGrid({ services = [] }) {
             className="group bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden shadow-xs hover:shadow-lg hover:border-[#216B35]/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
           >
             <div>
-              {/* Clean Cover Image Without Floating Badges */}
-              <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-100">
+              {/* Clean Cover Image (16:9 / 1920x1080 ratio) */}
+              <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
                 <img
                   src={service.featuredImage || '/img4.jpeg'}
                   alt={service.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
               </div>

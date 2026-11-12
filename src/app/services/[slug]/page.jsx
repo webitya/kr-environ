@@ -85,11 +85,11 @@ export default async function ServiceDetailPage({ params }) {
               </div>
 
               <div className="lg:col-span-4">
-                <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-slate-100">
+                <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-slate-100">
                   <img
                     src={service.featuredImage || '/img4.jpeg'}
                     alt={service.title}
-                    className="w-full h-60 object-cover"
+                    className="w-full h-full object-cover object-center"
                   />
                 </div>
               </div>
@@ -189,12 +189,12 @@ export default async function ServiceDetailPage({ params }) {
                       className="group bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden hover:border-[#216B35]/60 hover:shadow-md transition-all duration-300 flex flex-col justify-between"
                     >
                       <div>
-                        {/* Featured Image instead of top badge */}
-                        <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                        {/* Featured Image (16:9 / 1920x1080 ratio) */}
+                        <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
                           <img
                             src={rel.featuredImage || '/img4.jpeg'}
                             alt={rel.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
                           />
                         </div>

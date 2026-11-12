@@ -349,14 +349,12 @@ export async function getGallery() {
     const conn = await connectToDatabase();
     if (conn) {
       const items = await Gallery.find().sort({ displayOrder: 1, createdAt: -1 }).lean();
-      if (items && items.length > 0) {
-        return items.map(serializeDoc);
-      }
+      return (items || []).map(serializeDoc);
     }
   } catch (err) {
     console.error('Error fetching gallery from MongoDB:', err.message);
   }
-  return FALLBACK_GALLERY;
+  return [];
 }
 
 export async function upsertGallery(galleryData) {

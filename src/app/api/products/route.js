@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getProducts, upsertProduct, deleteProduct } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 function slugify(text) {
   return text
     .toString()

@@ -41,12 +41,12 @@ export default function HomeServices({ services = [] }) {
                 className="group bg-white rounded-xl border border-[#DCE5DD] overflow-hidden shadow-xs hover:shadow-md hover:border-[#216B35]/50 hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
-                  {/* Compact Service Image */}
-                  <Link href={serviceHref} className="block relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100 cursor-pointer">
+                  {/* Compact Service Image (16:9 / 1920x1080 ratio) */}
+                  <Link href={serviceHref} className="block relative aspect-video w-full overflow-hidden bg-slate-100 cursor-pointer">
                     <img
                       src={service.featuredImage || '/img4.jpeg'}
                       alt={service.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
                   </Link>

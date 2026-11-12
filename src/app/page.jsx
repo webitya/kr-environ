@@ -55,7 +55,7 @@ export default async function HomePage() {
         <HomeBlog blogs={blogs} />
 
         {/* 9. Contact & Enquiry Entry Point */}
-        <HomeContact />
+        <HomeContact services={services} products={products} />
       </main>
 
       <SiteFooter />

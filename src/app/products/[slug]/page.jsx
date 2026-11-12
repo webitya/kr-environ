@@ -84,13 +84,13 @@ export default async function ProductDetailPage({ params }) {
               
               {/* LEFT COLUMN: Visuals, Trust Badges, and Quick Action Box (5 Cols) */}
               <div className="lg:col-span-5 space-y-5">
-                {/* Product Image Stage */}
+                {/* Product Image Stage (16:9 / 1920x1080 ratio) */}
                 <div className="relative rounded-2xl overflow-hidden bg-white border border-[#DCE5DD] shadow-sm group">
-                  <div className="aspect-[4/3] w-full overflow-hidden bg-slate-50 flex items-center justify-center p-2">
+                  <div className="aspect-video w-full overflow-hidden bg-slate-50 flex items-center justify-center">
                     <img
                       src={product.featuredImage || '/details.jpeg'}
                       alt={product.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-xl"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
                 </div>
@@ -297,11 +297,11 @@ export default async function ProductDetailPage({ params }) {
                     className="group bg-white rounded-2xl border border-[#DCE5DD] overflow-hidden shadow-xs hover:shadow-md hover:border-[#216B35]/50 transition-all p-4 flex flex-col justify-between"
                   >
                     <div className="space-y-3">
-                      <div className="h-40 w-full rounded-xl overflow-hidden bg-slate-50">
+                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-50">
                         <img
                           src={rel.featuredImage || '/details.jpeg'}
                           alt={rel.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
                       <span className="text-[10px] font-bold text-[#216B35] uppercase tracking-wider block">

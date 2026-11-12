@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getServices, upsertService, deleteService } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 function slugify(text) {
   return text
     .toString()
@@ -42,6 +44,7 @@ export async function POST(req) {
     try {
       revalidatePath('/services');
       revalidatePath(`/services/${slug}`);
+      revalidatePath('/contact-us');
       revalidatePath('/');
       revalidatePath('/admin');
     } catch (e) {
@@ -65,6 +68,7 @@ export async function DELETE(req) {
     await deleteService(id);
     try {
       revalidatePath('/services');
+      revalidatePath('/contact-us');
       revalidatePath('/');
       revalidatePath('/admin');
     } catch (e) {
