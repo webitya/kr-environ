@@ -244,17 +244,17 @@ export default function AdminDashboardPage() {
 
       const [srvRes, blgRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes, carRes, appRes, abtRes] = await Promise.all([
         fetch('/api/services', { cache: 'no-store' }),
-        fetch('/api/blogs'),
-        fetch('/api/gallery'),
-        fetch('/api/videos'),
-        fetch('/api/enquiries'),
-        fetch('/api/clients'),
+        fetch('/api/blogs', { cache: 'no-store' }),
+        fetch('/api/gallery', { cache: 'no-store' }),
+        fetch('/api/videos', { cache: 'no-store' }),
+        fetch('/api/enquiries', { cache: 'no-store' }),
+        fetch('/api/clients', { cache: 'no-store' }),
         fetch('/api/products', { cache: 'no-store' }),
         fetch('/api/partners', { cache: 'no-store' }),
         fetch('/api/certificates', { cache: 'no-store' }),
-        fetch('/api/careers?all=true'),
-        fetch('/api/career-applications'),
-        fetch('/api/about-images')
+        fetch('/api/careers?all=true', { cache: 'no-store' }),
+        fetch('/api/career-applications', { cache: 'no-store' }),
+        fetch('/api/about-images', { cache: 'no-store' })
       ]);
 
       const [srvData, blgData, galData, vidData, enqData, cliData, prodData, partData, certData, carData, appData, abtData] = await Promise.all([
@@ -2913,7 +2913,7 @@ export default function AdminDashboardPage() {
                           <th className="px-2.5 py-1.5 font-semibold">Candidate / College</th>
                           <th className="px-2.5 py-1.5 font-semibold">Position Applied</th>
                           <th className="px-2.5 py-1.5 font-semibold">Contact &amp; City</th>
-                          <th className="px-2.5 py-1.5 font-semibold">Resume / Note</th>
+                          <th className="px-2.5 py-1.5 font-semibold">Skills &amp; Statement</th>
                           <th className="px-2.5 py-1.5 font-semibold">Status</th>
                           <th className="px-2.5 py-1.5 font-semibold text-right">Action</th>
                         </tr>
@@ -2950,7 +2950,20 @@ export default function AdminDashboardPage() {
                                 {app.city && <span className="text-[10px] text-[#68756D] block">{app.city}</span>}
                               </td>
                               <td className="px-2.5 py-2 max-w-xs space-y-1">
-                                {app.resumeUrl ? (
+                                {app.experienceSummary && (
+                                  <span className="block text-[11px] font-medium text-[#173B26]">
+                                    Skills: {app.experienceSummary}
+                                  </span>
+                                )}
+                                {app.coverNote && (
+                                  <p className="text-[10px] text-[#4B5563] bg-[#F5F8F3] px-1.5 py-1 rounded border border-[#DCE5DD] line-clamp-2" title={app.coverNote}>
+                                    {app.coverNote}
+                                  </p>
+                                )}
+                                {!app.experienceSummary && !app.coverNote && !app.resumeUrl && (
+                                  <span className="text-[10px] text-[#68756D]">—</span>
+                                )}
+                                {app.resumeUrl && (
                                   <a
                                     href={app.resumeUrl}
                                     target="_blank"
@@ -2961,16 +2974,6 @@ export default function AdminDashboardPage() {
                                     <span>View CV</span>
                                     <ExternalLink className="w-2.5 h-2.5" />
                                   </a>
-                                ) : (
-                                  <span className="text-[10px] text-[#68756D]">No file attached</span>
-                                )}
-                                {app.experienceSummary && (
-                                  <span className="block text-[10px] text-[#173B26]">Skills: {app.experienceSummary}</span>
-                                )}
-                                {app.coverNote && (
-                                  <p className="text-[10px] text-[#4B5563] bg-[#F5F8F3] px-1.5 py-1 rounded border border-[#DCE5DD] line-clamp-2" title={app.coverNote}>
-                                    {app.coverNote}
-                                  </p>
                                 )}
                               </td>
                               <td className="px-2.5 py-2">

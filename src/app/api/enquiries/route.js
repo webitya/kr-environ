@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createEnquiry, getEnquiries, deleteEnquiry } from '@/lib/db';
+import { sendEnquiryEmails } from '@/lib/mailer';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -21,7 +24,17 @@ export async function POST(req) {
     }
 
     const saved = await createEnquiry(body);
-    return NextResponse.json({ success: true, enquiry: saved }, { status: 201 });
+    let emailStatus = { adminSent: false, customerSent: false };
+    try {
+      emailStatus = await sendEnquiryEmails({
+        ...body,
+        ...saved
+      });
+    } catch (mailErr) {
+      console.error('Enquiry email error:', mailErr.message);
+    }
+
+    return NextResponse.json({ success: true, enquiry: saved, emailStatus }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

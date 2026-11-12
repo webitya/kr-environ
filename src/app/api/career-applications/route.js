@@ -5,6 +5,7 @@ import {
   updateCareerApplicationStatus,
   deleteCareerApplication
 } from '@/lib/db';
+import { sendCareerApplicationEmails } from '@/lib/mailer';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +45,14 @@ export async function POST(req) {
       status: 'New'
     });
 
-    return NextResponse.json({ success: true, application: saved }, { status: 201 });
+    let emailStatus = { adminSent: false, customerSent: false };
+    try {
+      emailStatus = await sendCareerApplicationEmails(saved);
+    } catch (mailErr) {
+      console.error('Career application email error:', mailErr.message);
+    }
+
+    return NextResponse.json({ success: true, application: saved, emailStatus }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

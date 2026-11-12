@@ -11,8 +11,6 @@ import {
   Search,
   CheckCircle2,
   X,
-  Upload,
-  FileText,
   ArrowRight,
   AlertCircle
 } from 'lucide-react';
@@ -21,7 +19,6 @@ export default function CareersClient({ initialCareers = [] }) {
   const [selectedType, setSelectedType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [applyingCareer, setApplyingCareer] = useState(null);
-  const [uploadingResume, setUploadingResume] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState({ status: '', message: '' });
 
@@ -34,7 +31,6 @@ export default function CareersClient({ initialCareers = [] }) {
     passingYear: '',
     city: '',
     experienceSummary: '',
-    resumeUrl: '',
     coverNote: ''
   });
 
@@ -69,38 +65,8 @@ export default function CareersClient({ initialCareers = [] }) {
       passingYear: '',
       city: '',
       experienceSummary: '',
-      resumeUrl: '',
       coverNote: ''
     });
-  };
-
-  const handleResumeUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingResume(true);
-    setSubmitState({ status: '', message: '' });
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', 'kr-environ/resumes');
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Resume upload failed');
-      }
-
-      setForm((prev) => ({ ...prev, resumeUrl: data.url }));
-    } catch (err) {
-      setSubmitState({ status: 'error', message: err.message || 'Could not upload resume file.' });
-    } finally {
-      setUploadingResume(false);
-    }
   };
 
   const handleSubmitApplication = async (e) => {
@@ -471,39 +437,6 @@ export default function CareersClient({ initialCareers = [] }) {
                   </div>
                 </div>
 
-                {/* Resume Upload or Link */}
-                <div className="p-3 rounded border border-[#DCE5DD] bg-[#F5F8F3]/60 space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <label className="font-semibold text-[#173B26]">
-                      Resume / CV (Upload PDF/DOC or paste Google Drive link)
-                    </label>
-                    <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-[#216B35]/40 text-[#216B35] hover:bg-[#F5F8F3] font-semibold cursor-pointer">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>{uploadingResume ? 'Uploading...' : 'Upload CV File'}</span>
-                      <input
-                        type="file"
-                        accept=".pdf,.doc,.docx,application/pdf"
-                        onChange={handleResumeUpload}
-                        disabled={uploadingResume}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                  <input
-                    type="url"
-                    value={form.resumeUrl}
-                    onChange={(e) => setForm({ ...form, resumeUrl: e.target.value })}
-                    placeholder="Uploaded CV URL or paste Drive link (https://...)"
-                    className="w-full p-2 rounded border border-[#DCE5DD] bg-white font-mono text-[11px] focus:border-[#216B35] focus:outline-none"
-                  />
-                  {form.resumeUrl && (
-                    <div className="flex items-center gap-1.5 text-[11px] text-[#216B35]">
-                      <FileText className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">Resume attached</span>
-                    </div>
-                  )}
-                </div>
-
                 <div>
                   <label className="block font-semibold text-[#173B26] mb-1">
                     Brief Statement / Why You Are Interested
@@ -527,7 +460,7 @@ export default function CareersClient({ initialCareers = [] }) {
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting || uploadingResume}
+                    disabled={submitting}
                     className="btn-primary px-5 py-2 rounded font-semibold disabled:opacity-60"
                   >
                     {submitting ? 'Submitting...' : 'Submit Application'}

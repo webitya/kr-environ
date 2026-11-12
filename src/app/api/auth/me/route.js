@@ -13,9 +13,9 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('kr_admin_token');
-    const expectedToken = (process.env.ADMIN_SESSION_SECRET || 'verified_secure_session').trim();
+    const expectedToken = (process.env.ADMIN_SESSION_SECRET || '').trim();
 
-    if (token && token.value === expectedToken) {
+    if (expectedToken && token && token.value === expectedToken) {
       return NextResponse.json({
         authenticated: true,
         user: { username: process.env.ADMIN_USERNAME || 'Authorized Admin', role: 'admin' }

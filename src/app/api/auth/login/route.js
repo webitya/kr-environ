@@ -7,8 +7,9 @@ export async function POST(req) {
 
     const expectedUser = (process.env.ADMIN_USERNAME || '').trim();
     const expectedPass = (process.env.ADMIN_PASSWORD || '').trim();
+    const sessionToken = (process.env.ADMIN_SESSION_SECRET || '').trim();
 
-    if (!expectedUser || !expectedPass) {
+    if (!expectedUser || !expectedPass || !sessionToken) {
       return NextResponse.json(
         { success: false, error: 'Authentication configuration error. Please ensure credentials are set in environment variables.' },
         { status: 500 }
@@ -19,7 +20,6 @@ export async function POST(req) {
     const inputPass = (password || '').trim();
 
     if (inputUser.toLowerCase() === expectedUser.toLowerCase() && inputPass === expectedPass) {
-      const sessionToken = (process.env.ADMIN_SESSION_SECRET || 'verified_secure_session').trim();
       const cookieStore = await cookies();
       
       const cookieOptions = {

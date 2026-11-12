@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
-// Configure Cloudinary with environment variables and secure credentials
+// Configure Cloudinary strictly from environment variables (no hardcoded credentials)
 function getCloudinary() {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'fjdmukyv';
-  const apiKey = process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '116643283675257';
-  const apiSecret = process.env.CLOUDINARY_API_SECRET || 'UX70B7MNFKNgfxLakSywBT9GKSs';
+  const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '').trim();
+  const apiKey = (process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '').trim();
+  const apiSecret = (process.env.CLOUDINARY_API_SECRET || '').trim();
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error('Cloudinary environment configuration missing.');
+  }
 
   cloudinary.config({
     cloud_name: cloudName,
