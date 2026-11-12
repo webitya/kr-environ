@@ -103,9 +103,6 @@ export default function HomeGallery({ gallery = [] }) {
             {/* Modal Top Bar */}
             <div className="bg-[#F5F8F3] px-4 py-2.5 border-b border-[#DCE5DD] flex items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-2 overflow-hidden">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#216B35] bg-[#EAF2EC] border border-[#216B35]/20 px-2 py-0.5 rounded font-manrope shrink-0">
-                  {activeItem.category || 'Photo'}
-                </span>
                 <span className="text-xs font-semibold text-[#68756D] font-manrope truncate">
                   {selectedIndex + 1} of {displayItems.length}
                 </span>

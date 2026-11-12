@@ -27,17 +27,21 @@ const SERVICES_LIST = [
 ];
 
 export default function HomeHero() {
+  const sectionRef = useRef(null);
   const videoRef = useRef(null);
-  const userToggledRef = useRef(false);
+  const userMutedRef = useRef(false);
+  const isHeroVisibleRef = useRef(true);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Attempt audible autoplay by default; handle AbortError cleanly and unlock on first gesture only if browser throws NotAllowedError
+  // Play with audio when Hero is visible on screen; pause & mute whenever scrolled away, tab hidden, or navigating to other pages
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    const section = sectionRef.current;
+    if (!video || !section) return;
 
     let unlockListener = null;
     let canPlayListener = null;
+    let isMounted = true;
 
     const removeListeners = () => {
       if (unlockListener) {
@@ -53,14 +57,27 @@ export default function HomeHero() {
       }
     };
 
+    const pauseAndMute = () => {
+      removeListeners();
+      video.muted = true;
+      video.pause();
+      if (isMounted) setIsMuted(true);
+    };
+
     const attachGestureUnlock = () => {
-      if (unlockListener) return;
+      if (unlockListener || !isHeroVisibleRef.current || document.hidden || userMutedRef.current) return;
       unlockListener = (e) => {
         if (e.target && e.target.closest && e.target.closest('[data-hero-mute-btn]')) {
           removeListeners();
           return;
         }
-        if (!userToggledRef.current && videoRef.current) {
+        if (
+          isMounted &&
+          isHeroVisibleRef.current &&
+          !document.hidden &&
+          !userMutedRef.current &&
+          videoRef.current
+        ) {
           videoRef.current.muted = false;
           videoRef.current.volume = 1;
           videoRef.current.play().catch(() => {});
@@ -74,23 +91,51 @@ export default function HomeHero() {
       document.addEventListener('keydown', unlockListener, { capture: true, passive: true });
     };
 
-    const startPlayback = async () => {
+    const syncPlaybackWithVisibility = async () => {
+      if (!isMounted) return;
+
+      if (!isHeroVisibleRef.current || document.hidden) {
+        pauseAndMute();
+        return;
+      }
+
+      if (userMutedRef.current) {
+        video.muted = true;
+        if (isMounted) setIsMuted(true);
+        video.play().catch(() => {});
+        return;
+      }
+
       try {
         video.defaultMuted = false;
         video.muted = false;
         video.volume = 1;
         await video.play();
-        setIsMuted(false);
+        if (!isHeroVisibleRef.current || document.hidden) {
+          pauseAndMute();
+          return;
+        }
+        if (isMounted) setIsMuted(false);
       } catch (err) {
+        if (!isHeroVisibleRef.current || document.hidden) {
+          pauseAndMute();
+          return;
+        }
         if (err && err.name === 'AbortError') {
           canPlayListener = () => {
+            if (!isHeroVisibleRef.current || document.hidden || userMutedRef.current) {
+              if (!isHeroVisibleRef.current || document.hidden) pauseAndMute();
+              return;
+            }
             video.muted = false;
             video.volume = 1;
             video.play()
-              .then(() => setIsMuted(false))
+              .then(() => {
+                if (isMounted) setIsMuted(false);
+              })
               .catch(() => {
                 video.muted = true;
-                setIsMuted(true);
+                if (isMounted) setIsMuted(true);
                 video.play().catch(() => {});
                 attachGestureUnlock();
               });
@@ -100,24 +145,64 @@ export default function HomeHero() {
         }
 
         video.muted = true;
-        setIsMuted(true);
+        if (isMounted) setIsMuted(true);
         video.play().catch(() => {});
         attachGestureUnlock();
       }
     };
 
-    startPlayback();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const visible = entry.isIntersecting && entry.intersectionRatio >= 0.2;
+        if (visible !== isHeroVisibleRef.current) {
+          isHeroVisibleRef.current = visible;
+          syncPlaybackWithVisibility();
+        } else if (!visible && (!video.paused || !video.muted)) {
+          pauseAndMute();
+        }
+      },
+      { threshold: [0, 0.2, 0.5] }
+    );
 
-    return () => removeListeners();
+    observer.observe(section);
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        pauseAndMute();
+      } else {
+        syncPlaybackWithVisibility();
+      }
+    };
+
+    const handlePageHide = () => {
+      pauseAndMute();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+
+    syncPlaybackWithVisibility();
+
+    return () => {
+      isMounted = false;
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+      removeListeners();
+      video.muted = true;
+      video.pause();
+    };
   }, []);
 
   const toggleMute = () => {
     const video = videoRef.current;
     if (!video) return;
-    userToggledRef.current = true;
     const nextMuted = !video.muted;
+    userMutedRef.current = nextMuted;
     video.muted = nextMuted;
-    if (!nextMuted) {
+    if (!nextMuted && isHeroVisibleRef.current && !document.hidden) {
       video.volume = 1;
       video.play().catch(() => {});
     }
@@ -154,8 +239,10 @@ export default function HomeHero() {
           setDisplayedText(fullTargetText.slice(0, displayedText.length - 1));
         }, deletingSpeed);
       } else {
-        setIsDeleting(false);
-        setServiceIndex((prev) => (prev + 1) % SERVICES_LIST.length);
+        timer = setTimeout(() => {
+          setIsDeleting(false);
+          setServiceIndex((prev) => (prev + 1) % SERVICES_LIST.length);
+        }, 0);
       }
     }
 
@@ -163,7 +250,8 @@ export default function HomeHero() {
   }, [displayedText, isDeleting, fullTargetText]);
 
   return (
-    <section 
+    <section
+      ref={sectionRef}
       className="relative w-full aspect-[16/9] min-h-[220px] max-h-[100dvh] md:aspect-auto md:h-[88vh] lg:h-[92vh] flex items-center justify-center overflow-hidden bg-[#0a1a11]"
       aria-label="KR Environ Solutions Hero Section"
     >
