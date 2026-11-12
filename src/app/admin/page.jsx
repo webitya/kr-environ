@@ -243,7 +243,7 @@ export default function AdminDashboardPage() {
       }
 
       const [srvRes, blgRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes, carRes, appRes, abtRes] = await Promise.all([
-        fetch('/api/services'),
+        fetch('/api/services', { cache: 'no-store' }),
         fetch('/api/blogs'),
         fetch('/api/gallery'),
         fetch('/api/videos'),
@@ -477,6 +477,50 @@ export default function AdminDashboardPage() {
       fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleSetServiceOrder = async (srv, slotNum) => {
+    const targetId = srv.id || srv._id || srv.slug;
+    const nextOrder = Number(srv.homeOrder) === slotNum ? 0 : slotNum;
+    const ordLabels = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th' };
+
+    setServices((prev) => {
+      const updated = prev.map((item) => {
+        const itemId = item.id || item._id || item.slug;
+        if (itemId === targetId) {
+          return { ...item, homeOrder: nextOrder };
+        }
+        if (nextOrder >= 1 && Number(item.homeOrder) === nextOrder) {
+          return { ...item, homeOrder: 0 };
+        }
+        return item;
+      });
+      return [...updated].sort((a, b) => {
+        const ao = a.homeOrder >= 1 && a.homeOrder <= 4 ? a.homeOrder : 999;
+        const bo = b.homeOrder >= 1 && b.homeOrder <= 4 ? b.homeOrder : 999;
+        return ao - bo;
+      });
+    });
+
+    try {
+      const res = await fetch('/api/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...srv, id: srv.id || srv._id, homeOrder: nextOrder })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update order');
+      setMessage({
+        text: nextOrder
+          ? `"${srv.title}" set to ${ordLabels[nextOrder]} position (Top 4).`
+          : `"${srv.title}" removed from Top 4 positions.`,
+        type: 'success'
+      });
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+      fetchData();
     }
   };
 
@@ -1575,6 +1619,7 @@ export default function AdminDashboardPage() {
                       content: '',
                       seoTitle: '',
                       metaDescription: '',
+                      homeOrder: 0,
                       specs: []
                     });
                     setIsEditingService(true);
@@ -1816,67 +1861,145 @@ export default function AdminDashboardPage() {
             </div>
           ) : (
             <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+              <div className="px-3 py-2 bg-[#F5F8F3]/70 border-b border-[#DCE5DD] flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                <span className="font-semibold text-[#173B26]">
+                  Best 4 Order (1st–4th):{' '}
+                  <span className="font-normal text-[#68756D]">
+                    Tick 1st, 2nd, 3rd, or 4th to display your top 4 services first in exact order.
+                  </span>
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {[
+                    { num: 1, label: '1st' },
+                    { num: 2, label: '2nd' },
+                    { num: 3, label: '3rd' },
+                    { num: 4, label: '4th' }
+                  ].map((slot) => {
+                    const matched = services.find((s) => Number(s.homeOrder) === slot.num);
+                    return (
+                      <span
+                        key={slot.num}
+                        className={`px-2 py-0.5 rounded border text-[10px] font-medium max-w-[160px] truncate ${
+                          matched
+                            ? 'bg-emerald-50 border-[#216B35]/30 text-[#173B26]'
+                            : 'bg-white border-[#DCE5DD] text-[#68756D]'
+                        }`}
+                        title={matched ? `${slot.label}: ${matched.title}` : `${slot.label}: Not set`}
+                      >
+                        <strong className="text-[#216B35]">{slot.label}:</strong>{' '}
+                        {matched ? matched.title : 'Not set'}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-[#4B5563] min-w-[550px]">
+                <table className="w-full text-left text-xs text-[#4B5563] min-w-[700px]">
                   <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
                     <tr>
                       <th className="px-2 py-1 font-semibold w-10">Image</th>
                       <th className="px-2 py-1 font-semibold">Service / Solution</th>
                       <th className="px-2 py-1 font-semibold">Category</th>
                       <th className="px-2 py-1 font-semibold">Slug URL</th>
+                      <th className="px-2 py-1 font-semibold whitespace-nowrap">Best 4 (1st–4th)</th>
                       <th className="px-2 py-1 font-semibold text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#DCE5DD]">
-                    {services.map((srv) => (
-                      <tr key={srv.id || srv.slug} className="hover:bg-[#F5F8F3]/50 transition-colors">
-                        <td className="px-2 py-1 w-10">
-                          <img
-                            src={srv.featuredImage || '/img4.jpeg'}
-                            alt={srv.title}
-                            className="w-8 h-8 rounded-sm object-cover border border-[#DCE5DD] shrink-0"
-                          />
-                        </td>
-                        <td className="px-2 py-1">
-                          <div className="font-semibold text-[#173B26] text-xs leading-tight">{srv.title}</div>
-                          <div className="text-[10px] text-[#68756D] line-clamp-1 max-w-sm">{srv.shortDescription}</div>
-                        </td>
-                        <td className="px-2 py-1 whitespace-nowrap">
-                          <span className="text-[10px] bg-[#F5F8F3] text-[#216B35] px-1.5 py-0.5 rounded font-medium border border-[#216B35]/20 inline-block">
-                            {srv.category}
-                          </span>
-                        </td>
-                        <td className="px-2 py-1 font-mono text-[10px] whitespace-nowrap">
-                          <Link
-                            href={`/services/${srv.slug}`}
-                            target="_blank"
-                            className="inline-flex items-center gap-1 text-[#216B35] hover:underline"
-                          >
-                            <span>/services/{srv.slug}</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
-                          </Link>
-                        </td>
-                        <td className="px-2 py-1 text-right whitespace-nowrap space-x-0.5">
-                          <button
-                            onClick={() => {
-                              setCurrentService(srv);
-                              setIsEditingService(true);
-                            }}
-                            className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3] transition-colors"
-                            title="Edit Service"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteService(srv.id || srv.slug, srv.title)}
-                            className="p-0.5 rounded text-red-600 hover:bg-red-50 transition-colors"
-                            title="Delete Service"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {services.map((srv) => {
+                      const rank = Number(srv.homeOrder) || 0;
+                      const isFeatured = rank >= 1 && rank <= 4;
+                      return (
+                        <tr
+                          key={srv.id || srv.slug}
+                          className={`hover:bg-[#F5F8F3]/50 transition-colors ${isFeatured ? 'bg-emerald-50/30' : ''}`}
+                        >
+                          <td className="px-2 py-1 w-10">
+                            <img
+                              src={srv.featuredImage || '/img4.jpeg'}
+                              alt={srv.title}
+                              className="w-8 h-8 rounded-sm object-cover border border-[#DCE5DD] shrink-0"
+                            />
+                          </td>
+                          <td className="px-2 py-1">
+                            <div className="font-semibold text-[#173B26] text-xs leading-tight flex items-center gap-1.5">
+                              {isFeatured && (
+                                <span className="inline-flex items-center px-1.5 py-0.2 rounded bg-[#216B35] text-white text-[9px] font-bold shrink-0">
+                                  #{rank}
+                                </span>
+                              )}
+                              <span className="line-clamp-1">{srv.title}</span>
+                            </div>
+                            <div className="text-[10px] text-[#68756D] line-clamp-1 max-w-sm">{srv.shortDescription}</div>
+                          </td>
+                          <td className="px-2 py-1 whitespace-nowrap">
+                            <span className="text-[10px] bg-[#F5F8F3] text-[#216B35] px-1.5 py-0.5 rounded font-medium border border-[#216B35]/20 inline-block">
+                              {srv.category}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1 font-mono text-[10px] whitespace-nowrap">
+                            <Link
+                              href={`/services/${srv.slug}`}
+                              target="_blank"
+                              className="inline-flex items-center gap-1 text-[#216B35] hover:underline"
+                            >
+                              <span>/services/{srv.slug}</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </Link>
+                          </td>
+                          <td className="px-2 py-1 whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1">
+                              {[
+                                { num: 1, label: '1st' },
+                                { num: 2, label: '2nd' },
+                                { num: 3, label: '3rd' },
+                                { num: 4, label: '4th' }
+                              ].map((slot) => {
+                                const isChecked = rank === slot.num;
+                                return (
+                                  <label
+                                    key={slot.num}
+                                    title={`Set ${srv.title} to position ${slot.label}`}
+                                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-semibold cursor-pointer transition-colors select-none ${
+                                      isChecked
+                                        ? 'bg-[#216B35] text-white border-[#216B35]'
+                                        : 'bg-white text-[#4B5563] border-[#DCE5DD] hover:border-[#216B35]/60 hover:bg-[#F5F8F3]'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => handleSetServiceOrder(srv, slot.num)}
+                                      className="w-3 h-3 accent-white cursor-pointer"
+                                    />
+                                    <span>{slot.label}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </td>
+                          <td className="px-2 py-1 text-right whitespace-nowrap space-x-0.5">
+                            <button
+                              onClick={() => {
+                                setCurrentService(srv);
+                                setIsEditingService(true);
+                              }}
+                              className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3] transition-colors"
+                              title="Edit Service"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteService(srv.id || srv.slug, srv.title)}
+                              className="p-0.5 rounded text-red-600 hover:bg-red-50 transition-colors"
+                              title="Delete Service"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

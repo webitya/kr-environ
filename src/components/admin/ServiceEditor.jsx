@@ -60,6 +60,7 @@ export default function ServiceEditor({
     content: '',
     seoTitle: '',
     metaDescription: '',
+    homeOrder: 0,
     specs: []
   });
 
@@ -91,6 +92,7 @@ export default function ServiceEditor({
         content: initialService.content || '',
         seoTitle: initialService.seoTitle || '',
         metaDescription: initialService.metaDescription || '',
+        homeOrder: Number(initialService.homeOrder) || 0,
         specs: Array.isArray(initialService.specs) ? initialService.specs : []
       });
       setSlugManuallyEdited(Boolean(initialService.slug));
@@ -631,6 +633,49 @@ export default function ServiceEditor({
 
           {/* ================= RIGHT COLUMN: SETTINGS & METADATA (4 COLS) ================= */}
           <div className="lg:col-span-4 space-y-5">
+
+            {/* Top 4 Best Service Order Card */}
+            <div className="bg-white rounded-xl border border-[#DCE5DD] p-4 sm:p-5 shadow-xs space-y-2.5">
+              <label className="text-xs font-bold text-[#173B26] uppercase tracking-wider block">
+                Best 4 Homepage &amp; Top Order
+              </label>
+              <p className="text-[11px] text-[#68756D]">
+                Tick a position (1st–4th) to feature this service in the top 4.
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { num: 1, label: '1st' },
+                  { num: 2, label: '2nd' },
+                  { num: 3, label: '3rd' },
+                  { num: 4, label: '4th' }
+                ].map((slot) => {
+                  const isChecked = Number(formData.homeOrder) === slot.num;
+                  return (
+                    <label
+                      key={slot.num}
+                      className={`flex items-center justify-center gap-1.5 py-2 rounded border text-xs font-semibold cursor-pointer transition-colors select-none ${
+                        isChecked
+                          ? 'bg-[#216B35] text-white border-[#216B35]'
+                          : 'bg-[#F5F8F3]/60 text-[#173B26] border-[#DCE5DD] hover:border-[#216B35]'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            homeOrder: Number(prev.homeOrder) === slot.num ? 0 : slot.num
+                          }))
+                        }
+                        className="w-3.5 h-3.5 accent-white cursor-pointer"
+                      />
+                      <span>{slot.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
             
             {/* Category Card */}
             <div className="bg-white rounded-xl border border-[#DCE5DD] p-4 sm:p-5 shadow-xs space-y-3">

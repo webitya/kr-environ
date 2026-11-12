@@ -14,6 +14,7 @@ const ServiceSchema = new mongoose.Schema({
   status: { type: String, enum: ['published', 'draft'], default: 'published' },
   seoTitle: { type: String, default: '' },
   metaDescription: { type: String, default: '' },
+  homeOrder: { type: Number, default: 0 },
   specs: [SpecSchema],
   content: { type: String, default: '' }
 }, {

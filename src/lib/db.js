@@ -37,7 +37,13 @@ export async function getServices() {
     const conn = await connectToDatabase();
     if (conn) {
       const items = await Service.find().sort({ createdAt: -1 }).lean();
-      return (items || []).map(serializeDoc);
+      const sorted = (items || []).sort((a, b) => {
+        const ao = a.homeOrder >= 1 && a.homeOrder <= 4 ? a.homeOrder : 999;
+        const bo = b.homeOrder >= 1 && b.homeOrder <= 4 ? b.homeOrder : 999;
+        if (ao !== bo) return ao - bo;
+        return 0;
+      });
+      return sorted.map(serializeDoc);
     }
   } catch (err) {
     console.error('Error fetching services from MongoDB:', err.message);
@@ -69,6 +75,18 @@ export async function upsertService(serviceData) {
       : { slug: serviceData.slug };
 
     const { id, _id, ...cleanData } = serviceData;
+    const parsedHomeOrder = Number(cleanData.homeOrder) || 0;
+    cleanData.homeOrder = parsedHomeOrder >= 1 && parsedHomeOrder <= 4 ? parsedHomeOrder : 0;
+
+    if (cleanData.homeOrder >= 1 && cleanData.homeOrder <= 4) {
+      const excludeFilter = (targetId && String(targetId).length === 24)
+        ? { _id: { $ne: targetId } }
+        : { slug: { $ne: cleanData.slug } };
+      await Service.updateMany(
+        { ...excludeFilter, homeOrder: cleanData.homeOrder },
+        { $set: { homeOrder: 0 } }
+      );
+    }
 
     const updated = await Service.findOneAndUpdate(
       filter,
