@@ -36,7 +36,8 @@ import {
   Video,
   Briefcase,
   GraduationCap,
-  Search
+  Search,
+  Users
 } from 'lucide-react';
 import ArticleEditor from '@/components/admin/ArticleEditor';
 import ServiceEditor from '@/components/admin/ServiceEditor';
@@ -58,8 +59,25 @@ export default function AdminDashboardPage() {
   const [aboutImages, setAboutImages] = useState([]);
   const [aboutPagePhoto, setAboutPagePhoto] = useState({ imageUrl: '', caption: '' });
   const [savingAboutPagePhoto, setSavingAboutPagePhoto] = useState(false);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
+
+  // Team Member Modal
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [savingTeamMember, setSavingTeamMember] = useState(false);
+  const [currentTeamMember, setCurrentTeamMember] = useState({
+    id: '',
+    name: '',
+    designation: '',
+    role: '',
+    photoUrl: '',
+    qualifications: '',
+    experience: '',
+    bio: '',
+    highlightsText: '',
+    displayOrder: 0
+  });
 
   // About Us Carousel Modal
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
@@ -246,7 +264,7 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      const [srvRes, blgRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes, carRes, appRes, abtRes, abtPageRes] = await Promise.all([
+      const [srvRes, blgRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes, carRes, appRes, abtRes, abtPageRes, teamRes] = await Promise.all([
         fetch('/api/services', { cache: 'no-store' }),
         fetch('/api/blogs', { cache: 'no-store' }),
         fetch('/api/gallery', { cache: 'no-store' }),
@@ -259,10 +277,11 @@ export default function AdminDashboardPage() {
         fetch('/api/careers?all=true', { cache: 'no-store' }),
         fetch('/api/career-applications', { cache: 'no-store' }),
         fetch('/api/about-images', { cache: 'no-store' }),
-        fetch('/api/about-page-photo', { cache: 'no-store' })
+        fetch('/api/about-page-photo', { cache: 'no-store' }),
+        fetch('/api/team', { cache: 'no-store' })
       ]);
 
-      const [srvData, blgData, galData, vidData, enqData, cliData, prodData, partData, certData, carData, appData, abtData, abtPageData] = await Promise.all([
+      const [srvData, blgData, galData, vidData, enqData, cliData, prodData, partData, certData, carData, appData, abtData, abtPageData, teamData] = await Promise.all([
         srvRes.json(),
         blgRes.json(),
         galRes.json(),
@@ -275,7 +294,8 @@ export default function AdminDashboardPage() {
         carRes.json(),
         appRes.json(),
         abtRes.json(),
-        abtPageRes.json()
+        abtPageRes.json(),
+        teamRes.json()
       ]);
 
       setServices(srvData.services || []);
@@ -291,6 +311,7 @@ export default function AdminDashboardPage() {
       setCareerApplications(appData.applications || []);
       setAboutImages(abtData.images || []);
       setAboutPagePhoto(abtPageData.photo || { imageUrl: '', caption: '' });
+      setTeamMembers(teamData.members || []);
 
       // Fetch dynamic video categories from MongoDB Atlas
       try {
@@ -405,6 +426,8 @@ export default function AdminDashboardPage() {
         setCurrentAboutImage((prev) => ({ ...prev, imageUrl: data.url }));
       } else if (targetForm === 'aboutPagePhoto') {
         setAboutPagePhoto((prev) => ({ ...prev, imageUrl: data.url }));
+      } else if (targetForm === 'team') {
+        setCurrentTeamMember((prev) => ({ ...prev, photoUrl: data.url }));
       }
 
       setMessage({ 
@@ -1442,6 +1465,114 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // ---------------- TEAM MEMBERS HANDLERS ----------------
+  const handleOpenTeamModal = (member = null) => {
+    if (member) {
+      setCurrentTeamMember({
+        id: member.id || member._id || '',
+        name: member.name || '',
+        designation: member.designation || '',
+        role: member.role || '',
+        photoUrl: member.photoUrl || '',
+        qualifications: member.qualifications || '',
+        experience: member.experience || '',
+        bio: member.bio || '',
+        highlightsText: Array.isArray(member.highlights) ? member.highlights.join('\n') : '',
+        displayOrder: member.displayOrder ?? 0
+      });
+    } else {
+      setCurrentTeamMember({
+        id: '',
+        name: '',
+        designation: '',
+        role: '',
+        photoUrl: '',
+        qualifications: '',
+        experience: '',
+        bio: '',
+        highlightsText: '',
+        displayOrder: teamMembers.length
+      });
+    }
+    setTeamModalOpen(true);
+  };
+
+  const handleSaveTeamMember = async (e) => {
+    e.preventDefault();
+    if (!currentTeamMember.name.trim()) {
+      setMessage({ text: 'Team member name is required.', type: 'error' });
+      return;
+    }
+
+    setSavingTeamMember(true);
+    try {
+      const highlights = (currentTeamMember.highlightsText || '')
+        .split(/\r?\n/)
+        .map((line) => line.replace(/^[•\-*]\s*/, '').trim())
+        .filter(Boolean);
+
+      const payload = {
+        ...(currentTeamMember.id ? { id: currentTeamMember.id } : {}),
+        name: currentTeamMember.name.trim(),
+        designation: (currentTeamMember.designation || '').trim(),
+        role: (currentTeamMember.role || '').trim(),
+        photoUrl: (currentTeamMember.photoUrl || '').trim(),
+        qualifications: (currentTeamMember.qualifications || '').trim(),
+        experience: (currentTeamMember.experience || '').trim(),
+        bio: (currentTeamMember.bio || '').trim(),
+        highlights,
+        displayOrder: Number.isFinite(Number(currentTeamMember.displayOrder))
+          ? Number(currentTeamMember.displayOrder)
+          : 0
+      };
+
+      const res = await fetch('/api/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save team member');
+
+      if (data.member) {
+        const savedId = data.member.id || data.member._id;
+        setTeamMembers((prev) => {
+          const exists = prev.some((m) => (m.id || m._id) === savedId);
+          const next = exists
+            ? prev.map((m) => ((m.id || m._id) === savedId ? data.member : m))
+            : [...prev, data.member];
+          return next.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+        });
+      }
+
+      setMessage({ text: 'Team member saved successfully.', type: 'success' });
+      setTeamModalOpen(false);
+      await fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setSavingTeamMember(false);
+    }
+  };
+
+  const handleDeleteTeamMember = async (id, name) => {
+    if (!confirm(`Delete team member "${name || 'Member'}"?`)) return;
+    try {
+      const res = await fetch(`/api/team?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        cache: 'no-store'
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete team member');
+
+      setTeamMembers((prev) => prev.filter((item) => item.id !== id && item._id !== id));
+      setMessage({ text: 'Team member deleted.', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
   const tabTitles = {
     services: 'Services',
     products: 'Products',
@@ -1450,6 +1581,7 @@ export default function AdminDashboardPage() {
     clients: 'Client Logos',
     aboutImages: 'About Us Images',
     aboutPagePhoto: 'About Page Photo',
+    team: 'Team Members',
     blogs: 'Blogs',
     gallery: 'Gallery',
     videos: 'Videos',
@@ -1466,6 +1598,7 @@ export default function AdminDashboardPage() {
     clients: clients.length,
     aboutImages: aboutImages.length,
     aboutPagePhoto: aboutPagePhoto?.imageUrl ? 1 : 0,
+    team: teamMembers.length,
     blogs: blogs.length,
     gallery: gallery.length,
     videos: videos.length,
@@ -1482,6 +1615,7 @@ export default function AdminDashboardPage() {
     clients: 'Homepage & clients marquee logos',
     aboutImages: 'Homepage About Us right-side slides & bottom text',
     aboutPagePhoto: 'Right-side feature photo displayed on /about-us page',
+    team: 'Leadership & team profiles shown on /about-us page',
     blogs: 'Published articles & updates',
     gallery: 'Field photos & Cloudinary assets',
     videos: 'YouTube demo links',
@@ -1498,6 +1632,7 @@ export default function AdminDashboardPage() {
     { id: 'clients', label: 'Clients', count: clients.length, icon: Building2 },
     { id: 'aboutImages', label: 'About Us Images', count: aboutImages.length, icon: ImageIcon },
     { id: 'aboutPagePhoto', label: 'About Page Photo', count: aboutPagePhoto?.imageUrl ? 1 : 0, icon: Camera },
+    { id: 'team', label: 'Team', count: teamMembers.length, icon: Users },
     { id: 'blogs', label: 'Blogs', count: blogs.length, icon: BookOpen },
     { id: 'gallery', label: 'Gallery', count: gallery.length, icon: Camera },
     { id: 'videos', label: 'Videos', count: videos.length, icon: Tv },
@@ -1774,6 +1909,16 @@ export default function AdminDashboardPage() {
               >
                 <Plus className="w-3 h-3" />
                 <span>Add Slide</span>
+              </button>
+            )}
+
+            {activeTab === 'team' && (
+              <button
+                onClick={() => handleOpenTeamModal()}
+                className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Team Member</span>
               </button>
             )}
 
@@ -2952,6 +3097,116 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {/* ================= TAB: TEAM MEMBERS ================= */}
+        {activeTab === 'team' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden p-3 w-full">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-[#DCE5DD]">
+              <div>
+                <h3 className="text-sm font-bold text-[#173B26]">Team &amp; Leadership Profiles</h3>
+                <p className="text-[11px] text-[#68756D]">
+                  Displayed on the /about-us page. Add, reorder, update photos, or edit any profile.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/about-us"
+                  target="_blank"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F5F8F3] hover:bg-[#EAEFE8] text-[#216B35] border border-[#DCE5DD] text-[11px] font-semibold"
+                >
+                  <span>View About Us</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+                <button
+                  onClick={() => handleOpenTeamModal()}
+                  className="btn-primary text-xs px-3 py-1 rounded inline-flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Team Member</span>
+                </button>
+              </div>
+            </div>
+
+            {teamMembers.length === 0 ? (
+              <div className="p-6 text-center text-xs text-[#68756D] space-y-2">
+                <Users className="w-6 h-6 text-[#216B35]/50 mx-auto" />
+                <p className="font-semibold text-[#173B26]">No Team Members Added Yet</p>
+                <button
+                  onClick={() => handleOpenTeamModal()}
+                  className="btn-primary text-xs px-3 py-1 rounded inline-flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First Team Member</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {teamMembers.map((member) => {
+                  const memberId = member.id || member._id;
+                  return (
+                    <div
+                      key={memberId}
+                      className="rounded-lg border border-[#DCE5DD] overflow-hidden bg-white flex flex-col justify-between shadow-2xs"
+                    >
+                      <div>
+                        <div className="relative aspect-[4/3] bg-[#F5F8F3] border-b border-[#DCE5DD] overflow-hidden">
+                          {member.photoUrl ? (
+                            <img
+                              src={member.photoUrl}
+                              alt={member.name || 'Team Member'}
+                              className="w-full h-full object-cover object-top"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[#216B35]/60 text-xs font-semibold">
+                              No Photo Set
+                            </div>
+                          )}
+                          <span className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded font-mono">
+                            #{member.displayOrder ?? 0}
+                          </span>
+                        </div>
+
+                        <div className="p-2.5 space-y-1">
+                          {member.designation && (
+                            <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-[#216B35] bg-[#F5F8F3] px-1.5 py-0.5 rounded border border-[#DCE5DD]">
+                              {member.designation}
+                            </span>
+                          )}
+                          <h4 className="font-bold text-[#173B26] text-xs truncate">{member.name}</h4>
+                          {member.role && (
+                            <p className="text-[11px] font-medium text-[#216B35] truncate">{member.role}</p>
+                          )}
+                          {member.bio && (
+                            <p className="text-[10px] text-[#68756D] line-clamp-2 leading-snug">{member.bio}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="px-2.5 py-1.5 bg-[#F5F8F3]/60 border-t border-[#DCE5DD] flex justify-end gap-1.5">
+                        <button
+                          onClick={() => handleOpenTeamModal(member)}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-[#216B35] hover:bg-white border border-transparent hover:border-[#DCE5DD]"
+                          title="Edit Team Member"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTeamMember(memberId, member.name)}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-red-600 hover:bg-red-50"
+                          title="Delete Team Member"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ================= TAB: CAREERS ================= */}
         {activeTab === 'careers' && (
           <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
@@ -3273,6 +3528,177 @@ export default function AdminDashboardPage() {
         )}
         </div>
       </main>
+
+      {/* ================= MODAL: ADD / EDIT TEAM MEMBER ================= */}
+      {teamModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-2.5 overflow-y-auto">
+          <div className="bg-white rounded max-w-lg w-full p-3.5 sm:p-4 shadow-xl border border-[#DCE5DD] my-3 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <h3 className="text-sm font-bold text-[#173B26]">
+                {currentTeamMember.id ? 'Edit Team Member' : 'Add Team Member'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setTeamModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveTeamMember} className="space-y-2.5 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={currentTeamMember.name}
+                    onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, name: e.target.value })}
+                    placeholder="e.g. Sarika Gupta"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Top Badge / Designation</label>
+                  <input
+                    type="text"
+                    value={currentTeamMember.designation}
+                    onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, designation: e.target.value })}
+                    placeholder="e.g. Proprietor & Founder"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-[#173B26] mb-1">Role / Title</label>
+                  <input
+                    type="text"
+                    value={currentTeamMember.role}
+                    onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, role: e.target.value })}
+                    placeholder="e.g. Lead Environmental Analyst"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Display Order</label>
+                  <input
+                    type="number"
+                    value={currentTeamMember.displayOrder ?? 0}
+                    onChange={(e) => {
+                      const parsed = parseInt(e.target.value, 10);
+                      setCurrentTeamMember({
+                        ...currentTeamMember,
+                        displayOrder: Number.isNaN(parsed) ? 0 : parsed
+                      });
+                    }}
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-semibold text-[#173B26]">Profile Photo (Top Card Frame)</label>
+                  <label className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F5F8F3] hover:bg-[#EAEFE8] text-[#216B35] border border-[#216B35]/40 font-semibold cursor-pointer">
+                    <Upload className="w-3 h-3" />
+                    <span>{uploadingImage ? 'Uploading...' : 'Upload Photo'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={(e) => handleImageUpload(e, 'team')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  value={currentTeamMember.photoUrl}
+                  onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, photoUrl: e.target.value })}
+                  placeholder="Upload photo or paste Cloudinary image URL"
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] font-mono text-[11px] focus:border-[#216B35] focus:outline-none"
+                />
+                {currentTeamMember.photoUrl && (
+                  <div className="mt-2 rounded overflow-hidden border border-[#DCE5DD] bg-[#F5F8F3] aspect-[4/3] max-w-[220px]">
+                    <img
+                      src={currentTeamMember.photoUrl}
+                      alt="Team photo preview"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Education / Qualifications</label>
+                  <input
+                    type="text"
+                    value={currentTeamMember.qualifications}
+                    onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, qualifications: e.target.value })}
+                    placeholder="e.g. Ph.D. (FRI Dehradun)"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Experience</label>
+                  <input
+                    type="text"
+                    value={currentTeamMember.experience}
+                    onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, experience: e.target.value })}
+                    placeholder="e.g. 15+ years experience"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Bio / Summary Paragraph</label>
+                <textarea
+                  rows={3}
+                  value={currentTeamMember.bio}
+                  onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, bio: e.target.value })}
+                  placeholder="Concise background bio shown on the team card..."
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none resize-y leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">
+                  Key Highlights (One bullet per line)
+                </label>
+                <textarea
+                  rows={3}
+                  value={currentTeamMember.highlightsText}
+                  onChange={(e) => setCurrentTeamMember({ ...currentTeamMember, highlightsText: e.target.value })}
+                  placeholder={"Enter each key point on a new line..."}
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none resize-y leading-relaxed"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2.5 border-t border-[#DCE5DD]">
+                <button
+                  type="button"
+                  onClick={() => setTeamModalOpen(false)}
+                  className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingImage || savingTeamMember}
+                  className="btn-primary px-4 py-1.5 rounded text-xs font-semibold disabled:opacity-60"
+                >
+                  {savingTeamMember ? 'Saving...' : (currentTeamMember.id ? 'Save Member' : 'Add Member')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ================= MODAL: ADD / EDIT ABOUT US SLIDE ================= */}
       {aboutModalOpen && (

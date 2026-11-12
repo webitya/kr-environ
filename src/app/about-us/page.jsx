@@ -1,15 +1,14 @@
 import SiteHeader from '@/components/layout/SiteHeader';
 import SiteFooter from '@/components/layout/SiteFooter';
 import AboutHeroPhoto from '@/components/about/AboutHeroPhoto';
-import { getAboutPagePhoto } from '@/lib/db';
+import AboutTeamSection from '@/components/about/AboutTeamSection';
+import { getAboutPagePhoto, getTeamMembers } from '@/lib/db';
 import Link from 'next/link';
 import { 
   ShieldCheck, 
-  Award, 
   UserCheck, 
   CheckCircle2, 
   ArrowRight,
-  GraduationCap,
   FileCheck,
   Compass,
   Eye,
@@ -26,50 +25,11 @@ export const metadata = {
   description: "Learn about KR Environ Solutions, proprietor Sarika Gupta, our doctoral expert panel (Dr. Raj Kumar, Dr. Satya Prakash), and our vision, mission & core values."
 };
 
-const leaders = [
-  {
-    name: "Sarika Gupta",
-    role: "Proprietor | Lead Environmental Analyst",
-    qualifications: "MSc (Environmental Science, Lucknow University) • MSc (Geoinformatics)",
-    experience: "15+ years experience as an Environmental Analyst",
-    bio: "Founder and proprietor of KR Environ Solutions, bridging statutory environmental compliance with modern ecological engineering across Jharkhand and pan-India.",
-    highlights: [
-      "Directs Environmental Clearance (EC), Forest Clearance (FC), CTE & CTO regulatory workflows",
-      "Leads high-precision GIS, KML, DGPS & drone topographical mapping surveys",
-      "Coordinates with State Forest Departments for Human-Wildlife Conflict mitigation & ranger gear"
-    ],
-    designation: "Proprietor & Founder"
-  },
-  {
-    name: "Dr. Raj Kumar",
-    role: "Senior Forest Clearance & Silviculture Expert",
-    qualifications: "Ph.D. / Doctorate (Forest Research Institute – FRI, Dehradun)",
-    experience: "10+ years specialized experience in EC & Forest Regulatory Clearances",
-    bio: "Forestry doctorate from FRI Dehradun specializing in statutory Forest Clearance (FC) and Environmental Clearance (EC) procedures alongside proprietor Sarika Gupta across Jharkhand and India.",
-    highlights: [
-      "Prepares statutory FC dossiers & PARIVESH compliance under Van Sanrakshan Evam Samvardhan Adhiniyam",
-      "Designs Compensatory Afforestation (CA) schemes, silviculture prescriptions & soil-moisture plans",
-      "Advises linear infrastructure, mining & power projects on site-specific forest management plans"
-    ],
-    designation: "Forest Clearance Expert"
-  },
-  {
-    name: "Dr. Satya Prakash",
-    role: "Chief Wildlife Conservationist & Ornithologist",
-    qualifications: "Ph.D. (Wildlife Biology) • President, Neo Human Foundation (NHF) • Member, Jharkhand State Wildlife Board",
-    experience: "25+ years authoritative experience in Wildlife, Avian & Biodiversity Management",
-    bio: "Renowned Hazaribagh-based wildlife biologist, IBCN State Coordinator, and BNHS/SAVE partner leading nationally recognized Gyps vulture recovery and biodiversity research across the Chota Nagpur Plateau.",
-    highlights: [
-      "Spearheaded the 100-km Hazaribagh Provisional Vulture Safe Zone (HPVSZ) & Koderma safe feeding sites with BNHS, RSPB & SAVE",
-      "Led anti-diclofenac veterinary advocacy (promoting safe meloxicam) & long-term nesting/roosting surveillance since 2007",
-      "Integrates avian & wildlife safeguards into railways, roads & power lines alongside tiger reserves and elephant corridors"
-    ],
-    designation: "Wildlife Management Authority"
-  }
-];
-
 export default async function AboutUsPage() {
-  const aboutPhoto = await getAboutPagePhoto();
+  const [aboutPhoto, teamMembers] = await Promise.all([
+    getAboutPagePhoto(),
+    getTeamMembers()
+  ]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -222,69 +182,9 @@ export default async function AboutUsPage() {
         </section>
 
         {/* =========================================================================
-            4. SCIENTIFIC LEADERSHIP & REGULATORY PANEL
+            4. SCIENTIFIC LEADERSHIP & TEAM MEMBERS (Managed via Admin Panel)
             ========================================================================= */}
-        <section className="py-10 sm:py-14 bg-white w-full border-t border-[#DCE5DD]">
-          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-            {/* Section Heading */}
-            <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
-                Scientific Leadership &amp; Regulatory Advisory Panel
-              </h2>
-              <p className="mt-2 text-xs sm:text-sm text-[#5B675E] font-manrope leading-relaxed">
-                Decades of combined academic scholarship, FRI Dehradun forestry expertise, and frontline wildlife management.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {leaders.map((leader, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white rounded-2xl p-6 sm:p-7 border border-[#DCE5DD] shadow-xs hover:border-[#216B35]/60 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-                >
-                  <div>
-                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#216B35] bg-[#F5F8F3] px-2.5 py-1 rounded-md border border-[#DCE5DD] font-manrope">
-                      {leader.designation}
-                    </span>
-
-                    <h3 className="text-lg sm:text-xl font-bold font-manrope text-[#173B26] mt-3">
-                      {leader.name}
-                    </h3>
-                    <div className="text-xs font-semibold text-[#216B35] font-manrope mt-0.5">
-                      {leader.role}
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-[#DCE5DD]/60 space-y-2 text-xs font-manrope text-[#4B5563]">
-                      <div className="flex items-start gap-2">
-                        <GraduationCap className="w-4 h-4 text-[#216B35] shrink-0 mt-0.5" />
-                        <span><strong>Education:</strong> {leader.qualifications}</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <Award className="w-4 h-4 text-[#216B35] shrink-0 mt-0.5" />
-                        <span><strong>Experience:</strong> {leader.experience}</span>
-                      </div>
-                    </div>
-
-                    <p className="mt-4 text-xs sm:text-[13px] text-[#4B5563] font-manrope leading-relaxed">
-                      {leader.bio}
-                    </p>
-
-                    {leader.highlights && leader.highlights.length > 0 && (
-                      <ul className="mt-4 pt-3 border-t border-[#DCE5DD]/60 space-y-2 text-xs font-manrope text-[#4B5563]">
-                        {leader.highlights.map((item, hIdx) => (
-                          <li key={hIdx} className="flex items-start gap-2 leading-relaxed">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#216B35] shrink-0 mt-0.5" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <AboutTeamSection initialMembers={teamMembers} />
 
         {/* =========================================================================
             5. TRACK RECORD & IMPACT: Engineering Sustainable Coexistence & Stewardship

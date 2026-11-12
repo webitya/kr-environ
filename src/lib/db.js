@@ -12,6 +12,7 @@ import Certificate from '@/models/Certificate';
 import Career from '@/models/Career';
 import CareerApplication from '@/models/CareerApplication';
 import AboutImage from '@/models/AboutImage';
+import TeamMember from '@/models/TeamMember';
 
 // Helper to convert Mongoose doc to clean plain JSON objects (stripping BSON ObjectId and __v)
 function serializeDoc(doc) {
@@ -1853,6 +1854,155 @@ export async function deleteAboutPagePhoto() {
     return true;
   } catch (err) {
     console.error('MongoDB deleteAboutPagePhoto error:', err.message);
+    throw err;
+  }
+}
+
+// ==================== TEAM MEMBERS (/about-us) ====================
+const INITIAL_TEAM_MEMBERS = [
+  {
+    name: 'Sarika Gupta',
+    designation: 'Proprietor & Founder',
+    role: 'Proprietor | Lead Environmental Analyst',
+    photoUrl: '',
+    qualifications: 'MSc (Environmental Science, Lucknow University) • MSc (Geoinformatics)',
+    experience: '15+ years experience as an Environmental Analyst',
+    bio: 'Founder and proprietor of KR Environ Solutions, bridging statutory environmental compliance with modern ecological engineering across Jharkhand and pan-India.',
+    highlights: [
+      'Directs Environmental Clearance (EC), Forest Clearance (FC), CTE & CTO regulatory workflows',
+      'Leads high-precision GIS, KML, DGPS & drone topographical mapping surveys',
+      'Coordinates with State Forest Departments for Human-Wildlife Conflict mitigation & ranger gear'
+    ],
+    displayOrder: 0
+  },
+  {
+    name: 'Dr. Raj Kumar',
+    designation: 'Forest Clearance Expert',
+    role: 'Senior Forest Clearance & Silviculture Expert',
+    photoUrl: '',
+    qualifications: 'Ph.D. / Doctorate (Forest Research Institute – FRI, Dehradun)',
+    experience: '10+ years specialized experience in EC & Forest Regulatory Clearances',
+    bio: 'Forestry doctorate from FRI Dehradun specializing in statutory Forest Clearance (FC) and Environmental Clearance (EC) procedures alongside proprietor Sarika Gupta across Jharkhand and India.',
+    highlights: [
+      'Prepares statutory FC dossiers & PARIVESH compliance under Van Sanrakshan Evam Samvardhan Adhiniyam',
+      'Designs Compensatory Afforestation (CA) schemes, silviculture prescriptions & soil-moisture plans',
+      'Advises linear infrastructure, mining & power projects on site-specific forest management plans'
+    ],
+    displayOrder: 1
+  },
+  {
+    name: 'Dr. Satya Prakash',
+    designation: 'Wildlife Management Authority',
+    role: 'Chief Wildlife Conservationist & Ornithologist',
+    photoUrl: '',
+    qualifications: 'Ph.D. (Wildlife Biology) • President, Neo Human Foundation (NHF) • Member, Jharkhand State Wildlife Board',
+    experience: '25+ years authoritative experience in Wildlife, Avian & Biodiversity Management',
+    bio: 'Renowned Hazaribagh-based wildlife biologist, IBCN State Coordinator, and BNHS/SAVE partner leading nationally recognized Gyps vulture recovery and biodiversity research across the Chota Nagpur Plateau.',
+    highlights: [
+      'Spearheaded the 100-km Hazaribagh Provisional Vulture Safe Zone (HPVSZ) & Koderma safe feeding sites with BNHS, RSPB & SAVE',
+      'Led anti-diclofenac veterinary advocacy (promoting safe meloxicam) & long-term nesting/roosting surveillance since 2007',
+      'Integrates avian & wildlife safeguards into railways, roads & power lines alongside tiger reserves and elephant corridors'
+    ],
+    displayOrder: 2
+  }
+];
+
+async function ensureTeamMembersInitialized(conn) {
+  try {
+    const db = conn.connection.db;
+    const settingsCol = db.collection('settings');
+    const marker = await settingsCol.findOne({ key: 'team_members_initialized' });
+    if (marker) return;
+
+    const count = await TeamMember.countDocuments();
+    if (count === 0) {
+      for (const member of INITIAL_TEAM_MEMBERS) {
+        await TeamMember.create(member).catch(() => {});
+      }
+    }
+
+    await settingsCol.updateOne(
+      { key: 'team_members_initialized' },
+      { $set: { key: 'team_members_initialized', initializedAt: new Date() } },
+      { upsert: true }
+    ).catch(() => {});
+  } catch (err) {
+    console.error('ensureTeamMembersInitialized error:', err.message);
+  }
+}
+
+export async function getTeamMembers() {
+  try {
+    const conn = await connectToDatabase();
+    if (conn) {
+      await ensureTeamMembersInitialized(conn);
+      const items = await TeamMember.find().sort({ displayOrder: 1, createdAt: 1 }).lean();
+      return (items || []).map(serializeDoc);
+    }
+  } catch (err) {
+    console.error('Error fetching team members from MongoDB:', err.message);
+  }
+  return INITIAL_TEAM_MEMBERS.map((m, idx) => ({ id: `team-${idx + 1}`, ...m }));
+}
+
+export async function upsertTeamMember(memberData) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    await ensureTeamMembersInitialized(conn);
+
+    const targetId = memberData.id || memberData._id;
+    const isValidObjectId = targetId && typeof targetId === 'string' && /^[0-9a-fA-F]{24}$/.test(targetId);
+    const { id, _id, __v, createdAt, updatedAt, ...rest } = memberData;
+
+    const cleanData = {
+      name: (rest.name || '').toString().trim(),
+      designation: (rest.designation || '').toString().trim(),
+      role: (rest.role || '').toString().trim(),
+      photoUrl: (rest.photoUrl || '').toString().trim(),
+      qualifications: (rest.qualifications || '').toString().trim(),
+      experience: (rest.experience || '').toString().trim(),
+      bio: (rest.bio || '').toString().trim(),
+      highlights: Array.isArray(rest.highlights)
+        ? rest.highlights.map((h) => String(h || '').trim()).filter(Boolean)
+        : [],
+      displayOrder: Number.isFinite(Number(rest.displayOrder)) ? Number(rest.displayOrder) : 0
+    };
+
+    let updated = null;
+    if (isValidObjectId) {
+      updated = await TeamMember.findByIdAndUpdate(
+        targetId,
+        { $set: cleanData },
+        { returnDocument: 'after', runValidators: true }
+      ).lean();
+    }
+
+    if (!updated) {
+      updated = await TeamMember.create(cleanData);
+    }
+
+    return serializeDoc(updated);
+  } catch (err) {
+    console.error('MongoDB upsertTeamMember error:', err.message);
+    throw err;
+  }
+}
+
+export async function deleteTeamMember(id) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    if (!id || typeof id !== 'string' || !/^[0-9a-fA-F]{24}$/.test(id)) {
+      return false;
+    }
+
+    await TeamMember.findByIdAndDelete(id);
+    return true;
+  } catch (err) {
+    console.error('MongoDB deleteTeamMember error:', err.message);
     throw err;
   }
 }
