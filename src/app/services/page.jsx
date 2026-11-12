@@ -51,7 +51,10 @@ export default async function ServicesPage() {
                   We prepare tailored HWC mitigation dossiers for state forest divisions, including boundary topology mapping, solar calculations, and live ranger training modules.
                 </p>
               </div>
-              <Link href="/contact-us" className="btn-primary shrink-0 text-xs sm:text-sm px-5 py-2.5">
+              <Link
+                href="/contact-us?subject=Custom Service RFP / Proposal"
+                className="btn-primary shrink-0 text-xs sm:text-sm px-5 py-2.5"
+              >
                 <PhoneCall className="w-4 h-4" />
                 <span>Request Custom RFP / Proposal</span>
               </Link>

@@ -10,6 +10,8 @@ export async function PUT(req, { params }) {
 
     try {
       revalidatePath('/products');
+      revalidatePath('/contact-us');
+      revalidatePath('/');
       revalidatePath('/admin');
     } catch (e) {}
 
@@ -26,6 +28,8 @@ export async function DELETE(req, { params }) {
 
     try {
       revalidatePath('/products');
+      revalidatePath('/contact-us');
+      revalidatePath('/');
       revalidatePath('/admin');
     } catch (e) {}
 

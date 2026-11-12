@@ -147,7 +147,7 @@ export default async function ProductDetailPage({ params }) {
                     </a>
 
                     <Link
-                      href={`/contact-us?subject=RFP Quote Request: ${encodeURIComponent(product.title)}`}
+                      href={`/contact-us?product=${encodeURIComponent(product.title)}&productSlug=${encodeURIComponent(product.slug || slug)}`}
                       className="btn-primary w-full text-center py-2.5 text-xs font-bold flex items-center justify-center gap-2 shadow-xs"
                     >
                       <Mail className="w-3.5 h-3.5" />

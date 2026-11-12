@@ -77,7 +77,10 @@ export default async function ServiceDetailPage({ params }) {
                 </p>
 
                 <div className="flex flex-wrap gap-3 pt-1">
-                  <Link href="/contact-us" className="btn-primary">
+                  <Link
+                    href={`/contact-us?service=${encodeURIComponent(service.title)}&serviceSlug=${encodeURIComponent(service.slug || slug)}`}
+                    className="btn-primary"
+                  >
                     <PhoneCall className="w-4 h-4" />
                     <span>Request Technical Quote / Deployment</span>
                   </Link>
@@ -168,7 +171,10 @@ export default async function ServiceDetailPage({ params }) {
                   <p className="text-xs text-[#E4EEE6]/80 font-lato leading-relaxed">
                     Connect directly with Sarika Gupta and our engineering team at Van Bhawan, Doranda, Ranchi.
                   </p>
-                  <Link href="/contact-us" className="btn-accent w-full text-center text-xs">
+                  <Link
+                    href={`/contact-us?service=${encodeURIComponent(service.title)}&serviceSlug=${encodeURIComponent(service.slug || slug)}`}
+                    className="btn-accent w-full text-center text-xs"
+                  >
                     Contact Forest Desk
                   </Link>
                 </div>

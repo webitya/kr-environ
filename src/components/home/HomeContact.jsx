@@ -4,46 +4,66 @@ import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import SectionHeading from '../common/SectionHeading';
 
-export default function HomeContact({ showHeading = true, services = [], products = [] }) {
-  const [serviceOptions, setServiceOptions] = useState(services);
-  const [productOptions, setProductOptions] = useState(products);
+export default function HomeContact({
+  showHeading = true,
+  services = [],
+  products = [],
+  initialService = '',
+  initialSelectionType = '',
+  initialSubject = ''
+}) {
+  const [fetchedServices, setFetchedServices] = useState(null);
+  const [fetchedProducts, setFetchedProducts] = useState(null);
+  const [selectedServiceOverride, setSelectedServiceOverride] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     organization: '',
     email: '',
     phone: '',
-    service: '',
-    message: ''
+    message: initialSubject ? `Inquiry Subject: ${initialSubject}\n` : ''
   });
   const [status, setStatus] = useState({ loading: false, success: false, error: null });
 
-  useEffect(() => {
-    if (services && services.length > 0) {
-      setServiceOptions(services);
-    } else {
-      fetch('/api/services', { cache: 'no-store' })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.services?.length) {
-            setServiceOptions(data.services);
-          }
-        })
-        .catch(() => {});
-    }
+  const serviceOptions = fetchedServices ?? (Array.isArray(services) ? services : []);
+  const productOptions = fetchedProducts ?? (Array.isArray(products) ? products : []);
+  const selectedService = selectedServiceOverride !== null ? selectedServiceOverride : initialService;
 
-    if (products && products.length > 0) {
-      setProductOptions(products);
-    } else {
-      fetch('/api/products', { cache: 'no-store' })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.products?.length) {
-            setProductOptions(data.products);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [services, products]);
+  const hasMatchingOption = Boolean(
+    selectedService && (
+      selectedService === 'General Technical Consultation / Other' ||
+      serviceOptions.some((s) => s.title === selectedService) ||
+      productOptions.some((p) => p.title === selectedService)
+    )
+  );
+
+  // Always sync latest Services & Products from MongoDB so admin deletions reflect immediately
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    fetch('/api/services', { cache: 'no-store', signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data?.services)) {
+          setFetchedServices(data.services);
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/products', { cache: 'no-store', signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data?.products)) {
+          setFetchedProducts(data.products);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,18 +73,21 @@ export default function HomeContact({ showHeading = true, services = [], product
       const res = await fetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          service: selectedService
+        })
       });
 
       if (!res.ok) throw new Error('Failed to submit enquiry');
 
       setStatus({ loading: false, success: true, error: null });
+      setSelectedServiceOverride('');
       setFormData({
         name: '',
         organization: '',
         email: '',
         phone: '',
-        service: '',
         message: ''
       });
     } catch (err) {
@@ -249,16 +272,26 @@ export default function HomeContact({ showHeading = true, services = [], product
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#173B26] mb-1">
-                  Primary Technology / Service Requirement *
-                </label>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                  <label className="block text-xs font-semibold text-[#173B26]">
+                    Primary Technology / Service / Product Requirement *
+                  </label>
+                  {selectedService && selectedService === initialService && (initialSelectionType === 'service' || initialSelectionType === 'product') && (
+                    <span className="text-[10px] font-semibold text-[#216B35] bg-[#F5F8F3] border border-[#216B35]/25 px-2 py-0.5 rounded-full">
+                      {initialSelectionType === 'product' ? 'Auto-selected Product' : 'Auto-selected Service'}
+                    </span>
+                  )}
+                </div>
                 <select
                   required
-                  value={formData.service}
-                  onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                  value={selectedService}
+                  onChange={(e) => setSelectedServiceOverride(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-[#DCE5DD] focus:outline-none focus:ring-2 focus:ring-[#216B35] font-lato text-sm bg-white"
                 >
-                  <option value="">-- Select Service / Technology Requirement --</option>
+                  <option value="">-- Select Service / Product Requirement --</option>
+                  {selectedService && !hasMatchingOption && (
+                    <option value={selectedService}>{selectedService}</option>
+                  )}
                   {serviceOptions.length > 0 && (
                     <optgroup label="Services & Technical Solutions">
                       {serviceOptions.map((svc, idx) => (

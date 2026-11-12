@@ -4,6 +4,12 @@ import { getServices, upsertService, deleteService } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0'
+};
+
 function slugify(text) {
   return text
     .toString()
@@ -16,9 +22,9 @@ function slugify(text) {
 export async function GET() {
   try {
     const services = await getServices();
-    return NextResponse.json({ success: true, services });
+    return NextResponse.json({ success: true, services }, { headers: NO_STORE_HEADERS });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: err.message }, { status: 500, headers: NO_STORE_HEADERS });
   }
 }
 

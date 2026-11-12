@@ -504,7 +504,10 @@ export default function AdminDashboardPage() {
   const handleDeleteService = async (id, title) => {
     if (!confirm(`Are you sure you want to delete service "${title}"?`)) return;
     try {
-      const res = await fetch(`/api/services?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/services?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        cache: 'no-store'
+      });
       if (!res.ok) throw new Error('Delete failed');
       setMessage({ text: `Service deleted`, type: 'success' });
       fetchData();

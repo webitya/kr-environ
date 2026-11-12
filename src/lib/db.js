@@ -112,10 +112,23 @@ export async function deleteService(idOrSlug) {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
 
-    if (idOrSlug && idOrSlug.length === 24) {
-      await Service.findByIdAndDelete(idOrSlug);
-    } else {
-      await Service.findOneAndDelete({ slug: idOrSlug });
+    if (!idOrSlug || idOrSlug === 'undefined' || idOrSlug === 'null') {
+      throw new Error('Service identifier is required');
+    }
+
+    const isValidObjectId = typeof idOrSlug === 'string' && /^[0-9a-fA-F]{24}$/.test(idOrSlug);
+    let deleted = null;
+    if (isValidObjectId) {
+      deleted = await Service.findByIdAndDelete(idOrSlug);
+    }
+    if (!deleted) {
+      deleted = await Service.findOneAndDelete({
+        $or: [
+          { slug: idOrSlug },
+          { id: idOrSlug },
+          { title: idOrSlug }
+        ]
+      });
     }
     return true;
   } catch (err) {
@@ -1162,25 +1175,42 @@ const FALLBACK_PRODUCTS = [
   }
 ];
 
+async function ensureProductsInitialized(conn) {
+  try {
+    const db = conn.connection.db;
+    const settingsCol = db.collection('settings');
+    const marker = await settingsCol.findOne({ key: 'products_initialized' });
+    if (marker) return;
+
+    const count = await Product.countDocuments();
+    if (count === 0) {
+      for (const p of FALLBACK_PRODUCTS) {
+        const { id, ...clean } = p;
+        await Product.findOneAndUpdate(
+          { slug: clean.slug },
+          { $set: clean },
+          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+        ).catch(() => {});
+      }
+    }
+
+    await settingsCol.updateOne(
+      { key: 'products_initialized' },
+      { $set: { key: 'products_initialized', initializedAt: new Date() } },
+      { upsert: true }
+    ).catch(() => {});
+  } catch (e) {
+    console.error('ensureProductsInitialized error:', e.message);
+  }
+}
+
 export async function getProducts() {
   try {
     const conn = await connectToDatabase();
     if (conn) {
+      await ensureProductsInitialized(conn);
       const items = await Product.find().sort({ displayOrder: 1, createdAt: -1 }).lean();
-      if (items && items.length > 0) {
-        return items.map(serializeDoc);
-      } else {
-        for (const p of FALLBACK_PRODUCTS) {
-          const { id, ...clean } = p;
-          await Product.findOneAndUpdate(
-            { slug: clean.slug },
-            { $set: clean },
-            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
-          ).catch(() => {});
-        }
-        const seeded = await Product.find().sort({ displayOrder: 1, createdAt: -1 }).lean();
-        if (seeded && seeded.length > 0) return seeded.map(serializeDoc);
-      }
+      return (items || []).map(serializeDoc);
     }
   } catch (err) {
     console.error('Error fetching products from MongoDB:', err.message);
@@ -1192,8 +1222,9 @@ export async function getProductBySlug(slug) {
   try {
     const conn = await connectToDatabase();
     if (conn) {
+      await ensureProductsInitialized(conn);
       const item = await Product.findOne({ slug }).lean();
-      if (item) return serializeDoc(item);
+      return item ? serializeDoc(item) : null;
     }
   } catch (err) {
     console.error('Error fetching product by slug:', err.message);
@@ -1206,6 +1237,8 @@ export async function upsertProduct(productData) {
   try {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
+
+    await ensureProductsInitialized(conn);
 
     const targetId = productData.id || productData._id;
     const isValidObjectId = targetId && typeof targetId === 'string' && /^[0-9a-fA-F]{24}$/.test(targetId);
@@ -1232,6 +1265,8 @@ export async function deleteProduct(idOrSlug) {
   try {
     const conn = await connectToDatabase();
     if (!conn) throw new Error('Database connection failed');
+
+    await ensureProductsInitialized(conn);
 
     if (!idOrSlug || idOrSlug === 'undefined' || idOrSlug === 'null') {
       throw new Error('Product identifier is required');

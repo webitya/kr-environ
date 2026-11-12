@@ -63,6 +63,22 @@ export default function SiteHeader() {
     };
   }, [mobileMenuOpen]);
 
+  // Compute context-aware Contact Us URL so clicking Contact Us from a Service or Product page auto-selects it
+  const getContactHref = () => {
+    if (!pathname) return '/contact-us';
+    if (pathname.startsWith('/services/')) {
+      const slug = pathname.slice('/services/'.length).split('/')[0];
+      if (slug) return `/contact-us?serviceSlug=${encodeURIComponent(slug)}`;
+    }
+    if (pathname.startsWith('/products/')) {
+      const slug = pathname.slice('/products/'.length).split('/')[0];
+      if (slug) return `/contact-us?productSlug=${encodeURIComponent(slug)}`;
+    }
+    return '/contact-us';
+  };
+
+  const contactHref = getContactHref();
+
   // Robust touch-safe link click handler preventing dropped events in mobile browsers
   const handleDrawerLinkClick = (href) => {
     if (href === pathname) {
@@ -122,7 +138,7 @@ export default function SiteHeader() {
             {/* Desktop Action Button */}
             <div className="hidden lg:flex items-center gap-3">
               <Link
-                href="/contact-us"
+                href={contactHref}
                 prefetch={true}
                 className="btn-primary touch-manipulation font-manrope"
               >
@@ -228,7 +244,7 @@ export default function SiteHeader() {
               }}
             >
               <Link
-                href="/contact-us"
+                href={contactHref}
                 prefetch={true}
                 onClick={() => handleDrawerLinkClick('/contact-us')}
                 className="btn-primary w-full text-center py-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm rounded-xl font-manrope touch-manipulation select-none active:scale-[0.98]"

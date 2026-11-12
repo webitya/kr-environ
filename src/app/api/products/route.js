@@ -4,6 +4,12 @@ import { getProducts, upsertProduct, deleteProduct } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0'
+};
+
 function slugify(text) {
   return text
     .toString()
@@ -16,9 +22,9 @@ function slugify(text) {
 export async function GET() {
   try {
     const products = await getProducts();
-    return NextResponse.json({ success: true, products });
+    return NextResponse.json({ success: true, products }, { headers: NO_STORE_HEADERS });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: err.message }, { status: 500, headers: NO_STORE_HEADERS });
   }
 }
 
@@ -44,13 +50,14 @@ export async function POST(req) {
     try {
       revalidatePath('/products');
       revalidatePath(`/products/${slug}`);
+      revalidatePath('/contact-us');
       revalidatePath('/');
       revalidatePath('/admin');
     } catch (e) {
       console.warn('Revalidate path warning:', e.message);
     }
 
-    return NextResponse.json({ success: true, product: saved });
+    return NextResponse.json({ success: true, product: saved }, { headers: NO_STORE_HEADERS });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
@@ -70,13 +77,14 @@ export async function DELETE(req) {
     await deleteProduct(target);
     try {
       revalidatePath('/products');
+      revalidatePath('/contact-us');
       revalidatePath('/');
       revalidatePath('/admin');
     } catch (e) {
       console.warn('Revalidate path warning:', e.message);
     }
 
-    return NextResponse.json({ success: true, message: 'Product deleted successfully' });
+    return NextResponse.json({ success: true, message: 'Product deleted successfully' }, { headers: NO_STORE_HEADERS });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
