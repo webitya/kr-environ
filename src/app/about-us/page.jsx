@@ -1,5 +1,7 @@
 import SiteHeader from '@/components/layout/SiteHeader';
 import SiteFooter from '@/components/layout/SiteFooter';
+import AboutHeroPhoto from '@/components/about/AboutHeroPhoto';
+import { getAboutPagePhoto } from '@/lib/db';
 import Link from 'next/link';
 import { 
   ShieldCheck, 
@@ -66,51 +68,61 @@ const leaders = [
   }
 ];
 
-export default function AboutUsPage() {
+export default async function AboutUsPage() {
+  const aboutPhoto = await getAboutPagePhoto();
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <SiteHeader />
 
       <main className="flex-1 w-full min-h-[calc(100vh-80px)] flex flex-col justify-between">
         {/* =========================================================================
-            1. WHO WE ARE: In-Depth Company Story (Full-Width Clean Editorial Layout)
+            1. WHO WE ARE: In-Depth Company Story (Left Content + Right Changeable Photo)
             ========================================================================= */}
         <section className="pt-8 pb-10 sm:pt-10 sm:pb-14 bg-white w-full">
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-            <div className="space-y-5 text-left">
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight max-w-4xl">
-                  Who We Are: Rooted in Jharkhand, Protecting Pan-India Ecosystems
-                </h1>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-14 items-center">
+              {/* Left Side Content */}
+              <div className="lg:col-span-7 space-y-5 text-left">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope tracking-tight leading-tight">
+                    Who We Are: Rooted in Jharkhand, Protecting Pan-India Ecosystems
+                  </h1>
+                </div>
+
+                <div className="space-y-3.5 text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed">
+                  <p>
+                    Founded and headed by proprietor <strong>Sarika Gupta</strong> (MSc Environmental Science, Lucknow University; MSc Geoinformatics), <strong>KR Environ Solutions</strong> operates out of Ranchi, Jharkhand. We serve as a trusted institutional bridge connecting government forest departments, industrial project proponents, and agricultural communities with certified environmental clearances and advanced wildlife conservation engineering.
+                  </p>
+                  <p>
+                    Our core technical scope spans statutory <strong>Environmental Clearances (EC)</strong>, <strong>Forest Clearances (FC)</strong> under the Van Sanrakshan Evam Samvardhan Adhiniyam, <strong>Environmental Impact Assessments (EIA)</strong>, <strong>Consent to Establish (CTE)</strong>, <strong>Consent to Operate (CTO)</strong>, GIS Drone Topography Mapping, and GPS Tree Enumeration.
+                  </p>
+                </div>
+
+                {/* 4 Feature Pills */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 font-manrope text-xs">
+                  <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
+                    <FileCheck className="w-4 h-4 text-[#216B35] shrink-0" />
+                    <span className="text-[#173B26] font-semibold">EC / FC / CTE / CTO Statutory Compliance</span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
+                    <Compass className="w-4 h-4 text-[#216B35] shrink-0" />
+                    <span className="text-[#173B26] font-semibold">High-Precision Drone KML &amp; GIS Mapping</span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
+                    <ShieldCheck className="w-4 h-4 text-[#216B35] shrink-0" />
+                    <span className="text-[#173B26] font-semibold">Certified Non-Lethal Wildlife Deterrents</span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
+                    <UserCheck className="w-4 h-4 text-[#216B35] shrink-0" />
+                    <span className="text-[#173B26] font-semibold">Tactical Equipment for Frontline Rangers</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-3.5 text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed max-w-5xl">
-                <p>
-                  Founded and headed by proprietor <strong>Sarika Gupta</strong> (MSc Environmental Science, Lucknow University; MSc Geoinformatics), <strong>KR Environ Solutions</strong> operates out of Ranchi, Jharkhand. We serve as a trusted institutional bridge connecting government forest departments, industrial project proponents, and agricultural communities with certified environmental clearances and advanced wildlife conservation engineering.
-                </p>
-                <p>
-                  Our core technical scope spans statutory <strong>Environmental Clearances (EC)</strong>, <strong>Forest Clearances (FC)</strong> under the Van Sanrakshan Evam Samvardhan Adhiniyam, <strong>Environmental Impact Assessments (EIA)</strong>, <strong>Consent to Establish (CTE)</strong>, <strong>Consent to Operate (CTO)</strong>, GIS Drone Topography Mapping, and GPS Tree Enumeration.
-                </p>
-              </div>
-
-              {/* 4 Feature Pills */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 font-manrope text-xs">
-                <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
-                  <FileCheck className="w-4 h-4 text-[#216B35] shrink-0" />
-                  <span className="text-[#173B26] font-semibold">EC / FC / CTE / CTO Statutory Compliance</span>
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
-                  <Compass className="w-4 h-4 text-[#216B35] shrink-0" />
-                  <span className="text-[#173B26] font-semibold">High-Precision Drone KML &amp; GIS Mapping</span>
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
-                  <ShieldCheck className="w-4 h-4 text-[#216B35] shrink-0" />
-                  <span className="text-[#173B26] font-semibold">Certified Non-Lethal Wildlife Deterrents</span>
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#F5F8F3] border border-[#DCE5DD] flex items-center gap-3 shadow-2xs">
-                  <UserCheck className="w-4 h-4 text-[#216B35] shrink-0" />
-                  <span className="text-[#173B26] font-semibold">Tactical Equipment for Frontline Rangers</span>
-                </div>
+              {/* Right Side Photo */}
+              <div className="lg:col-span-5 flex justify-center lg:justify-end">
+                <AboutHeroPhoto initialPhoto={aboutPhoto} />
               </div>
             </div>
           </div>

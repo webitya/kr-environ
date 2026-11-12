@@ -24,13 +24,11 @@ const OPERATIONAL_STATES = [
 ];
 
 export default function HomeAbout({ images = [] }) {
-  const [slides, setSlides] = useState(() => (Array.isArray(images) ? images : []));
+  const [syncedSlides, setSyncedSlides] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => {
-    setSlides(Array.isArray(images) ? images : []);
-  }, [images]);
+  const slides = syncedSlides ?? (Array.isArray(images) ? images : []);
 
   // Ensure fresh client-side sync from MongoDB (bypasses Next.js Router Cache after Admin edits)
   useEffect(() => {
@@ -46,7 +44,7 @@ export default function HomeAbout({ images = [] }) {
         if (!res.ok) return;
         const data = await res.json();
         if (active && data?.success && Array.isArray(data.images)) {
-          setSlides(data.images);
+          setSyncedSlides(data.images);
         }
       } catch (err) {
         if (err?.name !== 'AbortError') {

@@ -1785,3 +1785,74 @@ export async function deleteAboutImage(id) {
     throw err;
   }
 }
+
+// ==================== ABOUT US PAGE PHOTO ====================
+const ABOUT_PAGE_PHOTO_KEY = 'about_page_photo';
+
+export async function getAboutPagePhoto() {
+  try {
+    const conn = await connectToDatabase();
+    if (conn) {
+      const doc = await conn.connection.db
+        .collection('settings')
+        .findOne({ key: ABOUT_PAGE_PHOTO_KEY });
+
+      if (doc) {
+        return {
+          imageUrl: (doc.imageUrl || '').toString().trim(),
+          caption: (doc.caption || '').toString().trim(),
+          updatedAt: doc.updatedAt ? new Date(doc.updatedAt).toISOString() : null
+        };
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching About Us page photo from MongoDB:', err.message);
+  }
+  return { imageUrl: '', caption: '', updatedAt: null };
+}
+
+export async function saveAboutPagePhoto({ imageUrl, caption = '' }) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    const cleanImageUrl = (imageUrl || '').toString().trim();
+    const cleanCaption = (caption || '').toString().trim();
+    const now = new Date();
+
+    await conn.connection.db.collection('settings').updateOne(
+      { key: ABOUT_PAGE_PHOTO_KEY },
+      {
+        $set: {
+          key: ABOUT_PAGE_PHOTO_KEY,
+          imageUrl: cleanImageUrl,
+          caption: cleanCaption,
+          updatedAt: now
+        }
+      },
+      { upsert: true }
+    );
+
+    return {
+      imageUrl: cleanImageUrl,
+      caption: cleanCaption,
+      updatedAt: now.toISOString()
+    };
+  } catch (err) {
+    console.error('MongoDB saveAboutPagePhoto error:', err.message);
+    throw err;
+  }
+}
+
+export async function deleteAboutPagePhoto() {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    await conn.connection.db.collection('settings').deleteOne({ key: ABOUT_PAGE_PHOTO_KEY });
+    return true;
+  } catch (err) {
+    console.error('MongoDB deleteAboutPagePhoto error:', err.message);
+    throw err;
+  }
+}

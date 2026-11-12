@@ -56,6 +56,8 @@ export default function AdminDashboardPage() {
   const [careers, setCareers] = useState([]);
   const [careerApplications, setCareerApplications] = useState([]);
   const [aboutImages, setAboutImages] = useState([]);
+  const [aboutPagePhoto, setAboutPagePhoto] = useState({ imageUrl: '', caption: '' });
+  const [savingAboutPagePhoto, setSavingAboutPagePhoto] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
 
@@ -244,7 +246,7 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      const [srvRes, blgRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes, carRes, appRes, abtRes] = await Promise.all([
+      const [srvRes, blgRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes, carRes, appRes, abtRes, abtPageRes] = await Promise.all([
         fetch('/api/services', { cache: 'no-store' }),
         fetch('/api/blogs', { cache: 'no-store' }),
         fetch('/api/gallery', { cache: 'no-store' }),
@@ -256,10 +258,11 @@ export default function AdminDashboardPage() {
         fetch('/api/certificates', { cache: 'no-store' }),
         fetch('/api/careers?all=true', { cache: 'no-store' }),
         fetch('/api/career-applications', { cache: 'no-store' }),
-        fetch('/api/about-images', { cache: 'no-store' })
+        fetch('/api/about-images', { cache: 'no-store' }),
+        fetch('/api/about-page-photo', { cache: 'no-store' })
       ]);
 
-      const [srvData, blgData, galData, vidData, enqData, cliData, prodData, partData, certData, carData, appData, abtData] = await Promise.all([
+      const [srvData, blgData, galData, vidData, enqData, cliData, prodData, partData, certData, carData, appData, abtData, abtPageData] = await Promise.all([
         srvRes.json(),
         blgRes.json(),
         galRes.json(),
@@ -271,7 +274,8 @@ export default function AdminDashboardPage() {
         certRes.json(),
         carRes.json(),
         appRes.json(),
-        abtRes.json()
+        abtRes.json(),
+        abtPageRes.json()
       ]);
 
       setServices(srvData.services || []);
@@ -286,6 +290,7 @@ export default function AdminDashboardPage() {
       setCareers(carData.careers || []);
       setCareerApplications(appData.applications || []);
       setAboutImages(abtData.images || []);
+      setAboutPagePhoto(abtPageData.photo || { imageUrl: '', caption: '' });
 
       // Fetch dynamic video categories from MongoDB Atlas
       try {
@@ -398,6 +403,8 @@ export default function AdminDashboardPage() {
         setCurrentCertificate((prev) => ({ ...prev, imageUrl: data.url }));
       } else if (targetForm === 'about') {
         setCurrentAboutImage((prev) => ({ ...prev, imageUrl: data.url }));
+      } else if (targetForm === 'aboutPagePhoto') {
+        setAboutPagePhoto((prev) => ({ ...prev, imageUrl: data.url }));
       }
 
       setMessage({ 
@@ -1384,6 +1391,57 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // ---------------- ABOUT US PAGE PHOTO HANDLERS ----------------
+  const handleSaveAboutPagePhoto = async (e) => {
+    e.preventDefault();
+    if (!aboutPagePhoto.imageUrl?.trim()) {
+      setMessage({ text: 'Please upload an image or enter an image URL.', type: 'error' });
+      return;
+    }
+
+    setSavingAboutPagePhoto(true);
+    try {
+      const res = await fetch('/api/about-page-photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          imageUrl: aboutPagePhoto.imageUrl.trim(),
+          caption: (aboutPagePhoto.caption || '').trim()
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save About Us page photo');
+
+      if (data.photo) setAboutPagePhoto(data.photo);
+      setMessage({ text: 'About Us page right-side photo updated successfully.', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setSavingAboutPagePhoto(false);
+    }
+  };
+
+  const handleDeleteAboutPagePhoto = async () => {
+    if (!confirm('Remove the right-side photo from the About Us page?')) return;
+    setSavingAboutPagePhoto(true);
+    try {
+      const res = await fetch('/api/about-page-photo', {
+        method: 'DELETE',
+        cache: 'no-store'
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to remove About Us page photo');
+
+      setAboutPagePhoto({ imageUrl: '', caption: '' });
+      setMessage({ text: 'About Us page photo removed.', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setSavingAboutPagePhoto(false);
+    }
+  };
+
   const tabTitles = {
     services: 'Services',
     products: 'Products',
@@ -1391,6 +1449,7 @@ export default function AdminDashboardPage() {
     certificates: 'Certificates',
     clients: 'Client Logos',
     aboutImages: 'About Us Images',
+    aboutPagePhoto: 'About Page Photo',
     blogs: 'Blogs',
     gallery: 'Gallery',
     videos: 'Videos',
@@ -1406,6 +1465,7 @@ export default function AdminDashboardPage() {
     certificates: certificates.length,
     clients: clients.length,
     aboutImages: aboutImages.length,
+    aboutPagePhoto: aboutPagePhoto?.imageUrl ? 1 : 0,
     blogs: blogs.length,
     gallery: gallery.length,
     videos: videos.length,
@@ -1420,7 +1480,8 @@ export default function AdminDashboardPage() {
     partners: 'Institutional partner records',
     certificates: 'ISO, MSME & empanelment PDFs',
     clients: 'Homepage & clients marquee logos',
-    aboutImages: 'Homepage About Us right-side auto carousel slides',
+    aboutImages: 'Homepage About Us right-side slides & bottom text',
+    aboutPagePhoto: 'Right-side feature photo displayed on /about-us page',
     blogs: 'Published articles & updates',
     gallery: 'Field photos & Cloudinary assets',
     videos: 'YouTube demo links',
@@ -1436,6 +1497,7 @@ export default function AdminDashboardPage() {
     { id: 'certificates', label: 'Certificates', count: certificates.length, icon: Award },
     { id: 'clients', label: 'Clients', count: clients.length, icon: Building2 },
     { id: 'aboutImages', label: 'About Us Images', count: aboutImages.length, icon: ImageIcon },
+    { id: 'aboutPagePhoto', label: 'About Page Photo', count: aboutPagePhoto?.imageUrl ? 1 : 0, icon: Camera },
     { id: 'blogs', label: 'Blogs', count: blogs.length, icon: BookOpen },
     { id: 'gallery', label: 'Gallery', count: gallery.length, icon: Camera },
     { id: 'videos', label: 'Videos', count: videos.length, icon: Tv },
@@ -2772,6 +2834,121 @@ export default function AdminDashboardPage() {
                 })}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ================= TAB: ABOUT PAGE PHOTO ================= */}
+        {activeTab === 'aboutPagePhoto' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden p-4 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+              {/* Upload / Edit Form */}
+              <form onSubmit={handleSaveAboutPagePhoto} className="lg:col-span-7 space-y-3 text-xs">
+                <div className="flex items-center justify-between border-b border-[#DCE5DD] pb-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#173B26]">About Us Page Right-Side Photo</h3>
+                    <p className="text-[11px] text-[#68756D]">
+                      Displayed on the right side of the &ldquo;Who We Are&rdquo; section on the About Us page.
+                    </p>
+                  </div>
+                  <Link
+                    href="/about-us"
+                    target="_blank"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F5F8F3] hover:bg-[#EAEFE8] text-[#216B35] border border-[#DCE5DD] text-[11px] font-semibold shrink-0"
+                  >
+                    <span>View About Us</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-semibold text-[#173B26]">Photo Image *</label>
+                    <label className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F5F8F3] hover:bg-[#EAEFE8] text-[#216B35] border border-[#216B35]/40 font-semibold cursor-pointer">
+                      <Upload className="w-3 h-3" />
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload Photo'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingImage}
+                        onChange={(e) => handleImageUpload(e, 'aboutPagePhoto')}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={aboutPagePhoto.imageUrl || ''}
+                    onChange={(e) => setAboutPagePhoto((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                    placeholder="Upload image or paste Cloudinary image URL"
+                    className="w-full p-2 rounded border border-[#DCE5DD] font-mono text-[11px] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">
+                    Caption / Short Note (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={aboutPagePhoto.caption || ''}
+                    onChange={(e) => setAboutPagePhoto((prev) => ({ ...prev, caption: e.target.value }))}
+                    placeholder="Optional caption shown below the About Us photo"
+                    className="w-full p-2 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-2">
+                  <button
+                    type="submit"
+                    disabled={uploadingImage || savingAboutPagePhoto}
+                    className="btn-primary px-4 py-1.5 rounded text-xs font-semibold disabled:opacity-60 inline-flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{savingAboutPagePhoto ? 'Saving...' : 'Save About Page Photo'}</span>
+                  </button>
+
+                  {aboutPagePhoto.imageUrl && (
+                    <button
+                      type="button"
+                      disabled={savingAboutPagePhoto}
+                      onClick={handleDeleteAboutPagePhoto}
+                      className="px-3 py-1.5 rounded border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold disabled:opacity-60 inline-flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Remove Photo</span>
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              {/* Live Right-Side Card Preview */}
+              <div className="lg:col-span-5">
+                <p className="text-[11px] font-semibold text-[#173B26] mb-1.5">Live Preview (/about-us Right Side)</p>
+                {aboutPagePhoto.imageUrl ? (
+                  <div className="rounded-2xl overflow-hidden shadow-md border-2 border-[#DCE5DD] bg-white">
+                    <div className="aspect-[4/3] bg-[#F5F8F3] overflow-hidden">
+                      <img
+                        src={aboutPagePhoto.imageUrl}
+                        alt={aboutPagePhoto.caption || 'About Us Page Photo Preview'}
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
+                    {aboutPagePhoto.caption && (
+                      <div className="px-3 py-2 bg-[#F5F8F3]/70 border-t border-[#DCE5DD] text-[11px] text-[#173B26] font-medium">
+                        {aboutPagePhoto.caption}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="aspect-[4/3] rounded-2xl border-2 border-dashed border-[#DCE5DD] bg-[#F5F8F3]/60 flex flex-col items-center justify-center p-4 text-center text-xs text-[#68756D]">
+                    <Camera className="w-6 h-6 text-[#216B35]/50 mb-1.5" />
+                    <p className="font-semibold text-[#173B26]">No Photo Set Yet</p>
+                    <p className="text-[11px] mt-0.5">Upload an image on the left and save.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
