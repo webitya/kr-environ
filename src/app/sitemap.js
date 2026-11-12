@@ -1,18 +1,16 @@
-import { getServices, getBlogs, getProjects, getProducts } from '@/lib/db';
+import { getServices, getBlogs, getProducts } from '@/lib/db';
 
 export default async function sitemap() {
   const baseUrl = 'https://www.krenviron.in';
 
   let services = [];
   let blogs = [];
-  let projects = [];
   let products = [];
 
   try {
-    [services, blogs, projects, products] = await Promise.all([
+    [services, blogs, products] = await Promise.all([
       getServices().catch(() => []),
       getBlogs().catch(() => []),
-      getProjects().catch(() => []),
       getProducts().catch(() => [])
     ]);
   } catch (e) {}
@@ -22,12 +20,13 @@ export default async function sitemap() {
     '/about-us',
     '/services',
     '/products',
-    '/projects',
+    '/clients',
     '/partners',
     '/certificates',
     '/gallery',
     '/videos',
     '/blog',
+    '/careers',
     '/contact-us',
     '/privacy-policy',
     '/terms-and-conditions'
@@ -59,19 +58,11 @@ export default async function sitemap() {
     priority: 0.6
   }));
 
-  const projectRoutes = (projects || []).map((p) => ({
-    url: `${baseUrl}/projects/${p.slug}`,
-    lastModified: p.updatedAt || new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6
-  }));
-
   return [
     ...staticRoutes,
     ...serviceRoutes,
     ...productRoutes,
-    ...blogRoutes,
-    ...projectRoutes
+    ...blogRoutes
   ];
 }
 

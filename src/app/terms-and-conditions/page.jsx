@@ -26,14 +26,14 @@ export default function TermsPage() {
               1. General Disclaimer
             </h2>
             <p>
-              The materials, specifications, and wildlife mitigation claims published on this website are based on empirical testing and documentation provided by KR Environ Solutions and its technology partner, Kyari Innovations Pvt. Ltd. Field efficacy may vary based on local terrain, wildlife habituation history, and proper adherence to deployment guidelines.
+              The materials, specifications, and wildlife mitigation details published on this website are based on field documentation and technical standards maintained by KR Environ Solutions. Field efficacy may vary based on local terrain, wildlife habituation history, and proper adherence to deployment guidelines.
             </p>
 
             <h2 className="text-xl font-bold font-montserrat text-[#173B26]">
-              2. Intellectual Property & Partnership Recognition
+              2. Intellectual Property & Proprietary Assets
             </h2>
             <p>
-              ANIDERS, KyNet, and Smart Stick are proprietary innovations developed by Kyari Innovations Pvt. Ltd. and distributed in partnership with KR Environ Solutions across designated jurisdictions. All trademarks, awards, and brand assets remain the property of their respective owners.
+              All technical documentation, project methodologies, and product specifications featured on this website remain the property of KR Environ Solutions and their respective rights holders.
             </p>
 
             <h2 className="text-xl font-bold font-montserrat text-[#173B26]">

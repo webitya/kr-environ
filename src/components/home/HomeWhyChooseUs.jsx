@@ -30,10 +30,10 @@ const features = [
     desc: 'Equipped with rugged LiFePO4 batteries and solar harvesters engineered for dense jungle canopies, extreme monsoons, and high elevations.'
   },
   {
-    icon: Award,
-    stat: 'National Award',
-    title: 'NTCA National Award Winner',
-    desc: 'Kyari Innovations won the prestigious National Budding Innovator Award (2018) from the National Tiger Conservation Authority for ANIDERS.'
+    icon: ShieldCheck,
+    stat: 'MoEFCC & SEIAA',
+    title: 'Audit-Proof Statutory Clearances',
+    desc: 'Comprehensive dossiers for Environmental Clearance (EC), Forest Clearance (FC), EIA/EMP, and SPCB consents executed by FRI-trained specialists.'
   },
   {
     icon: Radio,
@@ -43,9 +43,9 @@ const features = [
   },
   {
     icon: ShieldAlert,
-    stat: '21+ States',
-    title: 'Trusted by 21+ State Forest Depts',
-    desc: 'Over 4,000 units actively safeguarding frontline rangers, tea estates, rail corridors, and fringe communities across India.'
+    stat: 'Pan-India Scope',
+    title: 'Trusted Across Forest Divisions',
+    desc: 'Delivering field-tested wildlife mitigation solutions, drone KML mapping, and ranger protection gear for estates, corridors, and communities.'
   }
 ];
 
@@ -98,26 +98,6 @@ export default function HomeWhyChooseUs() {
               </div>
             );
           })}
-        </div>
-
-        {/* Credibility Key Stats Banner - Edge-to-Edge Full Width */}
-        <div className="mt-10 sm:mt-12 bg-white rounded-2xl border border-[#DCE5DD] p-6 sm:p-8 shadow-xs grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-[#DCE5DD]">
-          <div className="p-2">
-            <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope">91%</div>
-            <div className="text-xs sm:text-sm text-[#68756D] font-manrope font-medium mt-1">Verified Conflict Deterrence</div>
-          </div>
-          <div className="p-2 pt-4 md:pt-2">
-            <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#216B35] font-manrope">4,000+</div>
-            <div className="text-xs sm:text-sm text-[#68756D] font-manrope font-medium mt-1">Active Field Deployments</div>
-          </div>
-          <div className="p-2 pt-4 md:pt-2">
-            <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#173B26] font-manrope">21+</div>
-            <div className="text-xs sm:text-sm text-[#68756D] font-manrope font-medium mt-1">State Forest Partnerships</div>
-          </div>
-          <div className="p-2 pt-4 md:pt-2">
-            <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#216B35] font-manrope">100%</div>
-            <div className="text-xs sm:text-sm text-[#68756D] font-manrope font-medium mt-1">Safe &amp; Non-Lethal Tech</div>
-          </div>
         </div>
       </div>
     </section>

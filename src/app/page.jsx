@@ -10,10 +10,14 @@ import HomeWhyChooseUs from '@/components/home/HomeWhyChooseUs';
 import HomeBlog from '@/components/home/HomeBlog';
 import HomeContact from '@/components/home/HomeContact';
 
-import { getBlogs, getClients, getGallery, getProducts, getServices } from '@/lib/db';
+import { getAboutImages, getBlogs, getClients, getGallery, getProducts, getServices } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function HomePage() {
-  const [blogs, clients, gallery, products, services] = await Promise.all([
+  const [aboutImages, blogs, clients, gallery, products, services] = await Promise.all([
+    getAboutImages(),
     getBlogs(),
     getClients(),
     getGallery(),
@@ -33,7 +37,7 @@ export default async function HomePage() {
         <HomeClients clients={clients} />
 
         {/* 3. Company Introduction */}
-        <HomeAbout />
+        <HomeAbout images={aboutImages} />
 
         {/* 4. Field Operations & Conservation Gallery (2 rows x 4 columns compact) */}
         <HomeGallery gallery={gallery} />

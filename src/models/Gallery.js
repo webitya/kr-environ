@@ -5,6 +5,7 @@ const GallerySchema = new mongoose.Schema({
   category: { type: String, default: 'Equipment' },
   imageUrl: { type: String, required: true },
   caption: { type: String, default: '' },
+  showOnHome: { type: Boolean, default: false },
   displayOrder: { type: Number, default: 0 }
 }, {
   timestamps: true,

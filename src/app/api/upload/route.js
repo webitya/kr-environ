@@ -30,13 +30,21 @@ export async function POST(req) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const mime = file.type || 'image/jpeg';
+    const isImage = mime.startsWith('image/');
     const base64Data = `data:${mime};base64,${buffer.toString('base64')}`;
 
     const cld = getCloudinary();
-    const result = await cld.uploader.upload(base64Data, {
+    const uploadOptions = {
       folder: targetFolder,
-      resource_type: 'image'
-    });
+      resource_type: isImage ? 'image' : 'raw'
+    };
+
+    if (!isImage && file.name) {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      uploadOptions.public_id = `${Date.now()}_${safeName}`;
+    }
+
+    const result = await cld.uploader.upload(base64Data, uploadOptions);
 
     return NextResponse.json({
       success: true,

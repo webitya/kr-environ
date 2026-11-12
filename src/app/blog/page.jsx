@@ -9,7 +9,7 @@ export const revalidate = 0;
 
 export const metadata = {
   title: "Our Blogs | KR Environ Solutions",
-  description: "Read in-depth field research, human-wildlife conflict analyses, ranger tactical equipment reviews, and NTCA award innovation breakdowns."
+  description: "Read in-depth field research, environmental clearance insights, human-wildlife conflict analyses, and conservation engineering updates."
 };
 
 export default async function BlogPage() {

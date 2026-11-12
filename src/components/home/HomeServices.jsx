@@ -49,11 +49,6 @@ export default function HomeServices({ services = [] }) {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
-                    {service.category && (
-                      <div className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-semibold text-[#173B26] border border-[#DCE5DD] shadow-xs">
-                        {service.category}
-                      </div>
-                    )}
                   </Link>
 
                   {/* Compact Content */}

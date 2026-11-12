@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Service from '@/models/Service';
 import Blog from '@/models/Blog';
-import Project from '@/models/Project';
 import Gallery from '@/models/Gallery';
 import Video from '@/models/Video';
 import Enquiry from '@/models/Enquiry';
@@ -21,10 +20,9 @@ export async function GET() {
 
     await seedMongoDBIfNeeded();
 
-    const [services, blogs, projects, gallery, videos, enquiries, categories] = await Promise.all([
+    const [services, blogs, gallery, videos, enquiries, categories] = await Promise.all([
       Service.countDocuments(),
       Blog.countDocuments(),
-      Project.countDocuments(),
       Gallery.countDocuments(),
       Video.countDocuments(),
       Enquiry.countDocuments(),
@@ -37,7 +35,6 @@ export async function GET() {
       counts: {
         services,
         blogs,
-        projects,
         gallery,
         videos,
         enquiries,

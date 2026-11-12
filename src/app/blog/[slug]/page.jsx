@@ -141,7 +141,7 @@ export default async function BlogDetailPage({ params }) {
                     About KR Environ Solutions
                   </h4>
                   <p className="text-xs text-[#68756D] font-lato mt-1 leading-relaxed">
-                    Under the leadership of proprietor Sarika Gupta, KR Environ Solutions bridges cutting-edge wildlife research, government policies, and on-ground deployment of Kyari Innovations technologies across India.
+                    Under the leadership of proprietor Sarika Gupta, KR Environ Solutions bridges ecological research, statutory environmental compliance, and field-level conservation engineering across India.
                   </p>
                 </div>
               </div>

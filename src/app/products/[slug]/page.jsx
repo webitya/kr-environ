@@ -93,18 +93,6 @@ export default async function ProductDetailPage({ params }) {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-xl"
                     />
                   </div>
-
-                  {product.category && (
-                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3 py-1 rounded-md text-xs font-bold text-[#173B26] border border-[#DCE5DD] shadow-xs">
-                      {product.category}
-                    </div>
-                  )}
-
-                  {product.modelCode && (
-                    <div className="absolute bottom-4 left-4 bg-black/75 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-mono text-white">
-                      Model: {product.modelCode}
-                    </div>
-                  )}
                 </div>
 
                 {/* Trust & Verification Badges */}

@@ -7,10 +7,10 @@ export const metadata = {
   metadataBase: new URL('https://www.krenviron.in'),
   title: "KR Environ Solutions | Advanced Wildlife Tech & Environmental Engineering",
   description:
-    "Jharkhand-based environmental technology firm led by Sarika Gupta, partnering with Kyari Innovations to deliver ANIDERS, Re-Pulse Mats, KyNet Net Guns, and Smart Sticks across India.",
+    "Jharkhand-based environmental consulting and conservation technology firm led by Sarika Gupta, delivering statutory EC/FC clearances, GIS drone mapping, and wildlife conflict mitigation solutions across India.",
   keywords: [
     "KR Environ Solutions",
-    "Kyari Innovations",
+    "Environmental Clearance",
     "ANIDERS",
     "Wildlife conservation",
     "Human Animal Conflict",

@@ -29,7 +29,7 @@ export default async function ProductsPage() {
                 Our Products &amp; Conservation Hardware
               </h1>
               <p className="text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed max-w-3xl">
-                Statutory CEA &amp; Supreme Court compliant Bird Flight Diverters &amp; Deflectors for transmission lines, Kyari bio-acoustic wildlife deterrents, frontline ranger patrol batons, humane rescue net guns, and Kyari patented self-watering smart eco-planters.
+                Statutory CEA &amp; Supreme Court compliant Bird Flight Diverters &amp; Deflectors for transmission lines, bio-acoustic wildlife deterrents, frontline ranger patrol batons, humane rescue net guns, and self-watering smart eco-planters.
               </p>
             </div>
           </div>

@@ -90,6 +90,18 @@ export default function HomeContact({ showHeading = true }) {
 
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#216B35]/10 text-[#216B35] flex items-center justify-center shrink-0 mt-0.5">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <strong className="text-[#173B26] block text-xs uppercase tracking-wide">Branch Office (Lucknow):</strong>
+                    <span className="text-[#4B5563]">
+                      Flat No. SWI/708/B-4, LDA Kabir Nagar Yojna, Devpur Para, Lucknow, UP - 226017
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#216B35]/10 text-[#216B35] flex items-center justify-center shrink-0 mt-0.5">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>

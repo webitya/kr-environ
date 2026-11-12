@@ -10,7 +10,7 @@ export const revalidate = 0;
 
 export const metadata = {
   title: "Our Partners & Institutional Alliances | KR Environ Solutions",
-  description: "Collaborations with Kyari Innovations, State Forest Departments, Wildlife Trusts, and Infrastructure utilities across India."
+  description: "Collaborations with accredited environmental laboratories, State Forest Departments, GIS survey specialists, and infrastructure utilities across India."
 };
 
 export default async function PartnersPage() {

@@ -5,61 +5,15 @@ import {
   ShieldCheck, 
   MapPin, 
   Phone, 
-  Mail, 
-  Award, 
-  Leaf, 
-  Tv 
+  Mail
 } from 'lucide-react';
 
 export default function SiteFooter() {
   return (
     <footer className="bg-[#142D20] text-[#E4EEE6] border-t border-[#216B35]/40 pt-10 pb-8 font-opensans">
       <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
-        {/* Top Feature Grid: Credibility Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-8 border-b border-white/10">
-          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-            <div className="w-10 h-10 rounded-lg bg-[#216B35] flex items-center justify-center shrink-0">
-              <Award className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-semibold text-white font-manrope">NTCA Award Winner</h4>
-              <p className="text-[11px] text-[#E4EEE6]/70 mt-0.5 font-lato">National Budding Innovator 2018</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-            <div className="w-10 h-10 rounded-lg bg-[#216B35] flex items-center justify-center shrink-0">
-              <Tv className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-semibold text-white font-manrope">Shark Tank India S2</h4>
-              <p className="text-[11px] text-[#E4EEE6]/70 mt-0.5 font-lato">Nationally featured wildlife tech</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-            <div className="w-10 h-10 rounded-lg bg-[#216B35] flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-semibold text-white font-manrope">1,400+ Deployments</h4>
-              <p className="text-[11px] text-[#E4EEE6]/70 mt-0.5 font-lato">21+ state forest depts & reserves</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-            <div className="w-10 h-10 rounded-lg bg-[#216B35] flex items-center justify-center shrink-0">
-              <Leaf className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-semibold text-white font-manrope">100% Non-Lethal</h4>
-              <p className="text-[11px] text-[#E4EEE6]/70 mt-0.5 font-lato">Certified safe mitigation</p>
-            </div>
-          </div>
-        </div>
-
         {/* Main Footer Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 pb-8">
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
@@ -83,9 +37,6 @@ export default function SiteFooter() {
             <p className="text-sm text-[#E4EEE6]/80 leading-relaxed max-w-sm">
               Your Trusted Environmental Partner. Specializing in Forest & Environmental Clearance (EC/FC), Wildlife Clearance, EIA/EMP, Ambient Monitoring, Drone Surveys, and non-lethal Human-Wildlife Conflict mitigation across India.
             </p>
-            <p className="text-xs text-[#E4EEE6]/80 pt-1">
-              Wildlife Tech Partner: <strong className="text-white font-medium">Kyari Innovations Pvt. Ltd.</strong>
-            </p>
           </div>
 
           {/* Navigation Links */}
@@ -107,7 +58,7 @@ export default function SiteFooter() {
                 <Link href="/products" className="hover:text-emerald-400 transition-colors">Products &amp; Hardware</Link>
               </li>
               <li>
-                <Link href="/projects" className="hover:text-emerald-400 transition-colors">Key Projects</Link>
+                <Link href="/clients" className="hover:text-emerald-400 transition-colors">Our Clients</Link>
               </li>
               <li>
                 <Link href="/partners" className="hover:text-emerald-400 transition-colors">Our Partners</Link>
@@ -123,6 +74,9 @@ export default function SiteFooter() {
               </li>
               <li>
                 <Link href="/blog" className="hover:text-emerald-400 transition-colors">Conservation Blog</Link>
+              </li>
+              <li>
+                <Link href="/careers" className="hover:text-emerald-400 transition-colors">Careers &amp; Internships</Link>
               </li>
               <li>
                 <Link href="/contact-us" className="hover:text-emerald-400 transition-colors">Contact Us</Link>
@@ -187,6 +141,13 @@ export default function SiteFooter() {
                 <div>
                   <strong className="text-white block font-medium">Branch Office (B.O.):</strong>
                   <span>H. No.4, Mansarovar Colony, Bhola Nagar, Kathal More, Ranchi</span>
+                </div>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white block font-medium">Branch Office (Lucknow):</strong>
+                  <span>Flat No. SWI/708/B-4, LDA Kabir Nagar Yojna, Devpur Para, Lucknow, UP - 226017</span>
                 </div>
               </li>
               <li className="flex items-center gap-2.5">

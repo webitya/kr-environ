@@ -7,71 +7,14 @@ import { ArrowRight, X, ChevronLeft, ChevronRight } from 'lucide-react';
 export default function HomeGallery({ gallery = [] }) {
   const [selectedIndex, setSelectedIndex] = useState(null);
 
-  // Fallback authentic photos if database returns fewer than 8 items
-  const fallbackItems = [
-    {
-      id: 'gal-fb-1',
-      title: 'Forest Headquarters Jharkhand (Van Bhawan, Doranda, Ranchi)',
-      category: 'Field Presence',
-      imageUrl: '/img4.jpeg',
-      caption: 'S. Gupta at Forest Headquarters Jharkhand coordinating regional environmental and HWC initiatives.'
-    },
-    {
-      id: 'gal-fb-2',
-      title: 'Consultation at D.F.O. Ranchi Desk',
-      category: 'Government Partnership',
-      imageUrl: '/img1.jpeg',
-      caption: 'Presenting statutory environmental proposals and wildlife conflict dossiers to the Divisional Forest Officer, Ranchi.'
-    },
-    {
-      id: 'gal-fb-3',
-      title: 'Meeting with PCCF & Chief Wildlife Warden',
-      category: 'Government Partnership',
-      imageUrl: '/img2.jpeg',
-      caption: 'High-level briefing at the Principal Chief Conservator of Forests & Chief Wildlife Warden office at Van Bhawan, Ranchi.'
-    },
-    {
-      id: 'gal-fb-4',
-      title: 'Forestry Clearance & Dossier Presentation',
-      category: 'Government Partnership',
-      imageUrl: '/img3.jpeg',
-      caption: 'Reviewing statutory forest clearance and wildlife proposal dossiers with state authorities.'
-    },
-    {
-      id: 'gal-fb-5',
-      title: 'Conservation Stewardship & Plantation Initiative',
-      category: 'Field Operations',
-      imageUrl: '/img5.jpeg',
-      caption: 'Promoting tree plantation, geo-tagging, and conservation awareness with forest department officers.'
-    },
-    {
-      id: 'gal-fb-6',
-      title: 'Laboratory Visit – Environmental Testing & Analysis',
-      category: 'Field Presence',
-      imageUrl: '/img2.jpeg',
-      caption: 'Informative laboratory visit exploring testing methodology and water quality assessment.'
-    },
-    {
-      id: 'gal-fb-7',
-      title: 'Official Company Visiting Card & Registration',
-      category: 'Credentials',
-      imageUrl: '/visitingcard.jpeg',
-      caption: 'Official registered office at Hariom Nand Tower, Kathal More, and statutory contact particulars.'
-    },
-    {
-      id: 'gal-fb-8',
-      title: 'Key Services & Technical Brochure',
-      category: 'Credentials',
-      imageUrl: '/details.jpeg',
-      caption: 'Comprehensive statutory clearance, GIS drone survey, and environmental monitoring capabilities.'
-    }
-  ];
+  // Only show gallery images explicitly ticked for Homepage (max 4 in 1 row)
+  const displayItems = (Array.isArray(gallery) ? gallery : [])
+    .filter((item) => Boolean(item.showOnHome))
+    .slice(0, 4);
 
-  // Combine items to guarantee exactly 8 items for 2 rows x 4 columns
-  const baseItems = Array.isArray(gallery) && gallery.length > 0 ? gallery : fallbackItems;
-  const displayItems = baseItems.length >= 8 
-    ? baseItems.slice(0, 8) 
-    : [...baseItems, ...fallbackItems.slice(0, 8 - baseItems.length)].slice(0, 8);
+  if (displayItems.length === 0) {
+    return null;
+  }
 
   const activeItem = selectedIndex !== null ? displayItems[selectedIndex] : null;
 
@@ -93,10 +36,10 @@ export default function HomeGallery({ gallery = [] }) {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6 pb-2 border-b border-[#DCE5DD]/60">
           <div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#173B26] font-manrope tracking-tight">
-              Field Operations &amp; Conservation In Action
+              Survey Team at Work
             </h2>
             <p className="text-xs sm:text-sm text-[#4B5563] font-manrope max-w-2xl mt-1 leading-relaxed">
-              Photographic records of our state forestry consultations, ranger safety equipment deployments, and field interventions across India.
+              On-ground ecological surveys, forestry consultations, and environmental field operations across India.
             </p>
           </div>
 
@@ -109,8 +52,8 @@ export default function HomeGallery({ gallery = [] }) {
           </Link>
         </div>
 
-        {/* 2 Rows x 4 Columns Compact Grid (8 Items Total) */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* 1 Row x 4 Columns Grid (4 Selected Images Max) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {displayItems.map((item, idx) => (
             <div
               key={item.id || item._id || idx}
@@ -127,15 +70,6 @@ export default function HomeGallery({ gallery = [] }) {
 
               {/* Seamless Dark Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-300" />
-
-              {/* Category Pill (Top-Left) */}
-              {item.category && (
-                <div className="absolute top-2.5 left-2.5 z-10">
-                  <span className="text-[9px] sm:text-[10px] font-semibold text-white/95 bg-black/45 backdrop-blur-xs border border-white/10 px-2 py-0.5 rounded font-manrope shadow-xs">
-                    {item.category}
-                  </span>
-                </div>
-              )}
 
               {/* Compact Caption at Bottom */}
               <div className="absolute inset-x-0 bottom-0 p-2.5 sm:p-3 text-white z-10">

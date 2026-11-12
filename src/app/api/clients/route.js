@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getClients, upsertClient, deleteClient } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -18,6 +21,10 @@ export async function POST(req) {
     }
 
     const saved = await upsertClient(body);
+    try {
+      revalidatePath('/clients');
+      revalidatePath('/');
+    } catch (e) {}
     return NextResponse.json({ success: true, client: saved });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
@@ -33,6 +40,10 @@ export async function DELETE(req) {
     }
 
     await deleteClient(id);
+    try {
+      revalidatePath('/clients');
+      revalidatePath('/');
+    } catch (e) {}
     return NextResponse.json({ success: true, message: 'Client deleted successfully' });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

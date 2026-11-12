@@ -18,7 +18,6 @@ import {
   Image as ImageIcon,
   AlertCircle,
   RefreshCw,
-  FolderKanban,
   Camera,
   Tv,
   MapPin,
@@ -34,17 +33,19 @@ import {
   Download,
   Eye,
   Play,
-  Video
+  Video,
+  Briefcase,
+  GraduationCap,
+  Search
 } from 'lucide-react';
 import ArticleEditor from '@/components/admin/ArticleEditor';
 import ServiceEditor from '@/components/admin/ServiceEditor';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('services'); // 'services' | 'blogs' | 'projects' | 'gallery' | 'videos' | 'enquiries'
+  const [activeTab, setActiveTab] = useState('services'); // 'services' | 'blogs' | 'gallery' | 'videos' | 'enquiries'
   const [services, setServices] = useState([]);
   const [blogs, setBlogs] = useState([]);
-  const [projects, setProjects] = useState([]);
   const [gallery, setGallery] = useState([]);
   const [videos, setVideos] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
@@ -52,8 +53,41 @@ export default function AdminDashboardPage() {
   const [products, setProducts] = useState([]);
   const [partners, setPartners] = useState([]);
   const [certificates, setCertificates] = useState([]);
+  const [careers, setCareers] = useState([]);
+  const [careerApplications, setCareerApplications] = useState([]);
+  const [aboutImages, setAboutImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
+
+  // About Us Carousel Modal
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [currentAboutImage, setCurrentAboutImage] = useState({
+    id: '',
+    title: '',
+    imageUrl: '',
+    displayOrder: 0
+  });
+
+  // Career Modal & Applications Filters
+  const [careerModalOpen, setCareerModalOpen] = useState(false);
+  const [currentCareer, setCurrentCareer] = useState({
+    id: '',
+    title: '',
+    department: 'Environmental & Forestry',
+    employmentType: 'Full-Time',
+    location: 'Ranchi, Jharkhand',
+    experience: 'Freshers / 0–2 Years',
+    qualification: '',
+    stipendOrSalary: '',
+    deadline: '',
+    status: 'open',
+    summary: '',
+    responsibilitiesText: '',
+    displayOrder: 0
+  });
+  const [appFilterCareer, setAppFilterCareer] = useState('All');
+  const [appFilterStatus, setAppFilterStatus] = useState('All');
+  const [appSearch, setAppSearch] = useState('');
 
   // Product modal state
   const [productModalOpen, setProductModalOpen] = useState(false);
@@ -139,21 +173,6 @@ export default function AdminDashboardPage() {
     schemaMarkup: ''
   });
 
-  const [projectModalOpen, setProjectModalOpen] = useState(false);
-  const [currentProject, setCurrentProject] = useState({
-    id: '',
-    title: '',
-    slug: '',
-    location: '',
-    category: 'Agricultural Perimeter Security',
-    date: '',
-    client: '',
-    featuredImage: '',
-    overview: '',
-    results: '',
-    status: 'published'
-  });
-
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
   const [currentGallery, setCurrentGallery] = useState({
     id: '',
@@ -161,6 +180,7 @@ export default function AdminDashboardPage() {
     category: 'Field Presence',
     imageUrl: '',
     caption: '',
+    showOnHome: false,
     displayOrder: 0
   });
 
@@ -222,35 +242,38 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      const [srvRes, blgRes, prjRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes] = await Promise.all([
+      const [srvRes, blgRes, galRes, vidRes, enqRes, cliRes, prodRes, partRes, certRes, carRes, appRes, abtRes] = await Promise.all([
         fetch('/api/services'),
         fetch('/api/blogs'),
-        fetch('/api/projects'),
         fetch('/api/gallery'),
         fetch('/api/videos'),
         fetch('/api/enquiries'),
         fetch('/api/clients'),
         fetch('/api/products'),
         fetch('/api/partners'),
-        fetch('/api/certificates')
+        fetch('/api/certificates'),
+        fetch('/api/careers?all=true'),
+        fetch('/api/career-applications'),
+        fetch('/api/about-images')
       ]);
 
-      const [srvData, blgData, prjData, galData, vidData, enqData, cliData, prodData, partData, certData] = await Promise.all([
+      const [srvData, blgData, galData, vidData, enqData, cliData, prodData, partData, certData, carData, appData, abtData] = await Promise.all([
         srvRes.json(),
         blgRes.json(),
-        prjRes.json(),
         galRes.json(),
         vidRes.json(),
         enqRes.json(),
         cliRes.json(),
         prodRes.json(),
         partRes.json(),
-        certRes.json()
+        certRes.json(),
+        carRes.json(),
+        appRes.json(),
+        abtRes.json()
       ]);
 
       setServices(srvData.services || []);
       setBlogs(blgData.blogs || []);
-      setProjects(prjData.projects || []);
       setGallery(galData.gallery || []);
       setVideos(vidData.videos || []);
       setEnquiries(enqData.enquiries || []);
@@ -258,6 +281,9 @@ export default function AdminDashboardPage() {
       setProducts(prodData.products || []);
       setPartners(partData.partners || []);
       setCertificates(certData.certificates || []);
+      setCareers(carData.careers || []);
+      setCareerApplications(appData.applications || []);
+      setAboutImages(abtData.images || []);
 
       // Fetch dynamic video categories from MongoDB Atlas
       try {
@@ -356,8 +382,6 @@ export default function AdminDashboardPage() {
         setCurrentService((prev) => ({ ...prev, featuredImage: data.url }));
       } else if (targetForm === 'blog') {
         setCurrentBlog((prev) => ({ ...prev, featuredImage: data.url }));
-      } else if (targetForm === 'project') {
-        setCurrentProject((prev) => ({ ...prev, featuredImage: data.url }));
       } else if (targetForm === 'gallery') {
         setCurrentGallery((prev) => ({ ...prev, imageUrl: data.url }));
       } else if (targetForm === 'video') {
@@ -370,6 +394,8 @@ export default function AdminDashboardPage() {
         setCurrentPartner((prev) => ({ ...prev, logoUrl: data.url }));
       } else if (targetForm === 'certificate') {
         setCurrentCertificate((prev) => ({ ...prev, imageUrl: data.url }));
+      } else if (targetForm === 'about') {
+        setCurrentAboutImage((prev) => ({ ...prev, imageUrl: data.url }));
       }
 
       setMessage({ 
@@ -486,58 +512,6 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // ---------------- PROJECTS HANDLERS ----------------
-  const handleSaveProject = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentProject)
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save project');
-
-      setMessage({ text: `Project '${currentProject.title}' saved successfully!`, type: 'success' });
-      setProjectModalOpen(false);
-      fetchData();
-    } catch (err) {
-      setMessage({ text: err.message, type: 'error' });
-    }
-  };
-
-  const handleDeleteProject = async (id, title) => {
-    if (!id && !title) {
-      setMessage({ text: 'Cannot delete project: Project identifier is missing.', type: 'error' });
-      return;
-    }
-    if (!confirm(`Are you sure you want to delete project "${title}"?`)) return;
-    try {
-      const targetId = id || '';
-      const res = await fetch(`/api/projects?id=${encodeURIComponent(targetId)}&title=${encodeURIComponent(title || '')}`, {
-        method: 'DELETE'
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Delete failed');
-      }
-      setMessage({ text: `Project "${title}" deleted successfully`, type: 'success' });
-
-      // Optimistically remove from state immediately
-      setProjects((prev) =>
-        prev.filter((p) => {
-          if (targetId && (p.id === targetId || p._id === targetId || p.slug === targetId)) return false;
-          if (title && p.title === title) return false;
-          return true;
-        })
-      );
-
-      fetchData();
-    } catch (err) {
-      setMessage({ text: err.message, type: 'error' });
-    }
-  };
-
   // ---------------- GALLERY HANDLERS ----------------
   const handleCreateGalleryCategory = async (e) => {
     if (e) e.preventDefault();
@@ -577,9 +551,24 @@ export default function AdminDashboardPage() {
   const handleSaveGallery = async (e) => {
     e.preventDefault();
     try {
+      const targetId = currentGallery.id || currentGallery._id;
+      if (currentGallery.showOnHome) {
+        const selectedOthers = gallery.filter(
+          (g) => Boolean(g.showOnHome) && (g.id || g._id) !== targetId
+        );
+        if (selectedOthers.length >= 4) {
+          setMessage({
+            text: 'Maximum 4 gallery photos can be shown on the homepage. Untick one first.',
+            type: 'error'
+          });
+          return;
+        }
+      }
+
       const payload = {
         ...currentGallery,
-        id: currentGallery.id || currentGallery._id
+        id: targetId,
+        showOnHome: Boolean(currentGallery.showOnHome)
       };
       const res = await fetch('/api/gallery', {
         method: 'POST',
@@ -594,6 +583,45 @@ export default function AdminDashboardPage() {
       fetchData();
     } catch (err) {
       setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleToggleGalleryHome = async (gal) => {
+    const targetId = gal._id || gal.id;
+    const nextVal = !Boolean(gal.showOnHome);
+
+    if (nextVal) {
+      const currentSelected = gallery.filter((g) => Boolean(g.showOnHome)).length;
+      if (currentSelected >= 4) {
+        setMessage({
+          text: 'Only 4 gallery images can be ticked for Homepage. Untick an existing one first.',
+          type: 'error'
+        });
+        return;
+      }
+    }
+
+    setGallery((prev) =>
+      prev.map((item) =>
+        (item._id || item.id) === targetId ? { ...item, showOnHome: nextVal } : item
+      )
+    );
+
+    try {
+      const res = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...gal, id: targetId, showOnHome: nextVal })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update homepage selection');
+      setMessage({
+        text: nextVal ? `"${gal.title}" added to Homepage (Survey Team at Work).` : `"${gal.title}" removed from Homepage.`,
+        type: 'success'
+      });
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+      fetchData();
     }
   };
 
@@ -1111,17 +1139,187 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // ---------------- CAREERS & STUDENT APPLICATIONS HANDLERS ----------------
+  const handleOpenCareerModal = (career = null) => {
+    if (career) {
+      setCurrentCareer({
+        id: career.id || career._id || '',
+        title: career.title || '',
+        department: career.department || 'Environmental & Forestry',
+        employmentType: career.employmentType || 'Full-Time',
+        location: career.location || 'Ranchi, Jharkhand',
+        experience: career.experience || 'Freshers / 0–2 Years',
+        qualification: career.qualification || '',
+        stipendOrSalary: career.stipendOrSalary || '',
+        deadline: career.deadline || '',
+        status: career.status || 'open',
+        summary: career.summary || '',
+        responsibilitiesText: Array.isArray(career.responsibilities) ? career.responsibilities.join('\n') : '',
+        displayOrder: career.displayOrder ?? 0
+      });
+    } else {
+      setCurrentCareer({
+        id: '',
+        title: '',
+        department: 'Environmental & Forestry',
+        employmentType: 'Full-Time',
+        location: 'Ranchi, Jharkhand',
+        experience: 'Freshers / 0–2 Years',
+        qualification: '',
+        stipendOrSalary: '',
+        deadline: '',
+        status: 'open',
+        summary: '',
+        responsibilitiesText: '',
+        displayOrder: careers.length
+      });
+    }
+    setCareerModalOpen(true);
+  };
+
+  const handleSaveCareer = async (e) => {
+    e.preventDefault();
+    if (!currentCareer.title.trim()) return;
+
+    try {
+      const payload = {
+        ...currentCareer,
+        responsibilities: currentCareer.responsibilitiesText
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+      };
+      delete payload.responsibilitiesText;
+
+      const res = await fetch('/api/careers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save career opening');
+
+      setMessage({ text: `Career "${currentCareer.title}" saved.`, type: 'success' });
+      setCareerModalOpen(false);
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleDeleteCareer = async (id, title) => {
+    if (!confirm(`Delete career opening "${title}"?`)) return;
+    try {
+      const res = await fetch(`/api/careers?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete career');
+      setMessage({ text: `Removed "${title}".`, type: 'success' });
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleUpdateApplicationStatus = async (id, status) => {
+    setCareerApplications((prev) =>
+      prev.map((a) => ((a.id === id || a._id === id) ? { ...a, status } : a))
+    );
+    try {
+      const res = await fetch('/api/career-applications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Status update failed');
+      setMessage({ text: `Application status set to ${status}.`, type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+      fetchData();
+    }
+  };
+
+  const handleDeleteApplication = async (id, applicantName) => {
+    if (!confirm(`Delete application from "${applicantName}"?`)) return;
+    try {
+      const res = await fetch(`/api/career-applications?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Delete failed');
+      setCareerApplications((prev) => prev.filter((a) => a.id !== id && a._id !== id));
+      setMessage({ text: `Deleted application from "${applicantName}".`, type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  // ---------------- ABOUT US CAROUSEL HANDLERS ----------------
+  const handleOpenAboutModal = (img = null) => {
+    if (img) {
+      setCurrentAboutImage({
+        id: img.id || img._id || '',
+        title: img.title || '',
+        imageUrl: img.imageUrl || '',
+        displayOrder: img.displayOrder ?? 0
+      });
+    } else {
+      setCurrentAboutImage({
+        id: '',
+        title: '',
+        imageUrl: '',
+        displayOrder: aboutImages.length
+      });
+    }
+    setAboutModalOpen(true);
+  };
+
+  const handleSaveAboutImage = async (e) => {
+    e.preventDefault();
+    if (!currentAboutImage.imageUrl.trim()) return;
+
+    try {
+      const res = await fetch('/api/about-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentAboutImage)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save About Us image');
+
+      setMessage({ text: 'About Us carousel image saved.', type: 'success' });
+      setAboutModalOpen(false);
+      fetchData();
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
+  const handleDeleteAboutImage = async (id, title) => {
+    if (!confirm(`Delete carousel image "${title || 'Slide'}"?`)) return;
+    try {
+      const res = await fetch(`/api/about-images?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete image');
+
+      setAboutImages((prev) => prev.filter((item) => item.id !== id && item._id !== id));
+      setMessage({ text: 'About Us carousel image removed.', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.message, type: 'error' });
+    }
+  };
+
   const tabTitles = {
-    services: 'Services & Consulting',
-    products: 'Products & Hardware',
-    partners: 'Our Partners & Alliances',
-    certificates: 'Our Certifications',
-    clients: 'Marquee Logos',
-    blogs: 'Blogs & Articles',
-    projects: 'Projects & Case Studies',
-    gallery: 'Photo Gallery',
-    videos: 'Tech Videos & Demos',
-    enquiries: 'Customer Inquiries'
+    services: 'Services',
+    products: 'Products',
+    partners: 'Partners',
+    certificates: 'Certificates',
+    clients: 'Client Logos',
+    aboutImages: 'About Us Images',
+    blogs: 'Blogs',
+    gallery: 'Gallery',
+    videos: 'Videos',
+    careers: 'Careers',
+    applications: 'Student Applications',
+    enquiries: 'Inquiries'
   };
 
   const tabCounts = {
@@ -1130,37 +1328,43 @@ export default function AdminDashboardPage() {
     partners: partners.length,
     certificates: certificates.length,
     clients: clients.length,
+    aboutImages: aboutImages.length,
     blogs: blogs.length,
-    projects: projects.length,
     gallery: gallery.length,
     videos: videos.length,
+    careers: careers.length,
+    applications: careerApplications.length,
     enquiries: enquiries.length
   };
 
   const tabDescriptions = {
-    services: 'Manage active wildlife technologies, specifications, and service pages.',
-    products: 'Manage field hardware, bio-acoustic sentinels, ranger gear, and specs.',
-    partners: 'Manage official institutional alliances, MoUs, and forest department collaborations.',
-    certificates: 'Manage ISO certifications, MSME credentials, and government recognitions.',
-    clients: 'Manage official partner and client logos moving in the homepage marquee.',
-    blogs: 'Publish research updates, conflict mitigation articles, and company news.',
-    projects: 'Showcase forest department deployments, field results, and case studies.',
-    gallery: 'Curate high-resolution field photos and deployment event images.',
-    videos: 'Link product demonstrations and YouTube field video overviews.',
-    enquiries: 'Review and manage inbound contact inquiries submitted via the live website.'
+    services: 'Consulting & field solutions',
+    products: 'Conservation hardware & specs',
+    partners: 'Institutional partner records',
+    certificates: 'ISO, MSME & empanelment PDFs',
+    clients: 'Homepage & clients marquee logos',
+    aboutImages: 'Homepage About Us right-side auto carousel slides',
+    blogs: 'Published articles & updates',
+    gallery: 'Field photos & Cloudinary assets',
+    videos: 'YouTube demo links',
+    careers: 'Post job & internship openings',
+    applications: 'Review student & candidate CVs',
+    enquiries: 'Inbound contact requests'
   };
 
   const navItems = [
-    { id: 'services', label: 'Services & Consulting', count: services.length, icon: Layers },
-    { id: 'products', label: 'Products & Hardware', count: products.length, icon: Package },
-    { id: 'partners', label: 'Our Partners', count: partners.length, icon: Handshake },
-    { id: 'certificates', label: 'Our Certificates', count: certificates.length, icon: Award },
-    { id: 'clients', label: 'Marquee Logos', count: clients.length, icon: Building2 },
-    { id: 'blogs', label: 'Blogs & Articles', count: blogs.length, icon: BookOpen },
-    { id: 'projects', label: 'Projects & Case Studies', count: projects.length, icon: FolderKanban },
-    { id: 'gallery', label: 'Photo Gallery', count: gallery.length, icon: Camera },
-    { id: 'videos', label: 'Videos & Tech Demos', count: videos.length, icon: Tv },
-    { id: 'enquiries', label: 'Inquiries', count: enquiries.length, icon: Mail },
+    { id: 'services', label: 'Services', count: services.length, icon: Layers },
+    { id: 'products', label: 'Products', count: products.length, icon: Package },
+    { id: 'partners', label: 'Partners', count: partners.length, icon: Handshake },
+    { id: 'certificates', label: 'Certificates', count: certificates.length, icon: Award },
+    { id: 'clients', label: 'Clients', count: clients.length, icon: Building2 },
+    { id: 'aboutImages', label: 'About Us Images', count: aboutImages.length, icon: ImageIcon },
+    { id: 'blogs', label: 'Blogs', count: blogs.length, icon: BookOpen },
+    { id: 'gallery', label: 'Gallery', count: gallery.length, icon: Camera },
+    { id: 'videos', label: 'Videos', count: videos.length, icon: Tv },
+    { id: 'careers', label: 'Careers', count: careers.length, icon: Briefcase },
+    { id: 'applications', label: 'Applications', count: careerApplications.length, icon: GraduationCap },
+    { id: 'enquiries', label: 'Inquiries', count: enquiries.length, icon: Mail }
   ];
 
   return (
@@ -1423,6 +1627,16 @@ export default function AdminDashboardPage() {
               </button>
             )}
 
+            {activeTab === 'aboutImages' && (
+              <button
+                onClick={() => handleOpenAboutModal()}
+                className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Slide</span>
+              </button>
+            )}
+
             {activeTab === 'blogs' && (
               isEditingBlog ? (
                 <button
@@ -1461,31 +1675,6 @@ export default function AdminDashboardPage() {
               )
             )}
 
-            {activeTab === 'projects' && (
-              <button
-                onClick={() => {
-                  setCurrentProject({
-                    id: '',
-                    title: '',
-                    slug: '',
-                    location: '',
-                    category: 'Agricultural Perimeter Security',
-                    date: '',
-                    client: '',
-                    featuredImage: '/img4.jpeg',
-                    overview: '',
-                    results: '',
-                    status: 'published'
-                  });
-                  setProjectModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
-              >
-                <Plus className="w-3 h-3" />
-                <span>Add Project</span>
-              </button>
-            )}
-
             {activeTab === 'gallery' && (
               <div className="flex items-center gap-1.5">
                 <label className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs transition-colors cursor-pointer">
@@ -1511,6 +1700,7 @@ export default function AdminDashboardPage() {
                           category: 'Field Presence',
                           imageUrl: url,
                           caption: '',
+                          showOnHome: false,
                           displayOrder: 0
                         });
                         setGalleryModalOpen(true);
@@ -1526,6 +1716,7 @@ export default function AdminDashboardPage() {
                       category: 'Field Presence',
                       imageUrl: '/img4.jpeg',
                       caption: '',
+                      showOnHome: false,
                       displayOrder: 0
                     });
                     setGalleryModalOpen(true);
@@ -1545,6 +1736,29 @@ export default function AdminDashboardPage() {
               >
                 <Plus className="w-3 h-3" />
                 <span>Add Video</span>
+              </button>
+            )}
+
+            {activeTab === 'careers' && (
+              <button
+                onClick={() => handleOpenCareerModal()}
+                className="inline-flex items-center gap-1 bg-[#216B35] hover:bg-[#174D28] text-white px-2 py-0.5 rounded text-xs font-medium shadow-xs transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Opening</span>
+              </button>
+            )}
+
+            {activeTab === 'applications' && careerApplications.length > 0 && (
+              <button
+                onClick={() => {
+                  setAppFilterCareer('All');
+                  setAppFilterStatus('All');
+                  setAppSearch('');
+                }}
+                className="inline-flex items-center gap-1 bg-[#F5F8F3] hover:bg-[#EAEFE8] text-[#173B26] px-2 py-0.5 rounded text-xs font-medium border border-[#DCE5DD]"
+              >
+                <span>Reset Filters</span>
               </button>
             )}
           </div>
@@ -2136,82 +2350,22 @@ export default function AdminDashboardPage() {
           )
         )}
 
-        {/* ================= TAB 3: PROJECTS ================= */}
-        {activeTab === 'projects' && (
-          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-[#4B5563] min-w-[550px]">
-                <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
-                  <tr>
-                    <th className="px-2 py-1 font-semibold w-10">Image</th>
-                    <th className="px-2 py-1 font-semibold">Project Title</th>
-                    <th className="px-2 py-1 font-semibold">Location & Client</th>
-                    <th className="px-2 py-1 font-semibold">Slug URL</th>
-                    <th className="px-2 py-1 font-semibold text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#DCE5DD]">
-                  {projects.map((prj) => (
-                    <tr key={prj.id || prj.slug} className="hover:bg-[#F5F8F3]/50 transition-colors">
-                      <td className="px-2 py-1 w-10">
-                        <img
-                          src={prj.featuredImage || '/img4.jpeg'}
-                          alt={prj.title}
-                          className="w-8 h-8 rounded-sm object-cover border border-[#DCE5DD] shrink-0"
-                        />
-                      </td>
-                      <td className="px-2 py-1">
-                        <div className="font-semibold text-[#173B26] text-xs leading-tight">{prj.title}</div>
-                        <div className="text-[10px] text-[#216B35] font-medium">{prj.category}</div>
-                      </td>
-                      <td className="px-2 py-1 text-[10px] whitespace-nowrap">
-                        <div className="font-medium text-[#173B26]">{prj.location}</div>
-                        <div className="text-[#68756D]">{prj.client}</div>
-                      </td>
-                      <td className="px-2 py-1 whitespace-nowrap">
-                        <Link
-                          href={`/projects/${prj.slug}`}
-                          target="_blank"
-                          className="inline-flex items-center gap-1 text-[10px] text-[#216B35] hover:underline font-mono"
-                        >
-                          <span>/projects/{prj.slug}</span>
-                          <ExternalLink className="w-2.5 h-2.5" />
-                        </Link>
-                      </td>
-                      <td className="px-2 py-1 text-right whitespace-nowrap space-x-0.5">
-                        <button
-                          onClick={() => {
-                            setCurrentProject(prj);
-                            setProjectModalOpen(true);
-                          }}
-                          className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3] transition-colors"
-                          title="Edit Project"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProject(prj._id || prj.id || prj.slug, prj.title)}
-                          className="p-0.5 rounded text-red-600 hover:bg-red-50 transition-colors"
-                          title="Delete Project"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
         {/* ================= TAB 4: GALLERY ================= */}
         {activeTab === 'gallery' && (
-          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden p-2 w-full">
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden p-2 w-full space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-1.5 rounded bg-[#F5F8F3] border border-[#DCE5DD] text-[11px]">
+              <span className="font-semibold text-[#173B26]">
+                Homepage (&quot;Survey Team at Work&quot;): {gallery.filter((g) => Boolean(g.showOnHome)).length} / 4 ticked
+              </span>
+              <span className="text-[#68756D]">
+                Tick up to 4 images below to display in 1 row on the homepage.
+              </span>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {/* Cloudinary Quick Upload Card */}
-              <label className="rounded-lg border-2 border-dashed border-[#216B35]/40 hover:border-[#216B35] bg-[#F5F8F3]/50 hover:bg-[#F5F8F3] p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all group min-h-[140px]">
-                <div className="w-9 h-9 rounded-full bg-white text-[#216B35] flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform mb-1.5 border border-[#216B35]/20">
+              <label className="rounded border-2 border-dashed border-[#216B35]/40 hover:border-[#216B35] bg-[#F5F8F3]/50 hover:bg-[#F5F8F3] p-2.5 flex flex-col items-center justify-center text-center cursor-pointer transition-all group min-h-[120px]">
+                <div className="w-8 h-8 rounded bg-white text-[#216B35] flex items-center justify-center shadow-xs mb-1 border border-[#216B35]/20">
                   {uploadingImage ? (
                     <div className="w-4 h-4 border-2 border-[#216B35] border-t-transparent rounded-full animate-spin" />
                   ) : (
@@ -2219,9 +2373,9 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
                 <span className="text-[11px] font-bold text-[#173B26] block">
-                  {uploadingImage ? 'Uploading...' : 'Upload to Cloudinary'}
+                  {uploadingImage ? 'Uploading...' : 'Upload Image'}
                 </span>
-                <span className="text-[9px] text-[#68756D] mt-0.5">Click or drag image file</span>
+                <span className="text-[9px] text-[#68756D] mt-0.5">Cloudinary CDN</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -2238,6 +2392,7 @@ export default function AdminDashboardPage() {
                         category: 'Field Presence',
                         imageUrl: url,
                         caption: '',
+                        showOnHome: false,
                         displayOrder: 0
                       });
                       setGalleryModalOpen(true);
@@ -2247,7 +2402,14 @@ export default function AdminDashboardPage() {
               </label>
 
               {gallery.map((gal) => (
-                <div key={gal.id} className="rounded border border-[#DCE5DD] overflow-hidden bg-slate-50 flex flex-col justify-between group">
+                <div
+                  key={gal.id || gal._id}
+                  className={`rounded border overflow-hidden flex flex-col justify-between group ${
+                    gal.showOnHome
+                      ? 'border-[#216B35] bg-emerald-50/40'
+                      : 'border-[#DCE5DD] bg-slate-50'
+                  }`}
+                >
                   <div className="relative">
                     <img
                       src={gal.imageUrl}
@@ -2267,27 +2429,41 @@ export default function AdminDashboardPage() {
                       <p className="text-[9px] text-[#68756D] line-clamp-1">{gal.caption}</p>
                     </div>
                   </div>
-                  <div className="p-1 pt-0 border-t border-[#DCE5DD]/60 flex justify-end gap-0.5">
-                    <button
-                      onClick={() => {
-                        setCurrentGallery({
-                          ...gal,
-                          id: gal._id || gal.id
-                        });
-                        setGalleryModalOpen(true);
-                      }}
-                      className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3]"
-                      title="Edit Photo"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteGallery(gal._id || gal.id || gal.imageUrl, gal.title)}
-                      className="p-0.5 rounded text-red-600 hover:bg-red-50"
-                      title="Delete Photo"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                  <div className="p-1.5 border-t border-[#DCE5DD]/60 bg-white flex items-center justify-between gap-1">
+                    <label className="inline-flex items-center gap-1 cursor-pointer select-none text-[10px] font-semibold text-[#173B26]">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(gal.showOnHome)}
+                        onChange={() => handleToggleGalleryHome(gal)}
+                        className="w-3.5 h-3.5 accent-[#216B35] rounded cursor-pointer"
+                      />
+                      <span className={gal.showOnHome ? 'text-[#216B35]' : 'text-[#68756D]'}>
+                        Home
+                      </span>
+                    </label>
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        onClick={() => {
+                          setCurrentGallery({
+                            ...gal,
+                            showOnHome: Boolean(gal.showOnHome),
+                            id: gal._id || gal.id
+                          });
+                          setGalleryModalOpen(true);
+                        }}
+                        className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3]"
+                        title="Edit Photo"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteGallery(gal._id || gal.id || gal.imageUrl, gal.title)}
+                        className="p-0.5 rounded text-red-600 hover:bg-red-50"
+                        title="Delete Photo"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -2314,19 +2490,19 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
                 {videos.map((vid) => (
-                  <div key={vid._id || vid.id} className="rounded-xl border border-[#DCE5DD] overflow-hidden bg-white hover:border-[#216B35]/50 hover:shadow-md transition-all flex flex-col justify-between">
+                  <div key={vid._id || vid.id} className="rounded border border-[#DCE5DD] overflow-hidden bg-white hover:border-[#216B35]/50 transition-all flex flex-col justify-between">
                     <div>
-                      <div className="relative h-32 w-full bg-slate-900 group overflow-hidden">
+                      <div className="relative h-28 w-full bg-slate-900 group overflow-hidden">
                         <img
                           src={vid.thumbnail || '/img4.jpeg'}
                           alt={vid.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                          <div className="w-8 h-8 rounded-full bg-[#216B35] text-white flex items-center justify-center shadow-md">
-                            <Play className="w-4 h-4 fill-current ml-0.5" />
+                          <div className="w-7 h-7 rounded bg-[#216B35] text-white flex items-center justify-center shadow-sm">
+                            <Play className="w-3.5 h-3.5 fill-current" />
                           </div>
                         </div>
                         {vid.category && (
@@ -2375,6 +2551,335 @@ export default function AdminDashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ================= TAB: ABOUT US IMAGES ================= */}
+        {activeTab === 'aboutImages' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden p-2.5 w-full">
+            {aboutImages.length === 0 ? (
+              <div className="p-6 text-center text-xs text-[#68756D] space-y-2">
+                <ImageIcon className="w-6 h-6 text-[#216B35]/50 mx-auto" />
+                <p className="font-semibold text-[#173B26]">No About Us Carousel Slides Yet</p>
+                <button
+                  onClick={() => handleOpenAboutModal()}
+                  className="btn-primary text-xs px-3 py-1 rounded inline-flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First Slide</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                {aboutImages.map((img) => {
+                  const imgId = img.id || img._id;
+                  return (
+                    <div key={imgId} className="rounded border border-[#DCE5DD] overflow-hidden bg-slate-50 flex flex-col justify-between">
+                      <div className="relative">
+                        <img
+                          src={img.imageUrl}
+                          alt={img.title || 'About Us Slide'}
+                          className="w-full h-28 object-cover"
+                        />
+                        <span className="absolute top-1 left-1 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded font-mono">
+                          #{img.displayOrder ?? 0}
+                        </span>
+                        <div className="p-1.5 bg-white border-t border-[#DCE5DD]/60">
+                          <h4 className="font-semibold text-[#173B26] text-[11px] truncate">
+                            {img.title || 'Carousel Slide'}
+                          </h4>
+                        </div>
+                      </div>
+                      <div className="p-1 bg-white border-t border-[#DCE5DD]/60 flex justify-end gap-1">
+                        <button
+                          onClick={() => handleOpenAboutModal(img)}
+                          className="p-0.5 rounded text-[#216B35] hover:bg-[#F5F8F3]"
+                          title="Edit Slide"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAboutImage(imgId, img.title)}
+                          className="p-0.5 rounded text-red-600 hover:bg-red-50"
+                          title="Delete Slide"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= TAB: CAREERS ================= */}
+        {activeTab === 'careers' && (
+          <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+            {careers.length === 0 ? (
+              <div className="p-6 text-center text-xs text-[#68756D] space-y-2">
+                <Briefcase className="w-6 h-6 text-[#216B35]/50 mx-auto" />
+                <p className="font-semibold text-[#173B26]">No Career Openings Added</p>
+                <button
+                  onClick={() => handleOpenCareerModal()}
+                  className="btn-primary text-xs px-3 py-1 rounded inline-flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Opening</span>
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#4B5563]">
+                  <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
+                    <tr>
+                      <th className="px-2.5 py-1.5 font-semibold">Position &amp; Department</th>
+                      <th className="px-2.5 py-1.5 font-semibold">Type &amp; Location</th>
+                      <th className="px-2.5 py-1.5 font-semibold">Qualification / Pay</th>
+                      <th className="px-2.5 py-1.5 font-semibold text-center">Status</th>
+                      <th className="px-2.5 py-1.5 font-semibold text-center">Applications</th>
+                      <th className="px-2.5 py-1.5 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCE5DD]">
+                    {careers.map((car) => {
+                      const carId = car.id || car._id;
+                      const applicantCount = careerApplications.filter(
+                        (a) => (a.careerId && a.careerId === carId) || a.careerTitle === car.title
+                      ).length;
+                      return (
+                        <tr key={carId} className="hover:bg-[#F5F8F3]/60 transition-colors">
+                          <td className="px-2.5 py-1.5">
+                            <span className="font-semibold text-[#173B26] block">{car.title}</span>
+                            <span className="text-[10px] text-[#68756D]">{car.department}</span>
+                          </td>
+                          <td className="px-2.5 py-1.5">
+                            <span className="inline-block px-1.5 py-0.5 rounded bg-[#F5F8F3] border border-[#DCE5DD] text-[#173B26] text-[10px] font-medium">
+                              {car.employmentType}
+                            </span>
+                            <span className="block text-[10px] text-[#68756D] mt-0.5">{car.location}</span>
+                          </td>
+                          <td className="px-2.5 py-1.5 max-w-xs">
+                            <span className="block text-[11px] text-[#173B26] truncate">{car.qualification || '—'}</span>
+                            <span className="block text-[10px] text-[#68756D] truncate">
+                              {car.experience}{car.stipendOrSalary ? ` • ${car.stipendOrSalary}` : ''}
+                            </span>
+                          </td>
+                          <td className="px-2.5 py-1.5 text-center">
+                            <span
+                              className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                                car.status === 'open'
+                                  ? 'bg-emerald-50 text-[#216B35] border border-emerald-200'
+                                  : 'bg-slate-100 text-slate-600 border border-slate-200'
+                              }`}
+                            >
+                              {car.status || 'open'}
+                            </span>
+                          </td>
+                          <td className="px-2.5 py-1.5 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAppFilterCareer(car.title);
+                                setActiveTab('applications');
+                              }}
+                              className="px-2 py-0.5 rounded bg-[#F5F8F3] hover:bg-[#216B35] hover:text-white text-[#216B35] border border-[#DCE5DD] text-[11px] font-semibold transition-colors"
+                              title="View Student Applications for this Role"
+                            >
+                              {applicantCount} Applied
+                            </button>
+                          </td>
+                          <td className="px-2.5 py-1.5 text-right whitespace-nowrap space-x-1">
+                            <button
+                              onClick={() => handleOpenCareerModal(car)}
+                              className="p-1 rounded text-[#216B35] hover:bg-[#F5F8F3]"
+                              title="Edit Opening"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCareer(carId, car.title)}
+                              className="p-1 rounded text-red-600 hover:bg-red-50"
+                              title="Delete Opening"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= TAB: STUDENT APPLICATIONS ================= */}
+        {activeTab === 'applications' && (
+          <div className="space-y-2 w-full">
+            {/* Compact Filter Bar */}
+            <div className="bg-white rounded border border-[#DCE5DD] p-2 flex flex-wrap items-center gap-2">
+              <div className="relative flex-1 min-w-[180px]">
+                <Search className="w-3.5 h-3.5 text-[#68756D] absolute left-2 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={appSearch}
+                  onChange={(e) => setAppSearch(e.target.value)}
+                  placeholder="Search student, college, city, email..."
+                  className="w-full pl-7 pr-2 py-1 rounded border border-[#DCE5DD] text-xs focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+              <select
+                value={appFilterCareer}
+                onChange={(e) => setAppFilterCareer(e.target.value)}
+                className="px-2 py-1 rounded border border-[#DCE5DD] text-xs bg-white focus:border-[#216B35] focus:outline-none max-w-[220px]"
+              >
+                <option value="All">All Positions</option>
+                {Array.from(new Set(careerApplications.map((a) => a.careerTitle).filter(Boolean))).map((title) => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+              <select
+                value={appFilterStatus}
+                onChange={(e) => setAppFilterStatus(e.target.value)}
+                className="px-2 py-1 rounded border border-[#DCE5DD] text-xs bg-white focus:border-[#216B35] focus:outline-none"
+              >
+                <option value="All">All Status</option>
+                <option value="New">New</option>
+                <option value="Reviewed">Reviewed</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+
+            {/* Applications List */}
+            <div className="bg-white rounded border border-[#DCE5DD] shadow-xs overflow-hidden w-full">
+              {(() => {
+                const filteredApps = careerApplications.filter((a) => {
+                  const matchRole = appFilterCareer === 'All' || a.careerTitle === appFilterCareer;
+                  const matchStatus = appFilterStatus === 'All' || (a.status || 'New') === appFilterStatus;
+                  const q = appSearch.trim().toLowerCase();
+                  const matchQ =
+                    !q ||
+                    a.applicantName?.toLowerCase().includes(q) ||
+                    a.collegeOrUniversity?.toLowerCase().includes(q) ||
+                    a.qualification?.toLowerCase().includes(q) ||
+                    a.city?.toLowerCase().includes(q) ||
+                    a.email?.toLowerCase().includes(q) ||
+                    a.careerTitle?.toLowerCase().includes(q);
+                  return matchRole && matchStatus && matchQ;
+                });
+
+                if (filteredApps.length === 0) {
+                  return (
+                    <div className="p-6 text-center text-xs text-[#68756D] space-y-1">
+                      <GraduationCap className="w-6 h-6 text-[#216B35]/50 mx-auto" />
+                      <p className="font-semibold text-[#173B26]">No Matching Student Applications</p>
+                      <p>Applications submitted on /careers appear here automatically.</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-[#4B5563]">
+                      <thead className="bg-[#F5F8F3] text-[10px] uppercase tracking-wider text-[#173B26] border-b border-[#DCE5DD]">
+                        <tr>
+                          <th className="px-2.5 py-1.5 font-semibold">Candidate / College</th>
+                          <th className="px-2.5 py-1.5 font-semibold">Position Applied</th>
+                          <th className="px-2.5 py-1.5 font-semibold">Contact &amp; City</th>
+                          <th className="px-2.5 py-1.5 font-semibold">Resume / Note</th>
+                          <th className="px-2.5 py-1.5 font-semibold">Status</th>
+                          <th className="px-2.5 py-1.5 font-semibold text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#DCE5DD]">
+                        {filteredApps.map((app) => {
+                          const appId = app.id || app._id;
+                          return (
+                            <tr key={appId} className="hover:bg-[#F5F8F3]/60 align-top">
+                              <td className="px-2.5 py-2">
+                                <span className="font-semibold text-[#173B26] block">{app.applicantName}</span>
+                                <span className="text-[11px] text-[#4B5563] block">
+                                  {app.qualification || '—'}{app.passingYear ? ` (${app.passingYear})` : ''}
+                                </span>
+                                {app.collegeOrUniversity && (
+                                  <span className="text-[10px] text-[#68756D] block">{app.collegeOrUniversity}</span>
+                                )}
+                              </td>
+                              <td className="px-2.5 py-2">
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-[#F5F8F3] border border-[#DCE5DD] text-[#173B26] font-medium text-[11px]">
+                                  {app.careerTitle}
+                                </span>
+                                <span className="block text-[10px] text-[#68756D] mt-0.5 font-mono">
+                                  {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : ''}
+                                </span>
+                              </td>
+                              <td className="px-2.5 py-2">
+                                <a href={`mailto:${app.email}`} className="text-[#216B35] hover:underline block text-[11px]">
+                                  {app.email}
+                                </a>
+                                <a href={`tel:${app.phone}`} className="text-[#173B26] hover:underline block text-[11px] font-mono">
+                                  {app.phone}
+                                </a>
+                                {app.city && <span className="text-[10px] text-[#68756D] block">{app.city}</span>}
+                              </td>
+                              <td className="px-2.5 py-2 max-w-xs space-y-1">
+                                {app.resumeUrl ? (
+                                  <a
+                                    href={app.resumeUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#216B35] hover:bg-[#174D28] text-white text-[10px] font-semibold"
+                                  >
+                                    <FileText className="w-3 h-3" />
+                                    <span>View CV</span>
+                                    <ExternalLink className="w-2.5 h-2.5" />
+                                  </a>
+                                ) : (
+                                  <span className="text-[10px] text-[#68756D]">No file attached</span>
+                                )}
+                                {app.experienceSummary && (
+                                  <span className="block text-[10px] text-[#173B26]">Skills: {app.experienceSummary}</span>
+                                )}
+                                {app.coverNote && (
+                                  <p className="text-[10px] text-[#4B5563] bg-[#F5F8F3] px-1.5 py-1 rounded border border-[#DCE5DD] line-clamp-2" title={app.coverNote}>
+                                    {app.coverNote}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-2.5 py-2">
+                                <select
+                                  value={app.status || 'New'}
+                                  onChange={(e) => handleUpdateApplicationStatus(appId, e.target.value)}
+                                  className="px-1.5 py-0.5 rounded border border-[#DCE5DD] text-[11px] font-semibold bg-white text-[#173B26] focus:border-[#216B35] focus:outline-none"
+                                >
+                                  <option value="New">New</option>
+                                  <option value="Reviewed">Reviewed</option>
+                                  <option value="Shortlisted">Shortlisted</option>
+                                  <option value="Rejected">Rejected</option>
+                                </select>
+                              </td>
+                              <td className="px-2.5 py-2 text-right">
+                                <button
+                                  onClick={() => handleDeleteApplication(appId, app.applicantName)}
+                                  className="p-1 rounded text-red-600 hover:bg-red-50"
+                                  title="Delete Application"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         )}
 
@@ -2428,159 +2933,269 @@ export default function AdminDashboardPage() {
         </div>
       </main>
 
-      {/* ================= MODAL: ADD / EDIT PROJECT ================= */}
-      {projectModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 overflow-y-auto">
-          <div className="bg-white rounded-md max-w-xl w-full p-4 sm:p-5 shadow-xl border border-[#DCE5DD] my-4">
-            <h3 className="text-base font-bold text-[#173B26] mb-0.5">
-              {currentProject.id ? 'Edit Deployment Project' : 'Add New Deployment Project'}
-            </h3>
-            <p className="text-[11px] text-[#68756D] mb-4">
-              Updates in MongoDB Atlas and renders at <span className="font-mono text-[#216B35]">/projects/[slug]</span>
-            </p>
+      {/* ================= MODAL: ADD / EDIT ABOUT US SLIDE ================= */}
+      {aboutModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-2.5 overflow-y-auto">
+          <div className="bg-white rounded max-w-md w-full p-3.5 sm:p-4 shadow-xl border border-[#DCE5DD] my-3">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <h3 className="text-sm font-bold text-[#173B26]">
+                {currentAboutImage.id ? 'Edit About Us Slide' : 'Add About Us Slide'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setAboutModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleSaveProject} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveAboutImage} className="space-y-2.5 text-xs">
               <div>
-                <label className="block font-semibold text-[#173B26] mb-1">Project Title *</label>
+                <label className="block font-semibold text-[#173B26] mb-1">Slide Title / Alt Caption</label>
                 <input
                   type="text"
-                  required
-                  value={currentProject.title}
-                  onChange={(e) => setCurrentProject({ ...currentProject, title: e.target.value })}
-                  placeholder="e.g. 70 ANIDERS Systems Deployed Along Bihar–Nepal Border"
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
+                  value={currentAboutImage.title}
+                  onChange={(e) => setCurrentAboutImage({ ...currentAboutImage, title: e.target.value })}
+                  placeholder="e.g. D.F.O. Ranchi Consultation Meeting"
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#173B26] mb-1">Location</label>
-                  <input
-                    type="text"
-                    value={currentProject.location}
-                    onChange={(e) => setCurrentProject({ ...currentProject, location: e.target.value })}
-                    placeholder="Araria District, Bihar"
-                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-[#173B26] mb-1">Client / Department</label>
-                  <input
-                    type="text"
-                    value={currentProject.client}
-                    onChange={(e) => setCurrentProject({ ...currentProject, client: e.target.value })}
-                    placeholder="State Forest Department"
-                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#173B26] mb-1">Category</label>
-                  <input
-                    type="text"
-                    value={currentProject.category}
-                    onChange={(e) => setCurrentProject({ ...currentProject, category: e.target.value })}
-                    placeholder="Agricultural Perimeter Security"
-                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-[#173B26] mb-1">Deployment Date</label>
-                  <input
-                    type="text"
-                    value={currentProject.date}
-                    onChange={(e) => setCurrentProject({ ...currentProject, date: e.target.value })}
-                    placeholder="April 2024"
-                    className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                  />
-                </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block font-semibold text-[#173B26]">Featured Image *</label>
-                  {currentProject.featuredImage?.includes('cloudinary.com') && (
-                    <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded">
-                      ☁️ Cloudinary Hosted
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
+                  <label className="block font-semibold text-[#173B26]">Image *</label>
+                  <label className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F5F8F3] hover:bg-[#EAEFE8] text-[#216B35] border border-[#216B35]/40 font-semibold cursor-pointer">
+                    <Upload className="w-3 h-3" />
+                    <span>{uploadingImage ? 'Uploading...' : 'Upload Image'}</span>
                     <input
-                      type="text"
-                      value={currentProject.featuredImage}
-                      onChange={(e) => setCurrentProject({ ...currentProject, featuredImage: e.target.value })}
-                      placeholder="/img4.jpeg or Cloudinary URL"
-                      className="flex-1 p-2 rounded border border-[#DCE5DD] text-xs font-mono"
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={(e) => handleImageUpload(e, 'about')}
+                      className="hidden"
                     />
-                    <label className="btn-secondary px-3 py-1.5 rounded cursor-pointer shrink-0 text-xs inline-flex items-center gap-1 font-semibold text-[#216B35] border-[#216B35]/40 hover:bg-[#F5F8F3]">
-                      {uploadingImage ? (
-                        <div className="w-3.5 h-3.5 border-2 border-[#216B35] border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Upload className="w-3.5 h-3.5" />
-                      )}
-                      <span>{uploadingImage ? 'Uploading...' : 'Upload (Cloudinary)'}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        disabled={uploadingImage}
-                        onChange={(e) => handleImageUpload(e, 'project')}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                  {currentProject.featuredImage && (
-                    <div className="relative rounded-lg overflow-hidden border border-[#DCE5DD] bg-slate-100 h-28 flex items-center justify-center">
-                      <img
-                        src={currentProject.featuredImage}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+                  </label>
                 </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#173B26] mb-1">Project Overview</label>
-                <textarea
-                  rows={3}
-                  value={currentProject.overview}
-                  onChange={(e) => setCurrentProject({ ...currentProject, overview: e.target.value })}
-                  placeholder="Overview of the deployment..."
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#173B26] mb-1">Results & Impact Metric</label>
                 <input
                   type="text"
-                  value={currentProject.results}
-                  onChange={(e) => setCurrentProject({ ...currentProject, results: e.target.value })}
-                  placeholder="Achieved 94% reduction in crop destruction across 300 hectares..."
-                  className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
+                  required
+                  value={currentAboutImage.imageUrl}
+                  onChange={(e) => setCurrentAboutImage({ ...currentAboutImage, imageUrl: e.target.value })}
+                  placeholder="/img1.jpeg or Cloudinary URL"
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] font-mono text-[11px] focus:border-[#216B35] focus:outline-none"
+                />
+                {currentAboutImage.imageUrl && (
+                  <div className="mt-2 rounded overflow-hidden border border-[#DCE5DD] bg-slate-100 h-36 flex items-center justify-center">
+                    <img
+                      src={currentAboutImage.imageUrl}
+                      alt="Slide preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Display Order</label>
+                <input
+                  type="number"
+                  value={currentAboutImage.displayOrder ?? 0}
+                  onChange={(e) => setCurrentAboutImage({ ...currentAboutImage, displayOrder: parseInt(e.target.value, 10) || 0 })}
+                  className="w-24 p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#DCE5DD]">
+              <div className="flex justify-end gap-2 pt-2.5 border-t border-[#DCE5DD]">
                 <button
                   type="button"
-                  onClick={() => setProjectModalOpen(false)}
+                  onClick={() => setAboutModalOpen(false)}
                   className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary px-4 py-1.5 rounded text-xs"
+                  disabled={uploadingImage}
+                  className="btn-primary px-4 py-1.5 rounded text-xs font-semibold disabled:opacity-60"
                 >
-                  Save Project
+                  {currentAboutImage.id ? 'Save Slide' : 'Add Slide'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: ADD / EDIT CAREER OPENING ================= */}
+      {careerModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-2.5 overflow-y-auto">
+          <div className="bg-white rounded max-w-xl w-full p-3.5 sm:p-4 shadow-xl border border-[#DCE5DD] my-3 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#DCE5DD]">
+              <h3 className="text-sm font-bold text-[#173B26]">
+                {currentCareer.id ? 'Edit Career Opening' : 'Post New Career / Internship'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setCareerModalOpen(false)}
+                className="text-[#68756D] hover:text-[#173B26] p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCareer} className="space-y-2.5 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-[#173B26] mb-1">Role / Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={currentCareer.title}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, title: e.target.value })}
+                    placeholder="e.g. GIS & Drone Mapping Intern"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Type</label>
+                  <select
+                    value={currentCareer.employmentType}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, employmentType: e.target.value })}
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] bg-white focus:border-[#216B35] focus:outline-none"
+                  >
+                    <option value="Full-Time">Full-Time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Part-Time">Part-Time</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Department</label>
+                  <input
+                    type="text"
+                    value={currentCareer.department}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, department: e.target.value })}
+                    placeholder="Environmental & GIS"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Location</label>
+                  <input
+                    type="text"
+                    value={currentCareer.location}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, location: e.target.value })}
+                    placeholder="Ranchi / Lucknow"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Experience</label>
+                  <input
+                    type="text"
+                    value={currentCareer.experience}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, experience: e.target.value })}
+                    placeholder="Freshers / 0–2 Yrs"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-[#173B26] mb-1">Qualification</label>
+                  <input
+                    type="text"
+                    value={currentCareer.qualification}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, qualification: e.target.value })}
+                    placeholder="B.Sc / M.Sc Environmental Science, GIS, Forestry"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Stipend / Salary</label>
+                  <input
+                    type="text"
+                    value={currentCareer.stipendOrSalary}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, stipendOrSalary: e.target.value })}
+                    placeholder="Optional"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Closing Date</label>
+                  <input
+                    type="text"
+                    value={currentCareer.deadline}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, deadline: e.target.value })}
+                    placeholder="e.g. 2026-12-31"
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Status</label>
+                  <select
+                    value={currentCareer.status}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, status: e.target.value })}
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] bg-white focus:border-[#216B35] focus:outline-none"
+                  >
+                    <option value="open">Open (Live)</option>
+                    <option value="closed">Closed (Hidden)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold text-[#173B26] mb-1">Display Order</label>
+                  <input
+                    type="number"
+                    value={currentCareer.displayOrder ?? 0}
+                    onChange={(e) => setCurrentCareer({ ...currentCareer, displayOrder: parseInt(e.target.value, 10) || 0 })}
+                    className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Role Summary</label>
+                <textarea
+                  rows={2}
+                  value={currentCareer.summary}
+                  onChange={(e) => setCurrentCareer({ ...currentCareer, summary: e.target.value })}
+                  placeholder="Concise summary of the position..."
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#173B26] mb-1">Key Responsibilities (one per line)</label>
+                <textarea
+                  rows={3}
+                  value={currentCareer.responsibilitiesText}
+                  onChange={(e) => setCurrentCareer({ ...currentCareer, responsibilitiesText: e.target.value })}
+                  placeholder="Assist with EIA/FC field data&#10;Prepare KML/GIS maps"
+                  className="w-full p-1.5 rounded border border-[#DCE5DD] focus:border-[#216B35] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2.5 border-t border-[#DCE5DD]">
+                <button
+                  type="button"
+                  onClick={() => setCareerModalOpen(false)}
+                  className="px-3 py-1.5 rounded border border-[#DCE5DD] hover:bg-[#F5F8F3] text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-4 py-1.5 rounded text-xs font-semibold"
+                >
+                  {currentCareer.id ? 'Save Opening' : 'Publish Opening'}
                 </button>
               </div>
             </form>
@@ -2648,7 +3263,7 @@ export default function AdminDashboardPage() {
                 </select>
 
                 {showAddGalleryCategory && (
-                  <div className="mt-2 p-2.5 bg-emerald-50/70 rounded-lg border border-emerald-200 space-y-2 animate-in fade-in duration-150">
+                  <div className="mt-2 p-2.5 bg-emerald-50/70 rounded border border-emerald-200 space-y-2 animate-in fade-in duration-150">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1">
                         <Plus className="w-3 h-3 text-emerald-700" />
@@ -2736,7 +3351,7 @@ export default function AdminDashboardPage() {
 
                   {/* Visual Preview */}
                   {currentGallery.imageUrl && (
-                    <div className="relative rounded-lg overflow-hidden border border-[#DCE5DD] bg-slate-100 h-36 flex items-center justify-center">
+                    <div className="relative rounded overflow-hidden border border-[#DCE5DD] bg-slate-100 h-36 flex items-center justify-center">
                       <img
                         src={currentGallery.imageUrl}
                         alt="Preview"
@@ -2760,6 +3375,18 @@ export default function AdminDashboardPage() {
                   className="w-full p-2 rounded border border-[#DCE5DD] text-xs"
                 />
               </div>
+
+              <label className="flex items-center gap-2 p-2 rounded bg-[#F5F8F3] border border-[#DCE5DD] cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={Boolean(currentGallery.showOnHome)}
+                  onChange={(e) => setCurrentGallery({ ...currentGallery, showOnHome: e.target.checked })}
+                  className="w-4 h-4 accent-[#216B35] rounded cursor-pointer"
+                />
+                <span className="font-semibold text-[#173B26]">
+                  Show on Homepage (&quot;Survey Team at Work&quot; — max 4 photos)
+                </span>
+              </label>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-[#DCE5DD]">
                 <button
@@ -2850,7 +3477,7 @@ export default function AdminDashboardPage() {
 
               {/* Live Video Preview if URL valid */}
               {currentVideo.embedUrl && currentVideo.embedUrl.includes('embed') && (
-                <div className="rounded-lg overflow-hidden border border-[#DCE5DD] aspect-video w-full bg-black">
+                <div className="rounded overflow-hidden border border-[#DCE5DD] aspect-video w-full bg-black">
                   <iframe
                     src={currentVideo.embedUrl}
                     title="Video Preview"
@@ -2889,7 +3516,7 @@ export default function AdminDashboardPage() {
                     </label>
                   </div>
                   {currentVideo.thumbnail && (
-                    <div className="relative rounded-lg overflow-hidden border border-[#DCE5DD] bg-slate-100 h-28 flex items-center justify-center">
+                    <div className="relative rounded overflow-hidden border border-[#DCE5DD] bg-slate-100 h-28 flex items-center justify-center">
                       <img
                         src={currentVideo.thumbnail}
                         alt="Preview"
@@ -2946,7 +3573,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {showAddVideoCategory && (
-                <div className="mt-2 p-2.5 bg-emerald-50/70 rounded-lg border border-emerald-200 space-y-2 animate-in fade-in duration-150">
+                <div className="mt-2 p-2.5 bg-emerald-50/70 rounded border border-emerald-200 space-y-2 animate-in fade-in duration-150">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1">
                       <Plus className="w-3 h-3 text-emerald-700" />

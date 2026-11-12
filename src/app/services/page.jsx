@@ -29,7 +29,7 @@ export default async function ServicesPage() {
                 Our Services &amp; Technical Solutions
               </h1>
               <p className="text-xs sm:text-sm text-[#4B5563] font-manrope leading-relaxed max-w-2xl">
-                Engineered in partnership with <strong>Kyari Innovations</strong>, our non-lethal deterrent devices and ranger safety equipment deliver 91% conflict mitigation without harming wildlife or humans.
+                Comprehensive statutory environmental clearances (EC/FC/CTE/CTO), precision GIS drone mapping, and humane wildlife conflict mitigation solutions tailored for forest divisions and infrastructure projects.
               </p>
             </div>
           </div>

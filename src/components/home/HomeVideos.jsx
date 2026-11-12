@@ -15,7 +15,7 @@ export default function HomeVideos({ videos = [] }) {
       <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
         <SectionHeading
           title="See Non-Lethal Wildlife Technology In Action"
-          subtitle="Watch Shark Tank India features, nocturnal deterrence camera footage, and ranger weapon demonstrations."
+          subtitle="Watch nocturnal deterrence camera footage, field installations, and ranger safety demonstrations."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

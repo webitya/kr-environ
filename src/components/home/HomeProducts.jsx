@@ -18,7 +18,7 @@ export default function HomeProducts({ products = [] }) {
               Certified Environmental &amp; Wildlife Products
             </h2>
             <p className="text-xs sm:text-sm text-[#4B5563] font-manrope max-w-2xl mt-1 leading-relaxed">
-              Patented non-lethal deterrent devices, bird flight diverters, and frontline ranger safety gear field-deployed across 21+ states.
+              Non-lethal deterrent devices, bird flight diverters, and frontline ranger safety gear deployed across India.
             </p>
           </div>
 
@@ -49,11 +49,6 @@ export default function HomeProducts({ products = [] }) {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
-                    {product.category && (
-                      <div className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-semibold text-[#173B26] border border-[#DCE5DD] shadow-xs">
-                        {product.category}
-                      </div>
-                    )}
                   </Link>
 
                   {/* Compact Content */}

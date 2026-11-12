@@ -1,7 +1,6 @@
 import { connectToDatabase } from './mongodb';
 import Service from '@/models/Service';
 import Blog from '@/models/Blog';
-import Project from '@/models/Project';
 import Gallery from '@/models/Gallery';
 import Video from '@/models/Video';
 import Enquiry from '@/models/Enquiry';
@@ -10,6 +9,9 @@ import Client from '@/models/Client';
 import Product from '@/models/Product';
 import Partner from '@/models/Partner';
 import Certificate from '@/models/Certificate';
+import Career from '@/models/Career';
+import CareerApplication from '@/models/CareerApplication';
+import AboutImage from '@/models/AboutImage';
 
 // Helper to convert Mongoose doc to clean plain JSON objects (stripping BSON ObjectId and __v)
 function serializeDoc(doc) {
@@ -71,7 +73,7 @@ export async function upsertService(serviceData) {
     const updated = await Service.findOneAndUpdate(
       filter,
       { $set: cleanData },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     ).lean();
 
     // Auto-persist category to Category collection in MongoDB
@@ -144,7 +146,7 @@ export async function upsertBlog(blogData) {
     const updated = await Blog.findOneAndUpdate(
       filter,
       { $set: cleanData },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     ).lean();
 
     // Auto-persist category to Category collection in MongoDB
@@ -255,7 +257,7 @@ export async function addCategory(name, type = 'blog') {
     const cat = await Category.findOneAndUpdate(
       { slug },
       { name: trimmedName, slug, type },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     ).lean();
 
     return serializeDoc(cat);
@@ -278,178 +280,6 @@ export async function deleteBlog(idOrSlug) {
     return true;
   } catch (err) {
     console.error('MongoDB deleteBlog error:', err.message);
-    throw err;
-  }
-}
-
-// ==================== PROJECTS ====================
-export const FALLBACK_PROJECTS = [
-  {
-    id: 'proj-1',
-    title: '70 ANIDERS Systems Deployed Along Bihar-Nepal Border',
-    slug: 'bihar-nepal-border-aniders',
-    category: 'Agricultural Perimeter Security',
-    location: 'Araria District, Bihar',
-    date: 'April 2023',
-    featuredImage: '/img4.jpeg',
-    overview: 'Installation of 70 solar-powered ANIDERS units along vulnerable agricultural tracts bordering Nepal to curb cross-border elephant herd raiding.',
-    results: 'Achieved 94% reduction in crop destruction across 300 hectares within the first 6 months of continuous operation.',
-    content: 'Full deployment scope including perimeter sensor calibration, solar battery management, and training of 30 village committee wardens.'
-  },
-  {
-    id: 'proj-2',
-    title: '200 Solar Smart Sticks Deployment in Ladakh & Valmiki Tiger Reserve',
-    slug: 'ladakh-valmiki-smart-sticks-patrol',
-    category: 'Ranger Tactical Equipment',
-    location: 'Ladakh Range & West Champaran, Bihar',
-    date: 'November 2023',
-    featuredImage: '/img1.jpeg',
-    overview: 'Supplying anti-poaching and snow patrol squads with cold-resilient solar smart batons for high-altitude snow leopard and tiger habitat patrolling.',
-    results: 'Enhanced night patrol safety and communication uptime for over 180 frontline guards.',
-    content: 'Telescoping batons equipped with high-intensity LED illumination, emergency alarms, and rechargeable batteries distributed across remote field posts.'
-  },
-  {
-    id: 'proj-3',
-    title: 'Odisha Forest Staff Net Gun Training & Tactical Workshop',
-    slug: 'odisha-ranger-net-gun-training',
-    category: 'Rescue Capacity Building',
-    location: 'Bhubaneswar & Similipal Tiger Reserve, Odisha',
-    date: 'January 2024',
-    featuredImage: '/img2.jpeg',
-    overview: 'Comprehensive classroom and live simulated field drills training 45 rangers and quick-response teams in humane animal capture with KyNet launchers.',
-    results: 'Certified 45 rapid response officers with zero incident rates during subsequent rescue calls.',
-    content: 'Live simulation drills for humane leopard and wild ungulate capture, equipment maintenance, and field safety protocols.'
-  }
-];
-
-let projectsInitPromise = null;
-export async function ensureProjectsInitialized() {
-  if (projectsInitPromise) return projectsInitPromise;
-
-  projectsInitPromise = (async () => {
-    try {
-      const conn = await connectToDatabase();
-      if (!conn) return;
-
-      const db = conn.connection.db;
-      const settingsCol = db.collection('settings');
-      const marker = await settingsCol.findOne({ key: 'projects_initialized_v2' });
-      if (marker) return;
-
-      // Clean up legacy fallback demo projects once so only admin panel projects are displayed
-      const demoSlugs = ['bihar-nepal-border-aniders', 'ladakh-valmiki-smart-sticks-patrol', 'odisha-ranger-net-gun-training'];
-      await Project.deleteMany({
-        $or: [
-          { slug: { $in: demoSlugs } },
-          { title: { $regex: /Bihar-Nepal|Smart Sticks|Net Gun Training|Valmiki|Similipal/i } }
-        ]
-      }).catch(() => {});
-
-      await settingsCol.updateOne(
-        { key: 'projects_initialized_v2' },
-        { $set: { key: 'projects_initialized_v2', initializedAt: new Date() } },
-        { upsert: true }
-      ).catch(() => {});
-    } catch (e) {
-      console.error('ensureProjectsInitialized error:', e.message);
-    }
-  })();
-
-  return projectsInitPromise;
-}
-
-export async function getProjects() {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      await ensureProjectsInitialized();
-      const items = await Project.find().sort({ createdAt: -1 }).lean();
-      return (items || []).map(serializeDoc);
-    }
-  } catch (err) {
-    console.error('Error fetching projects from MongoDB:', err.message);
-  }
-  return [];
-}
-
-export async function getProjectBySlug(slug) {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      await ensureProjectsInitialized();
-      const item = await Project.findOne({ slug }).lean();
-      if (item) return serializeDoc(item);
-    }
-  } catch (err) {
-    console.error('Error fetching project by slug:', err.message);
-  }
-  return null;
-}
-
-export async function upsertProject(projectData) {
-  try {
-    const conn = await connectToDatabase();
-    if (!conn) throw new Error('Database connection failed');
-
-    const filter = projectData.id && projectData.id.length === 24
-      ? { _id: projectData.id }
-      : { slug: projectData.slug };
-
-    const { id, _id, ...cleanData } = projectData;
-
-    const updated = await Project.findOneAndUpdate(
-      filter,
-      { $set: cleanData },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    ).lean();
-
-    return serializeDoc(updated);
-  } catch (err) {
-    console.error('MongoDB upsertProject error:', err.message);
-    throw err;
-  }
-}
-
-export async function deleteProject(idOrSlug, title = '') {
-  try {
-    const conn = await connectToDatabase();
-    if (!conn) throw new Error('Database connection failed');
-
-    // Guarantee initialized marker is saved so count reaching 0 never resurrects default demo projects
-    try {
-      const db = conn.connection.db;
-      await db.collection('settings').updateOne(
-        { key: 'projects_initialized' },
-        { $set: { key: 'projects_initialized', initializedAt: new Date() } },
-        { upsert: true }
-      );
-    } catch (e) {}
-
-    const isValidObjectId = typeof idOrSlug === 'string' && /^[0-9a-fA-F]{24}$/.test(idOrSlug);
-    let deleted = null;
-    if (isValidObjectId) {
-      deleted = await Project.findByIdAndDelete(idOrSlug);
-    }
-
-    if (!deleted) {
-      const orConditions = [];
-      if (isValidObjectId) orConditions.push({ _id: idOrSlug });
-      if (idOrSlug && idOrSlug !== 'undefined' && idOrSlug !== 'null') {
-        orConditions.push({ id: idOrSlug });
-        orConditions.push({ slug: idOrSlug });
-        orConditions.push({ title: idOrSlug });
-      }
-      if (title && title.trim()) {
-        orConditions.push({ title: title.trim() });
-      }
-
-      if (orConditions.length > 0) {
-        deleted = await Project.findOneAndDelete({ $or: orConditions });
-      }
-    }
-    return true;
-  } catch (err) {
-    console.error('MongoDB deleteProject error:', err.message);
     throw err;
   }
 }
@@ -535,13 +365,16 @@ export async function upsertGallery(galleryData) {
     if (!conn) throw new Error('Database connection failed');
 
     const { id, _id, ...cleanData } = galleryData;
+    if (cleanData.showOnHome !== undefined) {
+      cleanData.showOnHome = Boolean(cleanData.showOnHome);
+    }
 
     let doc;
     if (id && id.length === 24) {
       doc = await Gallery.findByIdAndUpdate(
         id,
         { $set: cleanData },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       ).lean();
     } else {
       doc = await Gallery.create(cleanData);
@@ -739,7 +572,7 @@ export async function upsertVideo(videoData) {
       updated = await Video.findByIdAndUpdate(
         targetId,
         { $set: cleanData },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       ).lean();
     }
 
@@ -752,7 +585,7 @@ export async function upsertVideo(videoData) {
           ...(cleanData.title ? [{ title: cleanData.title }] : [])
         ] },
         { $set: cleanData },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
       ).lean();
     }
 
@@ -906,7 +739,7 @@ export async function upsertClient(clientData) {
       doc = await Client.findByIdAndUpdate(
         id,
         { $set: cleanData },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       ).lean();
     } else {
       doc = await Client.create(cleanData);
@@ -1035,8 +868,8 @@ const FALLBACK_PRODUCTS = [
     title: 'ANIDERS (Animal Intrusion Detection and Repellent System)',
     slug: 'aniders-animal-intrusion-detection-system',
     category: 'Wildlife Deterrence & Smart Sensors',
-    modelCode: 'KYARI-ANIDERS-GEN3',
-    shortDescription: 'NTCA Award-winning autonomous solar-powered electronic bio-acoustic scarecrow that automatically senses approaching wildlife and safely repels them without electric shocks or physical injury.',
+    modelCode: 'KR-ANIDERS-GEN3',
+    shortDescription: 'Autonomous solar-powered electronic bio-acoustic scarecrow that automatically senses approaching wildlife and safely repels them without electric shocks or physical injury.',
     featuredImage: '/details.jpeg',
     price: 'Available on GeM / Official Forest Dept Quote',
     status: 'published',
@@ -1049,27 +882,27 @@ const FALLBACK_PRODUCTS = [
       { label: 'Monsoon Autonomy', value: 'Up to 10 consecutive cloudy / rain days without direct sunlight' },
       { label: 'Enclosure Rating', value: 'IP67 Weatherproof, UV-stabilized heavy-duty polymer' },
       { label: 'Target Animals', value: 'Elephants, wild boars, nilgai, leopards, deer, tigers, bears' },
-      { label: 'Field Efficacy', value: '91% verified conflict reduction across 21+ state forest departments' }
+      { label: 'Field Efficacy', value: 'Proven conflict reduction across forest fringes and agricultural belts' }
     ],
     features: [
-      '100% Non-Lethal: Strictly zero electric shock, zero projectiles, zero toxicity to wildlife or humans',
+      'Strictly Non-Lethal: Zero electric shock, zero projectiles, zero toxicity to wildlife or humans',
       'Anti-Habituation Intelligence: Randomizes audio frequencies and flashing cadences on every trigger',
       'Plug & Play Field Installation: Mounts to wooden poles, bamboo stakes, or trees in under 15 minutes',
-      'Shark Tank India & NTCA Winner: Nationally acclaimed and officially adopted by state forest circles'
+      'Field-Tested Reliability: Adopted for human-wildlife conflict mitigation across forest divisions'
     ],
     applications: [
       'Elephant corridors and sugarcane farm fringes bordering protected reserves',
       'Forest village agricultural boundaries, fruit orchards, highway crossings'
     ],
-    compliance: 'National Tiger Conservation Authority (NTCA) Innovation Recognition, WII Field Verified',
-    content: 'ANIDERS stands for Animal Intrusion Detection and Repellent System, created by Kyari Innovations and distributed across Eastern India by KR Environ Solutions. Widely recognized on Shark Tank India and awarded the National Budding Innovator Award by the National Tiger Conservation Authority (NTCA), ANIDERS acts as an intelligent electronic watchman. Utilizing passive infrared (PIR) and microwave Doppler radar sensors, it senses the entry of large animals (elephants, wild boars, blue bulls/nilgai, leopards, tigers) up to 30 meters away. Upon detection, it automatically triggers a proprietary algorithmic sequence of randomized acoustic distress sounds, ultrasonic sirens, and strobing flashlights. Over 30 variable patterns guarantee that animals never grow habituated to the device. Over 1,400 systems are actively deployed across 21+ state forest departments, achieving a verified 91% conflict reduction.'
+    compliance: 'Forest Department & Wildlife Conservation Field Verified',
+    content: 'ANIDERS stands for Animal Intrusion Detection and Repellent System, supplied across Eastern India by KR Environ Solutions. ANIDERS acts as an intelligent electronic watchman. Utilizing passive infrared (PIR) and microwave Doppler radar sensors, it senses the entry of large animals (elephants, wild boars, blue bulls/nilgai, leopards, tigers) up to 30 meters away. Upon detection, it automatically triggers an algorithmic sequence of randomized acoustic distress sounds, ultrasonic sirens, and strobing flashlights. Over 30 variable patterns guarantee that animals never grow habituated to the device, safeguarding crops and fringe habitats safely.'
   },
   {
     id: 'prod-5',
     title: 'Smart Stick Forester (Solar Ranger Tactical Patrol Baton)',
     slug: 'smart-stick-forester',
     category: 'Frontline Ranger Gear',
-    modelCode: 'KYARI-SSF-PRO',
+    modelCode: 'KR-SSF-PRO',
     shortDescription: 'Multi-functional tactical safety and patrol baton for frontline forest guards featuring solar recharging, non-lethal self-defense electroshock deterrent, 120dB SOS siren, and tactical torch.',
     featuredImage: '/img4.jpeg',
     price: 'State Forest Framework Contract',
@@ -1093,15 +926,15 @@ const FALLBACK_PRODUCTS = [
     applications: [
       'Tiger reserve foot patrols, anti-poaching squads, night ambush operations, trek guides, wildlife rescue teams'
     ],
-    compliance: 'Tested across 21+ state forest divisions including Valmiki Tiger Reserve, Similipal, and Ladakh',
-    content: 'Frontline forest rangers and anti-poaching squads trek tens of kilometers on foot every day through dense, remote jungles inhabited by dangerous predators and poachers. The Smart Stick Forester, developed by Kyari Innovations, replaces archaic wooden lathis with an aerospace-grade tactical survival device. Built from anodized aluminum alloy, the baton integrates a high-voltage, non-lethal micro-current stun probe for emergency defense against aggressive animals, a deafening 120dB acoustic distress siren heard up to 1.5 km away, an ultra-bright 800-lumen LED searchlight with SOS strobe, an emergency power bank for mobile/radio recharge, and a built-in solar panel for perpetual charging in deep forests.'
+    compliance: 'Field-tested across tiger reserves and wildlife divisions in India',
+    content: 'Frontline forest rangers and anti-poaching squads trek tens of kilometers on foot every day through dense, remote jungles inhabited by dangerous predators and poachers. The Smart Stick Forester replaces archaic wooden lathis with an aerospace-grade tactical survival device. Built from anodized aluminum alloy, the baton integrates a high-voltage, non-lethal micro-current stun probe for emergency defense against aggressive animals, a deafening 120dB acoustic distress siren heard up to 1.5 km away, an ultra-bright 800-lumen LED searchlight with SOS strobe, an emergency power bank for mobile/radio recharge, and a built-in solar panel for perpetual charging in deep forests.'
   },
   {
     id: 'prod-6',
     title: 'KyNet Humane Animal Rescue Net Gun',
     slug: 'kynet-humane-animal-rescue-net-gun',
     category: 'Humane Capture & Rescue',
-    modelCode: 'KYARI-KYNET-50',
+    modelCode: 'KR-KYNET-50',
     shortDescription: 'Handheld pneumatic net capture launcher designed for the humane, instantaneous capture and safe containment of leopards, stray primates, aggressive canines, and wild boars without chemical sedation.',
     featuredImage: '/img3.jpeg',
     price: 'Municipal & Forest Dept Authorized Supply',
@@ -1126,14 +959,14 @@ const FALLBACK_PRODUCTS = [
       'Urban leopard rescues, rapid response monkey containment, veterinary rescue circles, rabies control squads'
     ],
     compliance: 'Standard Operating Procedure (SOP) compliant for humane animal rescue in human habitations',
-    content: 'Chemical darting of urban leopards and aggressive wildlife in crowded Indian settlements involves severe hazards: tranquilizers take 10 to 25 minutes to take effect, during which terrified animals frequently attack bystanders or drown in wells. KyNet is an innovative pneumatic animal rescue net launcher developed by Kyari Innovations. Triggered electronically or via compressed pneumatic cartridge, KyNet instantly launches an 18-square-meter knotless ballistic nylon net with perimeter corner weights at a velocity that immobilizes the animal safely within 15 to 25 meters in under 2 seconds. The reusable net avoids lacerations, allowing veterinary squads to immediately secure and transport the animal.'
+    content: 'Chemical darting of urban leopards and aggressive wildlife in crowded Indian settlements involves severe hazards: tranquilizers take 10 to 25 minutes to take effect, during which terrified animals frequently attack bystanders or drown in wells. KyNet is a pneumatic animal rescue net launcher supplied by KR Environ Solutions. Triggered electronically or via compressed pneumatic cartridge, KyNet instantly launches an 18-square-meter knotless ballistic nylon net with perimeter corner weights at a velocity that immobilizes the animal safely within 15 to 25 meters in under 2 seconds. The reusable net avoids lacerations, allowing veterinary squads to immediately secure and transport the animal.'
   },
   {
     id: 'prod-7',
     title: 'Re-Pulse Smart Wildlife Intrusion Shock Mat',
     slug: 'repulse-mat-smart-deterrent',
     category: 'Perimeter Security & Ground Deterrents',
-    modelCode: 'KYARI-REPULSE-MAT',
+    modelCode: 'KR-REPULSE-MAT',
     shortDescription: 'Heavy-duty pulsed ground shock mat for perimeter trenches, agricultural gateways, and railway approaches that delivers a safe, startling micro-current pulse preventing elephant access.',
     featuredImage: '/img5.jpeg',
     price: 'Custom Corridor Installation Quote',
@@ -1191,17 +1024,17 @@ const FALLBACK_PRODUCTS = [
   },
   {
     id: 'prod-9',
-    title: 'Kyari Self-Watering Planters & Smart Pots',
-    slug: 'kyari-self-watering-smart-planters',
+    title: 'Smart Self-Watering Planters & Eco Pots',
+    slug: 'self-watering-smart-planters',
     category: 'Eco & Smart Green Solutions',
-    modelCode: 'KYARI-SWP-SERIES',
-    shortDescription: 'Patented sub-irrigation self-watering pots with detachable transparent water reservoir base, capillary wicking technology, and UV-stabilized recyclable virgin polymer.',
+    modelCode: 'KR-SWP-SERIES',
+    shortDescription: 'Sub-irrigation self-watering pots with detachable transparent water reservoir base, capillary wicking technology, and UV-stabilized recyclable virgin polymer.',
     featuredImage: '/visitingcard.jpeg',
     price: 'Corporate & Green Office Bulk Packs',
     status: 'published',
     displayOrder: 9,
     specs: [
-      { label: 'Irrigation Mechanism', value: 'Patented Capillary Wicking Sub-Irrigation System' },
+      { label: 'Irrigation Mechanism', value: 'Capillary Wicking Sub-Irrigation System' },
       { label: 'Watering Frequency', value: 'Refill required only once every 10 to 14 days' },
       { label: 'Reservoir Base', value: 'Detachable crystal-clear transparent viewing base for water level monitoring' },
       { label: 'Material', value: '100% Recyclable UV-stabilized virgin polymer (BPA-free & non-toxic)' },
@@ -1212,21 +1045,20 @@ const FALLBACK_PRODUCTS = [
     features: [
       'Zero Guesswork Plant Care: Transparent reservoir lets anyone see exactly when to add water',
       'Root Rot Prevention: Bottom-up capillary uptake keeps the root crown ventilated and oxygenated',
-      'Mess-Free & Spill-Proof: No messy overflow saucers or stained floorboards',
-      'Featured on Shark Tank India: Nationally acclaimed Indian consumer green innovation'
+      'Mess-Free & Spill-Proof: No messy overflow saucers or stained floorboards'
     ],
     applications: [
       'Corporate office workstations, hotel lobbies, eco-conscious residences, institutional botanical decor, corporate gifting'
     ],
     compliance: 'BPA-Free, RoHS Recyclable Polymer Certified',
-    content: 'As showcased on Shark Tank India and available through Kyari (https://kyari.in/), Kyari flagship self-watering planters revolutionize plant care for busy homeowners, offices, and green infrastructure projects. Traditional potted plants fail due to root rot from overwatering or desiccation from underwatering. Kyari intelligent capillary sub-irrigation system mimics natural groundwater hydrology: plants draw only the exact amount of moisture their root systems require from the bottom reservoir via high-absorption capillary wicks. The detachable clear-view reservoir base allows users to visually inspect water levels at a glance, extending refill intervals to 10–14 days. Crafted from UV-treated recyclable high-density polymer that resists color fading, cracking, and water leakage.'
+    content: 'Our flagship self-watering planters simplify plant care for homeowners, offices, and green infrastructure projects. Traditional potted plants fail due to root rot from overwatering or desiccation from underwatering. This capillary sub-irrigation system mimics natural groundwater hydrology: plants draw only the exact amount of moisture their root systems require from the bottom reservoir via high-absorption capillary wicks. The detachable clear-view reservoir base allows users to visually inspect water levels at a glance, extending refill intervals to 10–14 days. Crafted from UV-treated recyclable high-density polymer that resists color fading, cracking, and water leakage.'
   },
   {
     id: 'prod-10',
-    title: 'Kyari Hydrating Pen (Sub-Surface Soil Moisture Indicator)',
-    slug: 'kyari-hydrating-pen-moisture-indicator',
+    title: 'Eco Hydrating Pen (Sub-Surface Soil Moisture Indicator)',
+    slug: 'hydrating-pen-moisture-indicator',
     category: 'Eco & Smart Green Solutions',
-    modelCode: 'KYARI-HYDRO-PEN',
+    modelCode: 'KR-HYDRO-PEN',
     shortDescription: 'Battery-free visual soil moisture sensor pen that accurately monitors root-zone hydration through optical capillary color-shifting indicators.',
     featuredImage: '/logo.jpeg',
     price: 'Retail & Bulk Green Kits',
@@ -1249,14 +1081,14 @@ const FALLBACK_PRODUCTS = [
       'Indoor potted gardens, nursery propagation tables, green office maintenance, bonsai and exotic plant care'
     ],
     compliance: 'Non-toxic, Eco-safe soil contact certified',
-    content: 'The Kyari Hydrating Pen is a proprietary, precision plant care diagnostic tool created by Kyari (https://kyari.in/). Over 70% of indoor plant mortality is caused by inaccurate surface-soil guesswork: the top layer may look dry while root zones remain suffocated in water. Inserted directly into the potting mix near the root cluster, the Kyari Hydrating Pen utilizes treated micro-porous optical core material that turns vivid blue when adequate moisture is present at root level and shifts to pure white when roots require watering. It requires no batteries, electricity, or maintenance.'
+    content: 'The Eco Hydrating Pen is a precision plant care diagnostic tool. Over 70% of indoor plant mortality is caused by inaccurate surface-soil guesswork: the top layer may look dry while root zones remain suffocated in water. Inserted directly into the potting mix near the root cluster, the Hydrating Pen utilizes treated micro-porous optical core material that turns vivid blue when adequate moisture is present at root level and shifts to pure white when roots require watering. It requires no batteries, electricity, or maintenance.'
   },
   {
     id: 'prod-11',
-    title: 'Kyari Modular Vertical Garden & Living Wall System',
-    slug: 'kyari-modular-vertical-garden-system',
+    title: 'Modular Vertical Garden & Living Wall System',
+    slug: 'modular-vertical-garden-system',
     category: 'Eco & Smart Green Solutions',
-    modelCode: 'KYARI-VERT-WALL',
+    modelCode: 'KR-VERT-WALL',
     shortDescription: 'Engineered modular living green wall system with integrated self-watering drip channels for commercial building facades, urban cooling, and corporate interior air purification.',
     featuredImage: '/img1.jpeg',
     price: 'Per Square Meter Turnkey Supply & Installation',
@@ -1279,15 +1111,15 @@ const FALLBACK_PRODUCTS = [
       'Commercial building facades, IT park atriums, government office corridors, airport lounges, sustainable green infrastructure'
     ],
     compliance: 'IGBC Green Building Credits Compatible, GRIHA Standard',
-    content: 'Rapid urbanization has reduced urban green cover, worsening ambient air quality and building heat gain. KR Environ Solutions, integrating green innovations from Kyari (https://kyari.in/), delivers turnkey Modular Vertical Living Wall installations. Each lightweight, interlocking module features engineered multi-pocket planters with root-retaining felt and sub-irrigation channels. Capable of housing diverse air-purifying foliage like Nephrolepis ferns, Philodendrons, Syngoniums, and Aglaonemas, the living wall acts as a bio-filter that removes airborne VOCs, reduces interior temperatures by 3–5°C, and dampens ambient noise.'
+    content: 'Rapid urbanization has reduced urban green cover, worsening ambient air quality and building heat gain. KR Environ Solutions delivers turnkey Modular Vertical Living Wall installations. Each lightweight, interlocking module features engineered multi-pocket planters with root-retaining felt and sub-irrigation channels. Capable of housing diverse air-purifying foliage like Nephrolepis ferns, Philodendrons, Syngoniums, and Aglaonemas, the living wall acts as a bio-filter that removes airborne VOCs, reduces interior temperatures by 3–5°C, and dampens ambient noise.'
   },
   {
     id: 'prod-12',
-    title: 'Kyari Air-Purifying & Vastu Indoor Ecosystem Planters',
-    slug: 'kyari-air-purifying-vastu-ecosystem-planters',
+    title: 'Air-Purifying & Vastu Indoor Ecosystem Planters',
+    slug: 'air-purifying-vastu-ecosystem-planters',
     category: 'Eco & Smart Green Solutions',
-    modelCode: 'KYARI-ECO-TRIO',
-    shortDescription: 'Curated NASA-approved air-purifying plants (Snake Plant, Golden Pothos, Jade, ZZ) paired with designer Kyari self-watering pots for healthy workspaces and clean indoor air.',
+    modelCode: 'KR-ECO-TRIO',
+    shortDescription: 'Curated NASA-approved air-purifying plants (Snake Plant, Golden Pothos, Jade, ZZ) paired with designer self-watering pots for healthy workspaces and clean indoor air.',
     featuredImage: '/img4.jpeg',
     price: 'Institutional & Corporate Subscription Sets',
     status: 'published',
@@ -1295,7 +1127,7 @@ const FALLBACK_PRODUCTS = [
     specs: [
       { label: 'Included Botanical Varieties', value: 'Sansevieria (Snake), Golden Pothos (Money Plant), Jade Plant, ZZ Plant' },
       { label: 'Air Purification Benchmark', value: 'Removes formaldehyde, benzene, trichloroethylene, and airborne micro-dust' },
-      { label: 'Planter Included', value: 'Kyari Premium Self-Watering Pots with sub-irrigation capillary reservoirs' },
+      { label: 'Planter Included', value: 'Premium Self-Watering Pots with sub-irrigation capillary reservoirs' },
       { label: 'Growing Medium', value: 'Sterilized pathogen-free coco-peat, vermiculite, and active bio-char mix' },
       { label: 'Maintenance Requirement', value: 'Minimal light tolerant (50–100 foot-candles); watered once every 12 days' },
       { label: 'Packaging', value: 'Specially engineered breathable corrugated transit box ensuring 100% plant arrival vitality' }
@@ -1309,7 +1141,7 @@ const FALLBACK_PRODUCTS = [
       'Government ministry suites, executive boardrooms, healthcare reception spaces, green building projects'
     ],
     compliance: 'NASA Clean Air Study Approved Botanical Selections',
-    content: 'Indoor air within enclosed offices and buildings can be 2 to 5 times more polluted than outdoor air due to synthetic carpets, paint VOCs, and carbon dioxide buildup. Kyari curated Air-Purifying & Vastu Eco-Sets combine scientifically validated NASA Clean Air Study botanical varieties with Kyari signature self-watering planters. Featuring resilient varieties such as Sansevieria trifasciata (Snake Plant, which releases oxygen at night), Epipremnum aureum (Golden Pothos, which absorbs xylene and benzene), and Crassula ovata (Lucky Jade Plant for positive Vastu energy). Pre-planted in nutrient-rich organic soil-less potting substrate with balanced slow-release bio-fertilizers.'
+    content: 'Indoor air within enclosed offices and buildings can be 2 to 5 times more polluted than outdoor air due to synthetic carpets, paint VOCs, and carbon dioxide buildup. Our curated Air-Purifying & Vastu Eco-Sets combine scientifically validated NASA Clean Air Study botanical varieties with signature self-watering planters. Featuring resilient varieties such as Sansevieria trifasciata (Snake Plant, which releases oxygen at night), Epipremnum aureum (Golden Pothos, which absorbs xylene and benzene), and Crassula ovata (Lucky Jade Plant for positive Vastu energy). Pre-planted in nutrient-rich organic soil-less potting substrate with balanced slow-release bio-fertilizers.'
   }
 ];
 
@@ -1326,7 +1158,7 @@ export async function getProducts() {
           await Product.findOneAndUpdate(
             { slug: clean.slug },
             { $set: clean },
-            { upsert: true, new: true, setDefaultsOnInsert: true }
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
           ).catch(() => {});
         }
         const seeded = await Product.find().sort({ displayOrder: 1, createdAt: -1 }).lean();
@@ -1369,7 +1201,7 @@ export async function upsertProduct(productData) {
     const updated = await Product.findOneAndUpdate(
       filter,
       { $set: cleanData },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     ).lean();
 
     return serializeDoc(updated);
@@ -1480,7 +1312,7 @@ export async function getPartners() {
         await Partner.findOneAndUpdate(
           { name: clean.name },
           { $set: clean },
-          { upsert: true, new: true, setDefaultsOnInsert: true }
+          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
         ).catch(() => {});
       }
 
@@ -1512,7 +1344,7 @@ export async function upsertPartner(partnerData) {
     const updated = await Partner.findOneAndUpdate(
       filter,
       { $set: cleanData },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     ).lean();
 
     return serializeDoc(updated);
@@ -1587,17 +1419,10 @@ const FALLBACK_CERTIFICATES = [
   },
   {
     id: 'cert-5',
-    title: 'National Tiger Conservation Authority (NTCA) Award Citation',
-    pdfUrl: 'https://drive.google.com/file/d/1v8UuX-example-ntca/preview',
-    issuingAuthority: 'National Tiger Conservation Authority & Ministry of Environment',
-    displayOrder: 5
-  },
-  {
-    id: 'cert-6',
     title: 'Statutory Forest & Environmental Clearance Empanelment Dossier',
     pdfUrl: 'https://drive.google.com/file/d/1v8UuX-example-forest-clearance/preview',
     issuingAuthority: 'Forest, Environment & Climate Change Department, Jharkhand',
-    displayOrder: 6
+    displayOrder: 5
   }
 ];
 
@@ -1674,7 +1499,7 @@ export async function upsertCertificate(certificateData) {
       updated = await Certificate.findByIdAndUpdate(
         targetId,
         { $set: cleanData },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       ).lean();
     } else {
       const orConditions = [];
@@ -1686,7 +1511,7 @@ export async function upsertCertificate(certificateData) {
         updated = await Certificate.findOneAndUpdate(
           { $or: orConditions },
           { $set: cleanData },
-          { upsert: true, new: true, setDefaultsOnInsert: true }
+          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
         ).lean();
       } else {
         updated = await Certificate.create(cleanData);
@@ -1737,6 +1562,240 @@ export async function deleteCertificate(idOrQuery, title = '') {
     return true;
   } catch (err) {
     console.error('MongoDB deleteCertificate error:', err.message);
+    throw err;
+  }
+}
+
+// ==================== CAREERS & STUDENT APPLICATIONS ====================
+export async function getCareers({ includeClosed = false } = {}) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) return [];
+
+    const query = includeClosed ? {} : { status: 'open' };
+    const items = await Career.find(query).sort({ displayOrder: 1, createdAt: -1 }).lean();
+    return items.map(serializeDoc);
+  } catch (err) {
+    console.error('Error fetching careers from MongoDB:', err.message);
+    return [];
+  }
+}
+
+export async function upsertCareer(careerData) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    const targetId = careerData.id || careerData._id;
+    const isValidObjectId = targetId && typeof targetId === 'string' && /^[0-9a-fA-F]{24}$/.test(targetId);
+
+    const { id, _id, ...cleanData } = careerData;
+    if (!cleanData.slug && cleanData.title) {
+      cleanData.slug = cleanData.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+
+    let updated;
+    if (isValidObjectId) {
+      updated = await Career.findByIdAndUpdate(
+        targetId,
+        { $set: cleanData },
+        { returnDocument: 'after', runValidators: true }
+      ).lean();
+    } else {
+      updated = await Career.create(cleanData);
+    }
+
+    return serializeDoc(updated);
+  } catch (err) {
+    console.error('MongoDB upsertCareer error:', err.message);
+    throw err;
+  }
+}
+
+export async function deleteCareer(id) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+    await Career.findByIdAndDelete(id);
+    return true;
+  } catch (err) {
+    console.error('MongoDB deleteCareer error:', err.message);
+    throw err;
+  }
+}
+
+export async function getCareerApplications() {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) return [];
+
+    const items = await CareerApplication.find().sort({ createdAt: -1 }).lean();
+    return items.map(serializeDoc);
+  } catch (err) {
+    console.error('Error fetching career applications from MongoDB:', err.message);
+    return [];
+  }
+}
+
+export async function createCareerApplication(appData) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    const created = await CareerApplication.create(appData);
+    return serializeDoc(created);
+  } catch (err) {
+    console.error('MongoDB createCareerApplication error:', err.message);
+    throw err;
+  }
+}
+
+export async function updateCareerApplicationStatus(id, status) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    const updated = await CareerApplication.findByIdAndUpdate(
+      id,
+      { $set: { status } },
+      { returnDocument: 'after', runValidators: true }
+    ).lean();
+    return serializeDoc(updated);
+  } catch (err) {
+    console.error('MongoDB updateCareerApplicationStatus error:', err.message);
+    throw err;
+  }
+}
+
+export async function deleteCareerApplication(id) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+    await CareerApplication.findByIdAndDelete(id);
+    return true;
+  } catch (err) {
+    console.error('MongoDB deleteCareerApplication error:', err.message);
+    throw err;
+  }
+}
+
+// ==================== ABOUT US CAROUSEL IMAGES ====================
+const FALLBACK_ABOUT_IMAGES = [
+  {
+    id: 'about-1',
+    title: 'Sarika Gupta in consultation at D.F.O. Ranchi Desk',
+    imageUrl: '/img1.jpeg',
+    displayOrder: 0
+  },
+  {
+    id: 'about-2',
+    title: 'Institutional Forestry & Environmental Engagement',
+    imageUrl: '/img2.jpeg',
+    displayOrder: 1
+  },
+  {
+    id: 'about-3',
+    title: 'Conservation & Statutory Clearance Briefing',
+    imageUrl: '/img3.jpeg',
+    displayOrder: 2
+  }
+];
+
+let aboutImagesInitPromise = null;
+async function ensureAboutImagesInitialized() {
+  if (aboutImagesInitPromise) return aboutImagesInitPromise;
+
+  aboutImagesInitPromise = (async () => {
+    try {
+      const conn = await connectToDatabase();
+      if (!conn) return;
+
+      const count = await AboutImage.countDocuments();
+      if (count > 0) return;
+
+      const db = conn.connection.db;
+      const settingsCol = db.collection('settings');
+      const marker = await settingsCol.findOne({ key: 'about_images_initialized' });
+      if (marker) return;
+
+      for (const img of FALLBACK_ABOUT_IMAGES) {
+        const { id, ...clean } = img;
+        await AboutImage.create(clean).catch(() => {});
+      }
+
+      await settingsCol.updateOne(
+        { key: 'about_images_initialized' },
+        { $set: { key: 'about_images_initialized', initializedAt: new Date() } },
+        { upsert: true }
+      ).catch(() => {});
+    } catch (e) {
+      console.error('ensureAboutImagesInitialized error:', e.message);
+    }
+  })();
+
+  return aboutImagesInitPromise;
+}
+
+export async function getAboutImages() {
+  try {
+    const conn = await connectToDatabase();
+    if (conn) {
+      await ensureAboutImagesInitialized();
+      const items = await AboutImage.find().sort({ displayOrder: 1, createdAt: 1 }).lean();
+      if (items && items.length > 0) {
+        return items.map(serializeDoc);
+      }
+      const marker = await conn.connection.db.collection('settings').findOne({ key: 'about_images_initialized' });
+      if (marker) return [];
+    }
+  } catch (err) {
+    console.error('Error fetching about images from MongoDB:', err.message);
+  }
+  return FALLBACK_ABOUT_IMAGES;
+}
+
+export async function upsertAboutImage(imageData) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    await ensureAboutImagesInitialized();
+
+    const targetId = imageData.id || imageData._id;
+    const isValidObjectId = targetId && typeof targetId === 'string' && /^[0-9a-fA-F]{24}$/.test(targetId);
+    const { id, _id, ...cleanData } = imageData;
+
+    let updated;
+    if (isValidObjectId) {
+      updated = await AboutImage.findByIdAndUpdate(
+        targetId,
+        { $set: cleanData },
+        { returnDocument: 'after', runValidators: true }
+      ).lean();
+    } else {
+      updated = await AboutImage.create(cleanData);
+    }
+
+    return serializeDoc(updated);
+  } catch (err) {
+    console.error('MongoDB upsertAboutImage error:', err.message);
+    throw err;
+  }
+}
+
+export async function deleteAboutImage(id) {
+  try {
+    const conn = await connectToDatabase();
+    if (!conn) throw new Error('Database connection failed');
+
+    await ensureAboutImagesInitialized();
+    await AboutImage.findByIdAndDelete(id);
+    return true;
+  } catch (err) {
+    console.error('MongoDB deleteAboutImage error:', err.message);
     throw err;
   }
 }
