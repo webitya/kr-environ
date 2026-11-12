@@ -31,19 +31,47 @@ export default function HomeHero() {
   const userToggledRef = useRef(false);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Attempt audible autoplay first; fall back to muted + unlock on first interaction if browser blocks unmuted autoplay
+  // Attempt audible autoplay by default; handle AbortError cleanly and unlock on first gesture only if browser throws NotAllowedError
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     let unlockListener = null;
+    let canPlayListener = null;
 
-    const removeUnlock = () => {
+    const removeListeners = () => {
       if (unlockListener) {
-        window.removeEventListener('pointerdown', unlockListener);
-        window.removeEventListener('keydown', unlockListener);
+        document.removeEventListener('click', unlockListener, true);
+        document.removeEventListener('pointerdown', unlockListener, true);
+        document.removeEventListener('touchstart', unlockListener, true);
+        document.removeEventListener('keydown', unlockListener, true);
         unlockListener = null;
       }
+      if (canPlayListener) {
+        video.removeEventListener('canplay', canPlayListener);
+        canPlayListener = null;
+      }
+    };
+
+    const attachGestureUnlock = () => {
+      if (unlockListener) return;
+      unlockListener = (e) => {
+        if (e.target && e.target.closest && e.target.closest('[data-hero-mute-btn]')) {
+          removeListeners();
+          return;
+        }
+        if (!userToggledRef.current && videoRef.current) {
+          videoRef.current.muted = false;
+          videoRef.current.volume = 1;
+          videoRef.current.play().catch(() => {});
+          setIsMuted(false);
+        }
+        removeListeners();
+      };
+      document.addEventListener('click', unlockListener, { capture: true, passive: true });
+      document.addEventListener('pointerdown', unlockListener, { capture: true, passive: true });
+      document.addEventListener('touchstart', unlockListener, { capture: true, passive: true });
+      document.addEventListener('keydown', unlockListener, { capture: true, passive: true });
     };
 
     const startPlayback = async () => {
@@ -53,33 +81,34 @@ export default function HomeHero() {
         video.volume = 1;
         await video.play();
         setIsMuted(false);
-      } catch {
+      } catch (err) {
+        if (err && err.name === 'AbortError') {
+          canPlayListener = () => {
+            video.muted = false;
+            video.volume = 1;
+            video.play()
+              .then(() => setIsMuted(false))
+              .catch(() => {
+                video.muted = true;
+                setIsMuted(true);
+                video.play().catch(() => {});
+                attachGestureUnlock();
+              });
+          };
+          video.addEventListener('canplay', canPlayListener, { once: true });
+          return;
+        }
+
         video.muted = true;
         setIsMuted(true);
         video.play().catch(() => {});
-
-        unlockListener = (e) => {
-          if (e.target && e.target.closest && e.target.closest('[data-hero-mute-btn]')) {
-            removeUnlock();
-            return;
-          }
-          if (!userToggledRef.current && videoRef.current) {
-            videoRef.current.muted = false;
-            videoRef.current.volume = 1;
-            videoRef.current.play().catch(() => {});
-            setIsMuted(false);
-          }
-          removeUnlock();
-        };
-
-        window.addEventListener('pointerdown', unlockListener, { passive: true });
-        window.addEventListener('keydown', unlockListener, { passive: true });
+        attachGestureUnlock();
       }
     };
 
     startPlayback();
 
-    return () => removeUnlock();
+    return () => removeListeners();
   }, []);
 
   const toggleMute = () => {

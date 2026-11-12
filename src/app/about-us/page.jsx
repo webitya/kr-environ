@@ -28,25 +28,40 @@ const leaders = [
   {
     name: "Sarika Gupta",
     role: "Proprietor | Lead Environmental Analyst",
-    qualifications: "MSc (Environmental Science) (Lucknow University) • MSc (Geoinformatics)",
+    qualifications: "MSc (Environmental Science, Lucknow University) • MSc (Geoinformatics)",
     experience: "15+ years experience as an Environmental Analyst",
-    bio: "Pioneering environmental analyst and proprietor of KR Environ Solutions. Spearheads statutory Environmental Clearances (EC), Forest Clearances (FC), GIS drone topography mapping, and Human-Wildlife Conflict mitigation across Jharkhand and India.",
+    bio: "Founder and proprietor of KR Environ Solutions, bridging statutory environmental compliance with modern ecological engineering across Jharkhand and pan-India.",
+    highlights: [
+      "Directs Environmental Clearance (EC), Forest Clearance (FC), CTE & CTO regulatory workflows",
+      "Leads high-precision GIS, KML, DGPS & drone topographical mapping surveys",
+      "Coordinates with State Forest Departments for Human-Wildlife Conflict mitigation & ranger gear"
+    ],
     designation: "Proprietor & Founder"
   },
   {
     name: "Dr. Raj Kumar",
     role: "Senior Forest Clearance & Silviculture Expert",
-    qualifications: "Doctorate (Forest Research Institute - FRI, Dehradun)",
-    experience: "10+ years specialized experience in Forest Regulatory Clearances",
-    bio: "Doctorate from India's premier forestry institution (FRI Dehradun). Specializes in statutory Forest Clearance dossiers, compensatory afforestation schemes, site-specific management plans, and institutional compliance frameworks.",
+    qualifications: "Ph.D. / Doctorate (Forest Research Institute – FRI, Dehradun)",
+    experience: "10+ years specialized experience in EC & Forest Regulatory Clearances",
+    bio: "Forestry doctorate from FRI Dehradun specializing in statutory Forest Clearance (FC) and Environmental Clearance (EC) procedures alongside proprietor Sarika Gupta across Jharkhand and India.",
+    highlights: [
+      "Prepares statutory FC dossiers & PARIVESH compliance under Van Sanrakshan Evam Samvardhan Adhiniyam",
+      "Designs Compensatory Afforestation (CA) schemes, silviculture prescriptions & soil-moisture plans",
+      "Advises linear infrastructure, mining & power projects on site-specific forest management plans"
+    ],
     designation: "Forest Clearance Expert"
   },
   {
     name: "Dr. Satya Prakash",
-    role: "Chief Wildlife Conservationist & Biodiversity Authority",
-    qualifications: "Doctorate / Eminent National Wildlife & Biodiversity Authority",
-    experience: "25+ years authoritative experience in Wildlife Management",
-    bio: "Renowned conservation biologist leading comprehensive biodiversity assessments across tiger reserves, elephant corridors, and fringe forests. Expert in humane non-lethal deterrent arrays and quick-response rescue protocols.",
+    role: "Chief Wildlife Conservationist & Ornithologist",
+    qualifications: "Ph.D. (Wildlife Biology) • President, Neo Human Foundation (NHF) • Member, Jharkhand State Wildlife Board",
+    experience: "25+ years authoritative experience in Wildlife, Avian & Biodiversity Management",
+    bio: "Renowned Hazaribagh-based wildlife biologist, IBCN State Coordinator, and BNHS/SAVE partner leading nationally recognized Gyps vulture recovery and biodiversity research across the Chota Nagpur Plateau.",
+    highlights: [
+      "Spearheaded the 100-km Hazaribagh Provisional Vulture Safe Zone (HPVSZ) & Koderma safe feeding sites with BNHS, RSPB & SAVE",
+      "Led anti-diclofenac veterinary advocacy (promoting safe meloxicam) & long-term nesting/roosting surveillance since 2007",
+      "Integrates avian & wildlife safeguards into railways, roads & power lines alongside tiger reserves and elephant corridors"
+    ],
     designation: "Wildlife Management Authority"
   }
 ];
@@ -241,6 +256,17 @@ export default function AboutUsPage() {
                     <p className="mt-4 text-xs sm:text-[13px] text-[#4B5563] font-manrope leading-relaxed">
                       {leader.bio}
                     </p>
+
+                    {leader.highlights && leader.highlights.length > 0 && (
+                      <ul className="mt-4 pt-3 border-t border-[#DCE5DD]/60 space-y-2 text-xs font-manrope text-[#4B5563]">
+                        {leader.highlights.map((item, hIdx) => (
+                          <li key={hIdx} className="flex items-start gap-2 leading-relaxed">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#216B35] shrink-0 mt-0.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               ))}
