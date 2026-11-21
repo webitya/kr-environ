@@ -268,7 +268,7 @@ export default function HomeHero() {
           className="w-full h-full object-cover scale-[1.01] transform-gpu"
         >
           <source 
-            src="https://res.cloudinary.com/fjdmukyv/video/upload/v1794487640/1104_2.mp4" 
+            src="https://res.cloudinary.com/fjdmukyv/video/upload/v1795236642/1121_1.mp4" 
             type="video/mp4" 
           />
         </video>
