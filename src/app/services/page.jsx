@@ -5,8 +5,7 @@ import { PhoneCall, ArrowRight } from 'lucide-react';
 import { getServices } from '@/lib/db';
 import ServicesGrid from '@/components/services/ServicesGrid';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export const metadata = {
   title: "Our Services & Solutions | KR Environ Solutions",

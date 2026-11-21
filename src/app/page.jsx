@@ -12,8 +12,7 @@ import HomeContact from '@/components/home/HomeContact';
 
 import { getAboutImages, getBlogs, getClients, getGallery, getProducts, getServices } from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation from admin updates
 
 export default async function HomePage() {
   const [aboutImages, blogs, clients, gallery, products, services] = await Promise.all([

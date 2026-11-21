@@ -3,8 +3,7 @@ import SiteFooter from '@/components/layout/SiteFooter';
 import GalleryClient from '@/components/gallery/GalleryClient';
 import { getGallery } from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export const metadata = {
   title: 'Field Operations & Equipment Gallery | KR Environ Solutions',

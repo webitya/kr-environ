@@ -3,8 +3,7 @@ import SiteFooter from '@/components/layout/SiteFooter';
 import { getCertificates } from '@/lib/db';
 import CertificatesClient from '@/components/certificates/CertificatesClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export const metadata = {
   title: "Our Certifications & Accreditations | KR Environ Solutions",

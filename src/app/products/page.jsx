@@ -5,8 +5,7 @@ import { PhoneCall, ArrowRight, ShieldCheck } from 'lucide-react';
 import { getProducts } from '@/lib/db';
 import ProductsClient from '@/components/products/ProductsClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export const metadata = {
   title: "Our Products & Conservation Hardware | KR Environ Solutions",

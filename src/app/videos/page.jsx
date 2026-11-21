@@ -4,8 +4,7 @@ import Container from '@/components/common/Container';
 import { getVideos } from '@/lib/db';
 import VideosClient from '@/components/videos/VideosClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export const metadata = {
   title: "Field Demonstrations & Media Coverage | KR Environ Solutions",

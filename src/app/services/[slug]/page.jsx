@@ -15,8 +15,7 @@ import {
 } from 'lucide-react';
 import { getServiceBySlug, getServices } from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;

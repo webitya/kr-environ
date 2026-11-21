@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createEnquiry, getEnquiries, deleteEnquiry } from '@/lib/db';
+import { createEnquiry, getEnquiries, deleteEnquiry, updateEnquiry } from '@/lib/db';
 import { sendEnquiryEmails } from '@/lib/mailer';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +49,23 @@ export async function DELETE(req) {
     }
     await deleteEnquiry(id);
     return NextResponse.json({ success: true, message: 'Enquiry deleted' });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(req) {
+  try {
+    const body = await req.json();
+    const { id, status, internalNotes, notes } = body;
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Enquiry ID is required' }, { status: 400 });
+    }
+    const updated = await updateEnquiry(id, {
+      status,
+      internalNotes: internalNotes !== undefined ? internalNotes : notes
+    });
+    return NextResponse.json({ success: true, enquiry: updated });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

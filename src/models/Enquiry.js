@@ -7,7 +7,13 @@ const EnquirySchema = new mongoose.Schema({
   phone: { type: String, required: true },
   service: { type: String, default: 'General Consultation' },
   message: { type: String, default: '' },
-  status: { type: String, enum: ['pending', 'contacted', 'resolved'], default: 'pending' },
+  status: { 
+    type: String, 
+    enum: ['pending', 'contacted', 'proposal', 'resolved', 'junk'], 
+    default: 'pending' 
+  },
+  internalNotes: { type: String, default: '' },
+  lastContactedAt: { type: Date },
   date: { type: Date, default: Date.now }
 }, {
   timestamps: true

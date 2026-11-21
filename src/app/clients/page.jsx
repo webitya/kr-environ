@@ -5,8 +5,7 @@ import { PhoneCall, Building2, ShieldCheck, Trees, Zap, Factory } from 'lucide-r
 import { getClients } from '@/lib/db';
 import ClientsGrid from '@/components/clients/ClientsGrid';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export const metadata = {
   title: "Our Clients & Institutional Associations | KR Environ Solutions",

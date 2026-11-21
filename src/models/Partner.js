@@ -6,11 +6,6 @@ const PartnerSchema = new mongoose.Schema({
     required: [true, 'Partner or organization name is required'],
     trim: true 
   },
-  category: { 
-    type: String, 
-    default: 'Technology & Hardware Alliance',
-    trim: true 
-  },
   logoUrl: { 
     type: String, 
     required: [true, 'Partner logo image URL is required'],

@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import { getBlogs } from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60s ISR with on-demand revalidation
 
 export const metadata = {
   title: "Our Blogs | KR Environ Solutions",
