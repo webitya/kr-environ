@@ -177,7 +177,10 @@ export default function SiteFooter() {
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+91 8317054180, 9155796749</span>
+                <span>
+                  <a href="tel:+919155796749" className="hover:text-white transition-colors">+91 91557 96749</a> (Primary),{' '}
+                  <a href="tel:+918317054180" className="hover:text-white transition-colors">+91 8317054180</a>
+                </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />

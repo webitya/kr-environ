@@ -158,7 +158,10 @@ export default function HomeContact({
                   </div>
                   <div>
                     <strong className="text-[#173B26] block text-xs uppercase tracking-wide">Contact Numbers:</strong>
-                    <span className="text-[#4B5563] block font-medium">+91 8317054180, +91 9155796749</span>
+                    <span className="text-[#4B5563] block font-medium">
+                      <a href="tel:+919155796749" className="hover:text-[#216B35] transition-colors">+91 91557 96749</a> (Primary),{' '}
+                      <a href="tel:+918317054180" className="hover:text-[#216B35] transition-colors">+91 8317054180</a>
+                    </span>
                     <span className="text-[#68756D] text-xs">Landline: 0651-4051577</span>
                   </div>
                 </div>

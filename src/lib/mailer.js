@@ -102,7 +102,7 @@ function buildEmailLayout({ badge, heading, intro, rows, footerNote }) {
               <tr>
                 <td style="background:#f5f8f3;padding:14px 24px;border-top:1px solid #dce5dd;font-size:12px;color:#68756d;">
                   KR Environ Solutions &bull; Ranchi (Jharkhand) &amp; Lucknow (UP)<br/>
-                  Phone: +91 8317054180, +91 9155796749 &bull; Landline: 0651-4051577
+                  Phone: +91 91557 96749 (Primary), +91 8317054180 &bull; Landline: 0651-4051577
                 </td>
               </tr>
             </table>
@@ -211,7 +211,7 @@ export async function sendEnquiryEmails(enquiry) {
       { label: 'Your Message', value: enquiry.message || '—' }
     ],
     customerFooterNote:
-      'If your request is urgent, feel free to call us at +91 8317054180 or +91 9155796749.'
+      'If your request is urgent, feel free to call us at +91 91557 96749 (Primary) or +91 8317054180.'
   });
 }
 

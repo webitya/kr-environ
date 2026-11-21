@@ -54,7 +54,7 @@ export default async function ProductDetailPage({ params }) {
     .slice(0, 3);
 
   const whatsappMessage = encodeURIComponent(
-    `Hello KR Environ Solutions, I would like to enquire about technical specifications and procurement for: ${product.title} (${product.modelCode || ''}).`
+    `Hello KR Environ Solutions, I would like to enquire about: ${product.title}.`
   );
 
   return (
@@ -135,7 +135,7 @@ export default async function ProductDetailPage({ params }) {
 
                   <div className="space-y-2 pt-1">
                     <a
-                      href={`https://wa.me/918317054180?text=${whatsappMessage}`}
+                      href={`https://wa.me/919155796749?text=${whatsappMessage}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-xs"

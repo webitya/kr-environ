@@ -1,15 +1,42 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Phone } from 'lucide-react';
 
+const PRIMARY_PHONE_DISPLAY = '+91 91557 96749';
+const PRIMARY_PHONE_TEL = '+919155796749';
+const PRIMARY_PHONE_WA = '919155796749';
+
 export default function FloatingContactButtons() {
   const pathname = usePathname();
+  const [pageContext, setPageContext] = useState('');
+
+  // Update context dynamically on client side when navigating
+  useEffect(() => {
+    if (!pathname) return;
+
+    const timer = setTimeout(() => {
+      if (pathname.startsWith('/services/') || pathname.startsWith('/products/')) {
+        const h1 = document.querySelector('h1')?.innerText?.trim();
+        setPageContext(h1 || '');
+      } else {
+        setPageContext('');
+      }
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   // Hide floating action buttons in the admin management dashboard and login screens
   if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/admin-login'))) {
     return null;
   }
+
+  // Pre-filled message: mentions particular service/product on service & product pages, clean greeting on global pages
+  const waMessage = pageContext
+    ? `Hello KR Environ Solutions, I would like to enquire about: ${pageContext}.`
+    : 'Hello KR Environ Solutions, I would like to make an enquiry.';
 
   return (
     <aside 
@@ -18,8 +45,8 @@ export default function FloatingContactButtons() {
     >
       {/* Call Button */}
       <a
-        href="tel:+918317054180"
-        aria-label="Direct Phone Call to KR Environ Solutions (+91 8317054180)"
+        href={`tel:${PRIMARY_PHONE_TEL}`}
+        aria-label={`Direct Phone Call to KR Environ Solutions (${PRIMARY_PHONE_DISPLAY})`}
         className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-[5px] bg-[#216B35] hover:bg-[#174D28] text-white shadow-md hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border border-white/20"
       >
         <Phone className="w-5 h-5 text-white" />
@@ -27,7 +54,7 @@ export default function FloatingContactButtons() {
 
       {/* WhatsApp Button */}
       <a
-        href="https://wa.me/918317054180?text=Hello%20KR%20Environ%20Solutions,%20I%20would%20like%20to%20inquire%20about%20your%20services%20and%20wildlife%20technologies."
+        href={`https://wa.me/${PRIMARY_PHONE_WA}?text=${encodeURIComponent(waMessage)}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with KR Environ Solutions on WhatsApp"
