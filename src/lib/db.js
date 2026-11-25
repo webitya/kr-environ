@@ -1942,7 +1942,7 @@ const INITIAL_TEAM_MEMBERS = [
     name: 'Sarika Gupta',
     designation: 'Proprietor & Founder',
     role: 'Proprietor | Lead Environmental Analyst',
-    photoUrl: '',
+    photoUrl: 'https://res.cloudinary.com/fjdmukyv/image/upload/v1794501644/kr-environ/team/kd9bd8gqe9waqwaktgus.webp',
     qualifications: 'MSc (Environmental Science, Lucknow University) • MSc (Geoinformatics)',
     experience: '15+ years experience as an Environmental Analyst',
     bio: 'Founder and proprietor of KR Environ Solutions, bridging statutory environmental compliance with modern ecological engineering across Jharkhand and pan-India.',
@@ -1952,33 +1952,47 @@ const INITIAL_TEAM_MEMBERS = [
       'Coordinates with State Forest Departments for Human-Wildlife Conflict mitigation & ranger gear'
     ],
     displayOrder: 0
+  },
+  {
+    name: 'Dr. Raj Kumar',
+    designation: 'Forest Clearance Expert',
+    role: 'Senior Forest Clearance & Silviculture Expert',
+    photoUrl: '',
+    qualifications: 'Ph.D. / Doctorate (Forest Research Institute – FRI, Dehradun)',
+    experience: '10+ years specialized experience in EC & Forest Regulatory Clearances',
+    bio: 'Forestry doctorate from FRI Dehradun specializing in statutory Forest Clearance (FC) and Environmental Clearance (EC) procedures alongside proprietor Sarika Gupta across Jharkhand and India.',
+    highlights: [
+      'Prepares statutory FC dossiers & PARIVESH compliance under Van Sanrakshan Evam Samvardhan Adhiniyam',
+      'Designs Compensatory Afforestation (CA) schemes, silviculture prescriptions & soil-moisture plans',
+      'Advises linear infrastructure, mining & power projects on site-specific forest management plans'
+    ],
+    displayOrder: 1
+  },
+  {
+    name: 'Dr. Satya Prakash',
+    designation: 'Wildlife Management Authority',
+    role: 'Chief Wildlife Conservationist & Ornithologist',
+    photoUrl: 'https://res.cloudinary.com/fjdmukyv/image/upload/v1794501311/kr-environ/team/zlubcaylpes0psjqeygf.jpg',
+    qualifications: 'Ph.D. (Wildlife Biology) • President, Neo Human Foundation (NHF) • Member, Jharkhand State Wildlife Board',
+    experience: '25+ years authoritative experience in Wildlife, Avian & Biodiversity Management',
+    bio: 'Renowned Hazaribagh-based wildlife biologist, IBCN State Coordinator, and BNHS/SAVE partner leading nationally recognized Gyps vulture recovery and biodiversity research across the Chota Nagpur Plateau.',
+    highlights: [
+      'Spearheaded the 100-km Hazaribagh Provisional Vulture Safe Zone (HPVSZ) & Koderma safe feeding sites with BNHS, RSPB & SAVE',
+      'Led anti-diclofenac veterinary advocacy (promoting safe meloxicam) & long-term nesting/roosting surveillance since 2007',
+      'Integrates avian & wildlife safeguards into railways, roads & power lines alongside tiger reserves and elephant corridors'
+    ],
+    displayOrder: 2
   }
 ];
 
 async function ensureTeamMembersInitialized(conn) {
   try {
-    // Purge unwanted demo profiles from MongoDB
-    await TeamMember.deleteMany({
-      name: { $in: ['Dr. Raj Kumar', 'Dr. Satya Prakash'] }
-    }).catch(() => {});
-
-    const db = conn.connection.db;
-    const settingsCol = db.collection('settings');
-    const marker = await settingsCol.findOne({ key: 'team_members_initialized' });
-    if (marker) return;
-
-    const count = await TeamMember.countDocuments();
-    if (count === 0) {
-      for (const member of INITIAL_TEAM_MEMBERS) {
+    for (const member of INITIAL_TEAM_MEMBERS) {
+      const existing = await TeamMember.findOne({ name: member.name }).lean();
+      if (!existing) {
         await TeamMember.create(member).catch(() => {});
       }
     }
-
-    await settingsCol.updateOne(
-      { key: 'team_members_initialized' },
-      { $set: { key: 'team_members_initialized', initializedAt: new Date() } },
-      { upsert: true }
-    ).catch(() => {});
   } catch (err) {
     console.error('ensureTeamMembersInitialized error:', err.message);
   }
@@ -1989,9 +2003,7 @@ export async function getTeamMembers() {
     const conn = await connectToDatabase();
     if (conn) {
       await ensureTeamMembersInitialized(conn);
-      const items = await TeamMember.find({
-        name: { $nin: ['Dr. Raj Kumar', 'Dr. Satya Prakash'] }
-      }).sort({ displayOrder: 1, createdAt: 1 }).lean();
+      const items = await TeamMember.find().sort({ displayOrder: 1, createdAt: 1 }).lean();
       return (items || []).map(serializeDoc);
     }
   } catch (err) {
